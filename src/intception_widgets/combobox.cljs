@@ -37,7 +37,6 @@
 (defn combobox
   [app path & {:keys [options class-name id read-only disabled onBlur onChange] :or {class-name ""}}]
  ;; entry point
- (println "class-name " class-name)
   (om/build combo app {:state {:options options
                                :class-name class-name
                                :read-only read-only
