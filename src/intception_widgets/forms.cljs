@@ -5,7 +5,6 @@
 ;;             [intception-widgets.autosuggest :refer [autosuggest]]
             [intception-widgets.checkbox :refer [checkbox]]
 ;;             [intception-widgets.editable-list-view :refer [editable-list-view]]
-            [intception-widgets.form-group :refer [form-group]]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
 
