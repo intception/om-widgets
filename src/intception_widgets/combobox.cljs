@@ -29,11 +29,9 @@
                       :value (pr-str {:value (app (:path state))})
                       :id (:id state) }
                      (merge (when (:read-only state) {:readOnly true})))]
-        (apply dom/select (clj->js opts)
-       ;; TODO Revisar esto (porque no usar un custom attribute?).
-          (dom/option #js { :value (pr-str {:value nil}) :disabled true})
-          (om/build-all option (:options state)))))))
-
+         (apply dom/select (clj->js opts)
+           (apply conj [(dom/option #js { :value (pr-str {:value nil}) :disabled true})]
+                       (om/build-all option (:options state))))))))
 (defn combobox
   [app path & {:keys [options class-name id read-only disabled onBlur onChange] :or {class-name ""}}]
  ;; entry point
