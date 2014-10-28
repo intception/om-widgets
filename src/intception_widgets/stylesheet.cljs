@@ -276,6 +276,67 @@
   .grid .pagination a {
     color:rgb(128, 128, 128);
   }
+  .tab {
+    width:100%;
+    margin:3px;
+    margin-bottom:5px;
+    overflow:hidden;
+  }
+  .tab .active-tab {
+    display:block;
+    width:100%;
+    height:100%;
+    padding:10px;
+/*
+    border-bottom: 1px solid #ddd;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    */
+  }
+  .tab .nav-tabs {
+     display:table;
+     border-bottom: 1px solid #ddd;
+     width:100%;
+  }
+  .nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
+    color: #555;
+    cursor: default;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-bottom-color: transparent;
+  }
+  .nav-tabs>li {
+    float:left;
+    margin-bottom:-1px;
+  }
+  .nav-tabs>li>a {
+    margin-right: 2px;
+    line-height: 1.42857143;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;
+  }
+  .nav>li>a {
+    position: relative;
+    display: block;
+    padding: 10px 15px;
+  }
+  .nav-tabs>li>a:hover {
+    border-color: #eee #eee #ddd;
+  }
+  .nav>li>a:hover, .nav>li>a:focus {
+    text-decoration: none;
+    background-color: #eee;
+  }
+
+  .tab .inactive-tab {
+    display:none;
+  }
+  .tab .nav-tabs {
+    border-bottom: 1px solid #ddd;
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+  }
 
   /* Forms */
    label.control-label {
