@@ -12,8 +12,9 @@
   [app]
  (reify
    om/IRenderState
-   (render-state [this state]
-       (let [opts (->> {:onChange (fn [e]
+   (render-state [this {:keys [options path] :as state}]
+       (let [value (when (get (into {} options) (path app)) (path app))
+             opts (->> {:onChange (fn [e]
                                          (let [value (reader/read-string (.. e -target -value))]
                                            (om/update! app
                                                        (:path state)
@@ -26,12 +27,12 @@
                                                             "combobox-readonly")])
                       :disabled (or (:disabled state) (if (:read-only state) true false))
                       :onBlur (:onBlur state)
-                      :value (pr-str {:value (app (:path state))})
+                      :value (pr-str {:value value})
                       :id (:id state) }
                      (merge (when (:read-only state) {:readOnly true})))]
          (apply dom/select (clj->js opts)
            (apply conj [(dom/option #js { :value (pr-str {:value nil}) :disabled true})]
-                       (om/build-all option (:options state))))))))
+                       (om/build-all option options)))))))
 (defn combobox
   [app path & {:keys [options class-name id read-only disabled onBlur onChange] :or {class-name ""}}]
  ;; entry point
