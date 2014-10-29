@@ -10,7 +10,12 @@
     (render-state [this state]
         (dom/li #js {:className (if (= (:current-page page) (:index page)) "active" "inactive")}
           (dom/a #js {:href "#" :onClick (fn[e]
-                                           (om/set-state! (:parent-owner page) :current-page (:index page))
+                                           (let [parent-owner (:parent-owner page)
+                                                 on-change (om/get-state parent-owner :on-change)]
+                                            (when (and on-change (not= (om/get-state parent-owner :current-page) (:index page)))
+                                                  (on-change (:index page)))
+                                            (om/set-state! parent-owner :current-page (:index page)))
+
                                            false)}
                 (:label page))))))
 
@@ -38,6 +43,6 @@
 
 
 (defn tab
-  [id & pages]
-  (om/build tab-component nil {:state {:id id :pages pages}
-                               :init-state {:current-page 0}}))
+  [{:keys [id current-page on-change] :or {current-page 0} } & pages]
+  (om/build tab-component nil {:state {:id id :pages pages :current-page current-page :on-change on-change}}))
+
