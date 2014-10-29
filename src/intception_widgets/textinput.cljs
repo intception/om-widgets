@@ -110,6 +110,7 @@
   [target owner state]
   (condp = (:input-format state)
     "numeric" :numeric
+    "password" :unmasked
     nil       :unmasked
     :mask))
 
