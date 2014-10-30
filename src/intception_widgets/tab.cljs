@@ -31,18 +31,22 @@
   [_ owner]
  (reify
    om/IRenderState
-   (render-state [this {:keys [current-page pages id]}]
+   (render-state [this {:keys [current-page pages id right-panel]}]
      (let [opts (map #(merge % {:current-page current-page
                                 :parent-owner owner
                                 :index %2})  pages (range))]
       (dom/div #js {:className "tab" :id id}
-        (apply dom/ul #js {:className "nav nav-tabs" :role "tablist"}
-              (om/build-all tab-header opts))
+        (dom/div #js {:className "top-row"}
+          (apply dom/ul #js {:className "nav nav-tabs" :role "tablist"}
+                (conj (om/build-all tab-header opts)
+                      (when right-panel
+                        (dom/li #js {:className "right-panel"}
+                          right-panel)))))
         (apply dom/div nil
                (om/build-all tab-page opts)))))))
 
 
 (defn tab
-  [{:keys [id current-page on-change] :or {current-page 0} } & pages]
-  (om/build tab-component nil {:state {:id id :pages pages :current-page current-page :on-change on-change}}))
+  [{:keys [id current-page on-change right-panel] :or {current-page 0} } & pages]
+  (om/build tab-component nil {:state {:id id :pages pages :current-page current-page :on-change on-change :right-panel right-panel}}))
 

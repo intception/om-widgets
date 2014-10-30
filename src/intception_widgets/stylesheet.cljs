@@ -296,8 +296,17 @@
   .tab .nav-tabs {
      display:table;
      border-bottom: 1px solid #ddd;
-     width:100%;
+     width:100%; 
   }
+  .tab .right-panel {
+    float:right;
+    position:relative
+  }
+  .tab .left-panel {
+    float:left;
+    position:relative
+  }
+
   .nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
     color: #555;
     cursor: default;
