@@ -5,25 +5,22 @@
             [cljs-time.core :as time]
             [cljs-time.local :as time-local]
             [cljs-time.coerce :as timec]))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def date-local-format "dd/MM/yyyy")
 (def date-local-mask "00/00/0000")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
 
 (defn- date-from-localstring
   [value fmt]
   (let [d (time-format/parse (time-format/formatter fmt) value)]
     (js/Date. d)))
 
-
 (defn- string-from-date
   [dt fmt]
   (let [dt (timec/from-date dt)]
     (time-format/unparse (time-format/formatter fmt) dt)))
-
-
 
 (defn- convert-input
   [input-type value]
@@ -33,6 +30,7 @@
              (catch  js/Error e
                value))
     value))
+
 (defn- convert-output
   [output-type value]
   (condp = output-type
@@ -41,8 +39,6 @@
              (catch js/Error e
                value))
     value))
-
-
 
 (defn replace-item-at-pos
   "Given a vector and position number, will return a new
@@ -71,7 +67,6 @@
   (if (and (> (count mask-vector) pos ) (string? (nth mask-vector pos)))
     (recur mask-vector (inc pos))
     pos))
-
 
 (defn- special-key?
   [char-code]
@@ -105,7 +100,6 @@
   [control pos]
   ( .setSelectionRange control pos pos ))
 
-
 (defn- mask-handler-selector
   [target owner state]
   (condp = (:input-format state)
@@ -124,13 +118,13 @@
 (defmulti applymask! mask-handler-selector)
 
 (defn- update-target
-       [target owner {:keys [cbtimeout typing-timeout input-format prev-value path  private-state] :as state}]
+       [target owner {:keys [cbtimeout typing-timeout input-format prev-value path private-state] :as state}]
   (let [prev-value (:prev-value @private-state )
         dom-node (:dom-node @private-state )
         value (convert-output input-format  (.-value dom-node))]
     (when (not= prev-value value)
       (do
-        (swap!  private-state assoc :cbtimeout nil :prev-value value)
+        (swap! private-state assoc :cbtimeout nil :prev-value value)
         (om/update! target path value)))))
 
 (defn- fire-on-change
@@ -143,12 +137,15 @@
 (defmethod handlekeydown :unmasked
   [target owner state e]
   true)
+
 (defmethod handlekeyup :unmasked
   [target owner state e]
   true)
+
 (defmethod handlekeypress :unmasked
   [target owner state e]
   true)
+
 (defmethod handlepaste :unmasked
   [target owner state e]
   true)
@@ -164,9 +161,6 @@
   [target owner state value]
   (when-let  [dom-node (:dom-node @(:private-state state))]
     (set! (.-value dom-node)  value)))
-
-
-
 
 (defmethod handlekeydown :unmasked
   [target owner state e]
@@ -192,8 +186,6 @@
     (if (special-key? k)
       true)
       false))
-
-
 
 (defmethod handlekeypress :mask
   [target owner state e]
@@ -226,9 +218,8 @@
                            (let [private-state (:private-state state)
                                  dom-node (:dom-node @private-state)]
                              (applymask! target owner state (.-value dom-node))))
-                         ,1)
+                         1)
   true)
-
 
 (defmethod handle-custom-keys! :mask
   [target owner state k]
@@ -267,7 +258,6 @@
         false)
       true)))
 
-
 (defmethod initmask! :mask
   [target owner state]
   (let [ private-state (:private-state state)
@@ -282,7 +272,6 @@
                            %) input-mask))]
     (swap! private-state assoc :entered-values (map #(when (string? %) %) mask)
                                :mask-vector (remove nil? mask))))
-
 
 (defmethod applymask! :mask
   [target owner state value]
@@ -340,12 +329,11 @@
                                   :onKeyDown #(handlekeydown target owner state %)
                                   :onKeyUp #(handlekeyup target owner state %)
                                   :onKeyPress #(handlekeypress target owner state %)
-                                  :onBlur (fn[]
+                                  :onBlur (fn [e]
                                             (update-target target owner state)
                                             (when (:onBlur state)
                                               ((:onBlur state)))
-                                            false
-                                            )
+                                            false)
 
                                   :onPaste #(handlepaste target owner state %)
                                   :placeholder (:placeholder state)
@@ -388,6 +376,3 @@
                      :onBlur onBlur
                      :onKeyPress onKeyPress
                      :auto-complete auto-complete}}))
-
-
-;; (partition 3 (reverse (vec (str (int 123002.23)))))
