@@ -34,11 +34,10 @@
                        (when (vector? title)
                          (apply dom/div #js {:className "modal-header"} title)))
 
-                     (if (string? body)
-                       (dom/div #js {:className "modal-body"}
-                                (dom/p nil body))
-                       (when (and (vector? body) (not-empty body))
-                         (apply dom/div #js {:className "modal-body"} body)))
+                     (if (seq? body)
+                      (apply dom/div #js {:className "modal-body"} body)
+                      (dom/div #js {:className "modal-body"}
+                               (dom/p nil body)))
 
                      (if (seq? footer)
                        (apply dom/div {:className "modal-footer"} footer)
@@ -102,5 +101,22 @@
                                                    :on-click #(put! c :cancel)})))
                      })
      (when-let [result (<! c)]
+       (om/set-state! owner :mb_config nil)
+       result))))
+
+
+(defn do-modal
+  [owner title content footer]
+  (let [c (chan)]
+    (go
+     (om/set-state! owner
+                    :mb_config
+                    {:title (if (fn? title)(title (fn[result]
+                                                       (put! c result))) title)
+                     :body (if (fn? content)(content (fn[result]
+                                                       (put! c result))) content)
+                     :footer (if (fn? footer)(footer (fn[result]
+                                                       (put! c result))) footer)})
+     (let [result (<! c)]
        (om/set-state! owner :mb_config nil)
        result))))

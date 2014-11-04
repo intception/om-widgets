@@ -25,4 +25,5 @@
 (def install-modal-box! intception-widgets.modal-box/install-modal-box!)
 (def alert intception-widgets.modal-box/alert)
 (def ok-cancel intception-widgets.modal-box/ok-cancel)
+(def do-modal intception-widgets.modal-box/do-modal)
 
