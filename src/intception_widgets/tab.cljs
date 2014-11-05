@@ -42,8 +42,8 @@
                       (when right-panel
                         (dom/li #js {:className "right-panel"}
                           right-panel)))))
-        (apply dom/div nil
-               (om/build-all tab-page opts)))))))
+        (dom/div nil
+               (om/build  tab-page (nth opts current-page))))))))
 
 
 (defn tab
