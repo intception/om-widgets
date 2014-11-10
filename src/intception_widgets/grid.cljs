@@ -52,7 +52,7 @@
     (reify
       om/IRenderState
       (render-state [this state]
-        (let [c (if (:key data) (utils/om-get (:target data) (:key data) (:target data)) (:target data))
+        (let [c (if (:key data) (utils/om-get (:target data) (:key data)) (:target data))
               current (:text-data (first (build-data (:columns data) (:convertions data) [c])))
               fields (map (fn [rec class]
                              {:rec rec :class (str "" (when (= (:text-data rec) current) "success"))})
