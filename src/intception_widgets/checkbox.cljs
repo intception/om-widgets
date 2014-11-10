@@ -1,6 +1,7 @@
 (ns intception-widgets.checkbox
   (:require [om.core :as om :include-macros true]
-     [om.dom :as dom :include-macros true]))
+     [om.dom :as dom :include-macros true]
+     [intception-widgets.utils :as utils]))
 
 (defn- check [app]
  (reify
@@ -11,9 +12,9 @@
           (dom/input #js {:type "checkbox"
                           :id id
                           :disabled disabled
-                          :checked (if (get-in app [path]) true false)
+                          :checked (if (utils/om-get app [path]) true false)
                           :onChange (fn [e]
-                                      (om/update! app path (.. e -target -checked)))}
+                                      (utils/om-update! app path (.. e -target -checked)))}
                      label))))))
 
 (defn checkbox [app path & {:keys [label id disabled class-name] :or {class-name "checkbox"}}]

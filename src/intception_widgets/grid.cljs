@@ -3,6 +3,7 @@
 
   (:require [om.core :as om :include-macros true]
      [cljs.core.async :refer [put! chan <! alts! timeout]]
+     [intception-widgets.utils :as utils]
      [om.dom :as dom :include-macros true]))
 
 (defn- title-header-cell [{:keys [caption :caption]}]
@@ -30,7 +31,7 @@
           (if (not= (:row (:rec row-data)) -1 )
             (apply dom/tr #js{ :className (:class row-data)
                              :onMouseDown (fn [e]
-                                (om/update! (:target (:parent-state state)) (:row (:rec row-data)))
+                                (utils/om-update! (:target (:parent-state state)) (:key (:parent-state state)) (:row (:rec row-data)))
                                 (om/refresh! (:parent state))
                                 )}
                   (om/build-all data-cell (:text-data (:rec row-data))))
@@ -51,7 +52,8 @@
     (reify
       om/IRenderState
       (render-state [this state]
-        (let [current (:text-data (first (build-data (:columns data) (:convertions data) [(:target data)])))
+        (let [c (if (:key data) (utils/om-get (:target data) (:key data) (:target data)) (:target data))
+              current (:text-data (first (build-data (:columns data) (:convertions data) [c])))
               fields (map (fn [rec class]
                              {:rec rec :class (str "" (when (= (:text-data rec) current) "success"))})
                           (build-data (:columns data) (:convertions data) (:rows data)))]
@@ -129,9 +131,9 @@
                                                      (:page-size state)
                                                      (:events-channel state)
                                                      (:height state))
+                                    :key (:key state)
                                     :target (:target state)
-                                    :convertions (:convertions state)})
-            )
+                                    :convertions (:convertions state)}))
             (om/build grid-pager  owner {:state { :total-rows (:total-rows source) }}))))))
 
 (defn- build-convertions [columns]
@@ -144,7 +146,7 @@
                      ;;                     (= (:input-format col) "date" ) #(if % (utils/get-utc-formatted-date %) "")
                      :else #(if % (str %) ""))) columns))))
 
-(defn grid [source target  & {:keys [id onChange  columns page-size events-channel height] :or {page-size 5}} ]
+(defn grid [source target  & {:keys [id onChange  columns page-size events-channel height key] :or {page-size 5}} ]
   (let [src (if (or (seq? source) (vector? source))
                 {:index 0 :rows source :total-rows (count source)}
 
@@ -158,6 +160,7 @@
               :state {
                       :target target
                       :id id
+                      :key key
                       :events-channel events-channel
                       :max-pages (- (int (/ (:total-rows src) page-size)) (if (= 0 (mod (:total-rows src) page-size)) 1 0))
                       :page-size page-size

@@ -1,6 +1,7 @@
 (ns intception-widgets.textinput
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            [intception-widgets.utils :as utils]
             [cljs-time.format :as time-format ]
             [cljs-time.core :as time]
             [cljs-time.local :as time-local]
@@ -125,7 +126,7 @@
     (when (not= prev-value value)
       (do
         (swap! private-state assoc :cbtimeout nil :prev-value value)
-        (om/update! target path value)))))
+        (utils/om-update! target path value)))))
 
 (defn- fire-on-change
   [target owner {:keys [cbtimeout typing-timeout prev-value path  private-state] :as state}]
@@ -313,12 +314,12 @@
        (let [state (om/get-state owner)
              private-state (:private-state state)]
          (swap! private-state assoc :dom-node (om.core/get-node owner))
-         (applymask! target owner state (get-in target [(:path state)] ))))
+         (applymask! target owner state (utils/om-get target [(:path state)] ))))
 
 
     om/IRenderState
     (render-state [this state]
-      (applymask! target owner state (get-in target [(:path state)] ))
+      (applymask! target owner state (utils/om-get target [(:path state)]))
       ((if (not (:multiline state))
           dom/input
           dom/textarea) (clj->js {:id (:id state)

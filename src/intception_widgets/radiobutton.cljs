@@ -1,6 +1,7 @@
 (ns intception-widgets.radiobutton
   (:require [om.core :as om :include-macros true]
-     [om.dom :as dom :include-macros true]))
+     [om.dom :as dom :include-macros true]
+     [intception-widgets.utils :as utils]))
 
 (defn- radio [entity]
  (reify
@@ -11,9 +12,9 @@
           (dom/input #js {:type "radio"
                           :id id
                           :disabled disabled
-                          :checked (= (get-in entity [path]) checked-value)
+                          :checked (= (utils/om-get entity [path]) checked-value)
                           :onChange (fn [e]
-                                      (om/update! entity path checked-value ))} label))))))
+                                      (utils/om-update! entity path checked-value ))} label))))))
 
 (defn  radiobutton [entity path & {:keys [label class-name id checked-value disabled ] :or {checked-value true class-name "radio"}}]
  ;; entry point

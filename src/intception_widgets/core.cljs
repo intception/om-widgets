@@ -11,8 +11,7 @@
             [intception-widgets.modal-box]
             [intception-widgets.button]
             [intception-widgets.tab]
-
-            ))
+            [intception-widgets.utils]))
 
 (def textinput intception-widgets.textinput/textinput)
 (def checkbox intception-widgets.checkbox/checkbox)
@@ -26,4 +25,6 @@
 (def alert intception-widgets.modal-box/alert)
 (def ok-cancel intception-widgets.modal-box/ok-cancel)
 (def do-modal intception-widgets.modal-box/do-modal)
+(def om-get intception-widgets.utils/om-get)
+(def om-update! intception-widgets.utils/om-update!)
 
