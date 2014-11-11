@@ -314,12 +314,12 @@
        (let [state (om/get-state owner)
              private-state (:private-state state)]
          (swap! private-state assoc :dom-node (om.core/get-node owner))
-         (applymask! target owner state (utils/om-get target [(:path state)] ))))
+         (applymask! target owner state (utils/om-get target (:path state) ))))
 
 
     om/IRenderState
     (render-state [this state]
-      (applymask! target owner state (utils/om-get target [(:path state)]))
+      (applymask! target owner state (utils/om-get target (:path state)))
       ((if (not (:multiline state))
           dom/input
           dom/textarea) (clj->js {:id (:id state)
