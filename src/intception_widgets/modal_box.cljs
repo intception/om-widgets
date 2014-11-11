@@ -8,48 +8,57 @@
   (:use-macros [dommy.macros :only [sel1]]))
 
 (enable-console-print!)
-(defn- create-modal-box [_ owner]
+(defn create-modal-box [_ owner]
   (reify
 
     om/IDidMount
     (did-mount [this]
-      (-> (sel1 "body")
-          (dommy/add-class! "modal-is-open")))
+               (-> (sel1 "body")
+                   (dommy/add-class! "modal-is-open")))
 
     om/IWillUnmount
     (will-unmount [this]
-      (-> (sel1 "body")
-          (dommy/remove-class! "modal-is-open")))
+                  (-> (sel1 "body")
+                      (dommy/remove-class! "modal-is-open")))
 
     om/IRenderState
-    (render-state [this {:keys [title body footer] :as state}]
-      (dom/div nil
-        (dom/div #js {:className "overlay"})
-        (dom/div #js {:className "modal-box"}
-          (dom/div #js {:className "modal-dialog"}
-            (dom/div #js {:className "modal-content"}
-                     (if (string? title)
-                       (dom/div #js {:className "modal-header"}
-                                (dom/h4 #js {:className "modal-title"} title))
-                       (when (vector? title)
-                         (apply dom/div #js {:className "modal-header"} title)))
+    (render-state [this {:keys [title body footer close-fn] :as state}]
+                  (dom/div nil
+                           (dom/div #js {:className "overlay"})
+                           (dom/div #js {:className "modal-box"}
+                                    (dom/div #js {:className "modal-dialog"}
+                                             (dom/div #js {:className "modal-content"}
+                                                      (if (string? title)
+                                                        (dom/div #js {:className "modal-header"}
+                                                                 (dom/h4 #js {:className "modal-title"} title))
+                                                        (when-let [title-seq (cond
+                                                                              (fn? title) [(title close-fn)]
+                                                                              (seq? title) title
+                                                                              (not= nil title) [title]
+                                                                              :else nil)]
+                                                          (apply dom/div #js {:className "modal-header"} title-seq)))
 
-                     (if (seq? body)
-                      (apply dom/div #js {:className "modal-body"} body)
-                      (dom/div #js {:className "modal-body"}
-                               (dom/p nil body)))
+                                                      (when-let [body-seq (cond
+                                                                           (fn? body) [(body close-fn)]
+                                                                           (seq? body) body
+                                                                           (not= nil body) [body]
+                                                                           :else nil)]
+                                                        (apply dom/div #js {:className "modal-body"} body-seq))
 
-                     (if (seq? footer)
-                       (apply dom/div {:className "modal-footer"} footer)
-                       (dom/div #js {:className "modal-footer"}
-                                (dom/p nil footer))))))))))
+                                                      (when-let [footer-seq (cond
+                                                                             (fn? footer) [(footer close-fn)]
+                                                                             (seq? footer) footer
+                                                                             (not= nil footer) [footer]
+                                                                             :else nil)]
+                                                        (apply dom/div #js {:className "modal-footer"} footer-seq)))))))))
 
 
 (defn modal-box
   "Arguments title,body and footer  [string or vector of components]"
-  [{:keys [title body footer]
+  [{:keys [title body footer close-fn]
     :or {body "Missing body parameter!"}}]
   (om/build create-modal-box {} {:state {:body body
+                                         :close-fn close-fn
                                          :footer footer
                                          :title title}}))
 
@@ -106,17 +115,19 @@
 
 
 (defn do-modal
-  [owner title content footer]
+  [owner title body footer]
   (let [c (chan)]
-    (go
-     (om/set-state! owner
-                    :mb_config
-                    {:title (if (fn? title)(title (fn[result]
-                                                       (put! c result))) title)
-                     :body (if (fn? content)(content (fn[result]
-                                                       (put! c result))) content)
-                     :footer (if (fn? footer)(footer (fn[result]
-                                                       (put! c result))) footer)})
+
+     (go
+       (let [close-fn (fn[result]
+                      (put! c result))]
+          (om/set-state! owner
+                          :mb_config
+                          {:close-fn close-fn
+                           :title title
+                           :body body
+                           :footer footer}))
      (let [result (<! c)]
        (om/set-state! owner :mb_config nil)
        result))))
+
