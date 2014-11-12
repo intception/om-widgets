@@ -18,6 +18,8 @@
 (defn om-get [tgt key]
   (if (satisfies? om/IGetState tgt)
     (om/get-state tgt key)
+    (if-not (= nil key)
       (let [ks (if (sequential? key) key [key])]
-           (get-in tgt ks))))
+            (get-in tgt ks))
+      tgt)))
 
