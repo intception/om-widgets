@@ -131,21 +131,6 @@
      :disabled ~disabled
      :label ~caption))
 
-;;
-;; (defmethod create-field :listview
-;;   [key {:keys [input-format is-valid? disabled]}]
-;;   `(widgets.editable-list-view/editable-list-view
-;;     intception-widgets.forms/*entity* ~key
-;;     :input-format ~input-format
-;;     :id ~key
-;;     :disabled ~disabled
-;;     :field-validation-fn ~is-valid?))
-;;
-;; (defmethod create-field :autosuggest
-;;   [key opts]
-;;   `(widgets.autosuggest/autosuggest
-;;     intception-widgets.forms/*entity* ~key
-;;     ~opts))
 
 (defmethod create-field :default
   [key opts]

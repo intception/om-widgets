@@ -1,2 +1,7 @@
 target
 pom.xml
+.DS_Store
+examples/datepicker/out
+examples/datepicker/main.js
+intception_widgets.js
+out

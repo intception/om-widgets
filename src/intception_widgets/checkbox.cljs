@@ -17,11 +17,10 @@
                                       (utils/om-update! app path (.. e -target -checked)))}
                      label))))))
 
-(defn checkbox [app path & {:keys [label id disabled class-name] :or {class-name "checkbox"}}]
+(defn checkbox [app path {:keys [label id disabled class-name] :or {class-name "checkbox"}}]
  ;; entry point
   (om/build check app { :state {:label label
                                 :id (or id path)
                                 :class-name class-name
                                 :disabled disabled
-                                :path path}} ))
-
+                                :path path}}))

@@ -146,7 +146,7 @@
                      ;;                     (= (:input-format col) "date" ) #(if % (utils/get-utc-formatted-date %) "")
                      :else #(if % (str %) ""))) columns))))
 
-(defn grid [source target  & {:keys [id onChange  columns page-size events-channel height key] :or {page-size 5}} ]
+(defn grid [source target {:keys [id onChange  columns page-size events-channel height key] :or {page-size 5}} ]
   (let [src (if (or (seq? source) (vector? source))
                 {:index 0 :rows source :total-rows (count source)}
 

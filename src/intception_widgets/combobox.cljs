@@ -34,7 +34,7 @@
            (apply conj [(dom/option #js { :value (pr-str {:value nil}) :disabled true})]
                        (om/build-all option options)))))))
 (defn combobox
-  [app path & {:keys [options class-name id read-only disabled onBlur onChange] :or {class-name ""}}]
+  [app path {:keys [options class-name id read-only disabled onBlur onChange] :or {class-name ""}}]
  ;; entry point
   (om/build combo app {:state {:options options
                                :class-name class-name

@@ -35,7 +35,7 @@
 
 
 (defn radiobutton-group
-  [entity path & {:keys [options id read-only disabled class-name] :or {class-name "radiogroup"}}]
+  [entity path {:keys [options id read-only disabled class-name] :or {class-name "radiogroup"}}]
  ;; entry point
   (om/build group entity {:state {
                                :options options

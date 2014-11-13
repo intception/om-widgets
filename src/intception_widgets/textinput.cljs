@@ -7,7 +7,6 @@
             [cljs-time.local :as time-local]
             [cljs-time.coerce :as timec]))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def date-local-format "dd/MM/yyyy")
 (def date-local-mask "00/00/0000")
@@ -345,9 +344,9 @@
                                     "text")
                                   :style {:text-align (:align state)}})))))
 
-(defn textinput [target path & {:keys [dont-update-cursor input-class input-format multiline onBlur
-                                       placeholder id decimals align onChange auto-complete read-only disabled onKeyPress]
-                                   :or {input-class "" } } ]
+(defn textinput [target path {:keys [dont-update-cursor input-class input-format multiline onBlur
+                                     placeholder id decimals align onChange auto-complete read-only disabled onKeyPress]
+                              :or {input-class "" } } ]
   (om/build create-textinput target
             {:state {:path path
                      :dont-update-cursor dont-update-cursor

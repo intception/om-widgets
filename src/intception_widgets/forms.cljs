@@ -2,9 +2,7 @@
   (:require [schema.core :as schema]
             [intception-widgets.textinput :refer [textinput]]
             [intception-widgets.combobox :refer [combobox]]
-;;             [intception-widgets.autosuggest :refer [autosuggest]]
             [intception-widgets.checkbox :refer [checkbox]]
-;;             [intception-widgets.editable-list-view :refer [editable-list-view]]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
 
@@ -52,7 +50,6 @@
     (when continuation
       (continuation)))
    false)
-
 
 (defn set-error
   [owner error-msg]
