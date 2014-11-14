@@ -9,14 +9,16 @@
     om/IRenderState
     (render-state [this state]
         (dom/li #js {:className (if (= (:current-page page) (:index page)) "active" "inactive")}
-          (dom/a #js {:href "#" :onClick (fn[e]
-                                           (let [parent-owner (:parent-owner page)
-                                                 on-change (om/get-state parent-owner :on-change)]
-                                            (when (and on-change (not= (om/get-state parent-owner :current-page) (:index page)))
-                                                  (on-change (:index page)))
-                                            (om/set-state! parent-owner :current-page (:index page)))
+          (dom/a #js {:className "tab-item"
+                      :href "#"
+                      :onClick (fn[e]
+                                  (let [parent-owner (:parent-owner page)
+                                        on-change (om/get-state parent-owner :on-change)]
+                                  (when (and on-change (not= (om/get-state parent-owner :current-page) (:index page)))
+                                        (on-change (:index page)))
+                                  (om/set-state! parent-owner :current-page (:index page)))
 
-                                           false)}
+                                  false)}
                 (:label page))))))
 
 (defn- tab-page
