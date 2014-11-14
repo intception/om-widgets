@@ -1,6 +1,7 @@
 (ns intception-widgets.combobox
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            [intception-widgets.utils :as utils]
             [cljs.reader :as reader]))
 
 (defn- option
@@ -9,16 +10,19 @@
    (dom/option #js {:value (pr-str {:value value})} name)))
 
 (defn- combo
-  [app]
+  [app owner]
  (reify
    om/IRenderState
    (render-state [this {:keys [options path] :as state}]
-       (let [value (when (get (into {} options) (path app)) (path app))
+       (let [value (when (get (into {} options) (utils/om-get app path)) (utils/om-get app path))
              opts (->> {:onChange (fn [e]
                                          (let [value (reader/read-string (.. e -target -value))]
-                                           (om/update! app
+                                           (utils/om-update! app
                                                        (:path state)
                                                        (:value value))
+                                             (when (utils/atom? app)
+                                                  (om/refresh! owner))
+
                                              (when (:onChange state)
                                                ((:onChange state) (:value value)))))
 

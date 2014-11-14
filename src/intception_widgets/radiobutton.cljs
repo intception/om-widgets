@@ -16,7 +16,7 @@
                           :onChange (fn [e]
                                       (utils/om-update! entity path checked-value ))} label))))))
 
-(defn  radiobutton [entity path & {:keys [label class-name id checked-value disabled ] :or {checked-value true class-name "radio"}}]
+(defn  radiobutton [entity path  {:keys [label class-name id checked-value disabled ] :or {checked-value true class-name "radio"}}]
  ;; entry point
   (om/build radio entity {:state {:label label
                                 :id id
@@ -31,7 +31,7 @@
     (render-state [this {:keys [class-name id path options disabled]}]
       (apply dom/div nil
          (map (fn [[value label]]
-                  (radiobutton entity path :label label :disabled disabled :checked-value value)) options)))))
+                  (radiobutton entity path {:label label :disabled disabled :checked-value value})) options)))))
 
 
 (defn radiobutton-group

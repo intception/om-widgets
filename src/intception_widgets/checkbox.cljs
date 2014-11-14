@@ -16,8 +16,7 @@
                           :onChange (fn [e]
                                       (utils/om-update! app path (.. e -target -checked))
                                       (when (utils/atom? app)
-                                        (om/set-state! owner :x (not (om/get-state owner :x))))
-                                      (println "onChange " on-change)
+                                        (om/set-state! owner :x (not (om/get-state owner :x)))) ;;om/refresh! ??? don't work !
                                       (when on-change (on-change (.. e -target -checked))))}
                      label))))))
 
