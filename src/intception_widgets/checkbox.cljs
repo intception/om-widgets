@@ -3,24 +3,30 @@
      [om.dom :as dom :include-macros true]
      [intception-widgets.utils :as utils]))
 
-(defn- check [app]
+(defn- check [app owner]
  (reify
    om/IRenderState
-   (render-state [this {:keys [label id path disabled class-name]}]
+   (render-state [this {:keys [label id path disabled on-change class-name]}]
      (dom/div #js {:className class-name}
         (dom/label #js {:className "label"}
           (dom/input #js {:type "checkbox"
                           :id id
                           :disabled disabled
-                          :checked (if (utils/om-get app [path]) true false)
+                          :checked (if (utils/om-get app path) true false)
                           :onChange (fn [e]
-                                      (utils/om-update! app path (.. e -target -checked)))}
+                                      (utils/om-update! app path (.. e -target -checked))
+                                      (when (utils/atom? app)
+                                        (om/set-state! owner :x (not (om/get-state owner :x))))
+                                      (println "onChange " on-change)
+                                      (when on-change (on-change (.. e -target -checked))))}
                      label))))))
 
-(defn checkbox [app path {:keys [label id disabled class-name] :or {class-name "checkbox"}}]
+(defn checkbox [app path {:keys [label id disabled class-name on-change] :or {class-name "checkbox"}}]
  ;; entry point
   (om/build check app { :state {:label label
                                 :id (or id path)
                                 :class-name class-name
                                 :disabled disabled
-                                :path path}}))
+                                :on-change on-change
+                                :path path}} ))
+
