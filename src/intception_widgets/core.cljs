@@ -5,6 +5,8 @@
             [intception-widgets.stylesheet]
             [intception-widgets.textinput]
             [intception-widgets.checkbox]
+            [intception-widgets.dropdown]
+            [intception-widgets.navbar]
             [intception-widgets.datepicker]
             [intception-widgets.radiobutton]
             [intception-widgets.combobox]
@@ -17,6 +19,8 @@
 
 (def textinput intception-widgets.textinput/textinput)
 (def checkbox intception-widgets.checkbox/checkbox)
+(def dropdown intception-widgets.dropdown/dropdown)
+(def navbar intception-widgets.navbar/navbar)
 (def datepicker intception-widgets.datepicker/datepicker)
 (def radiobutton intception-widgets.radiobutton/radiobutton)
 (def radiobutton-group intception-widgets.radiobutton/radiobutton-group)
