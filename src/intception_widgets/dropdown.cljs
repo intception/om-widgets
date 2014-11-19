@@ -76,7 +76,6 @@
 (defn dropdown-menu
   "Same as dropdown but with a few markup differences"
   [app id title items]
-  (println app id title items)
   (om/build dropdown-menu-container app {:state {:id id
                                                  :title title
                                                  :items items}}))

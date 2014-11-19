@@ -30,7 +30,6 @@
 
 (defn button-clicked
   [owner entity rules continuation]
-  (println (:pre-validation-transformation rules))
   (if rules
     (if-let [errors (validate (if (:pre-validation-transformation rules)
                                   ((:pre-validation-transformation rules) @entity)
