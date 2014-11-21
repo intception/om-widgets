@@ -15,6 +15,8 @@
             [intception-widgets.button]
             [intception-widgets.tab]
             [intception-widgets.page-switcher]
+            [intception-widgets.popover]
+
             [intception-widgets.utils]))
 
 (def textinput intception-widgets.textinput/textinput)
@@ -28,6 +30,7 @@
 (def button intception-widgets.button/button)
 (def grid intception-widgets.grid/grid)
 (def tab intception-widgets.tab/tab)
+(def popover intception-widgets.popover/popover)
 (def install-modal-box! intception-widgets.modal-box/install-modal-box!)
 (def alert intception-widgets.modal-box/alert)
 (def ok-cancel intception-widgets.modal-box/ok-cancel)

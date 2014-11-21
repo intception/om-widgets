@@ -27,7 +27,31 @@
     /* Good browsers */
     opacity: 0.2;
   }
+  .click-handler {
+      position:fixed;
+      width:100%;
+      height:100%;
+      left:0;
+      z-index:11000;
+      display:block;
+      top:0;
+  }
+  .popover-launcher {
+    position:relative;
+  }
 
+  .popover {
+    position:absolute;
+    background:white;
+    top:16px;
+    z-index:12000;
+    padding:15px;
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: 6px;
+    outline: 0;
+    -webkit-box-shadow: 0 3px 9px rgba(0,0,0,.5);
+    box-shadow: 0 3px 9px rgba(0,0,0,.5);
+  }
 
   .modal-is-open {
     overflow: hidden;
@@ -453,7 +477,6 @@
     margin-left: -15px;
     margin-bottom:2px;
     margin-top:2px;
-
     overflow:hidden;
   }
 
