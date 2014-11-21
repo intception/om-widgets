@@ -8,7 +8,9 @@
   (:use-macros [dommy.macros :only [sel1]]))
 
 (enable-console-print!)
-(defn create-modal-box [_ owner]
+
+(defn create-modal-box
+  [target owner]
   (reify
 
     om/IDidMount
@@ -35,21 +37,21 @@
                                             (dom/div #js {:className "modal-header"}
                                                      (dom/h4 #js {:className "modal-title"} title))
                                             (when-let [title-seq (cond
-                                                                  (fn? title) [(title close-fn)]
+                                                                  (fn? title) [(title close-fn target)]
                                                                   (seq? title) title
                                                                   (not= nil title) [title]
                                                                   :else nil)]
                                               (apply dom/div #js {:className "modal-header"} title-seq)))
 
                                           (when-let [body-seq (cond
-                                                               (fn? body) [(body close-fn)]
+                                                               (fn? body) [(body close-fn target)]
                                                                (seq? body) body
                                                                (not= nil body) [body]
                                                                :else nil)]
                                             (apply dom/div #js {:className "modal-body"} body-seq))
 
                                           (when-let [footer-seq (cond
-                                                                 (fn? footer) [(footer close-fn)]
+                                                                 (fn? footer) [(footer close-fn target)]
                                                                  (seq? footer) footer
                                                                  (not= nil footer) [footer]
                                                                  :else nil)]
@@ -58,18 +60,18 @@
 
 (defn modal-box
   "Arguments title,body and footer  [string or vector of components]"
-  [{:keys [title body footer close-fn class-name]
+  [target {:keys [title body footer close-fn class-name]
     :or {body "Missing body parameter!"}}]
-  (om/build create-modal-box {} {:state {:body body
-                                         :close-fn close-fn
-                                         :footer footer
-                                         :title title
-                                         :class-name class-name}}))
+  (om/build create-modal-box target {:state {:body body
+                                             :close-fn close-fn
+                                             :footer footer
+                                             :title title
+                                             :class-name class-name}}))
 
 (defn install-modal-box!
-  [owner]
+  [target owner]
   (when-let [config (om/get-state owner :mb_config)]
-    (modal-box config)))
+    (modal-box target config)))
 
 (defn alert
   [owner title message]
