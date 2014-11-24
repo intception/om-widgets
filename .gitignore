@@ -8,3 +8,4 @@ out
 .idea
 .nrepl-port
 intception_widgets.iml
+examples/navbar/main.js

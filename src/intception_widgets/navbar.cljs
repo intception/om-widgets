@@ -62,15 +62,16 @@
     (display-name[_] "NavBarContainer")
 
     om/IRenderState
-    (render-state [this state]
+    (render-state [this {:keys [container items brand-image-url brand-title selected] :as state}]
                   (dom/nav #js {:className "navbar navbar-default" :role "navigation" }
-                           (dom/div #js {:className "container-fluid"}
-                                    (om/build nav-header app {:state {:brand-image-url (:brand-image-url state)
-                                                                      :brand-title (:brand-title state)}})
+                           (dom/div #js {:className (str "container"
+                                                         (when (= container :fluid) "-fluid"))}
+                                    (om/build nav-header app {:state {:brand-image-url brand-image-url
+                                                                      :brand-title brand-title}})
                                     (apply dom/div #js {:className "navbar-collapse"}
-                                           (map #(om/build navbar-nav app {:state {:selected (:selected state)
+                                           (map #(om/build navbar-nav app {:state {:selected selected
                                                                                    :navbar %}})
-                                                (:items state))))))))
+                                                items)))))))
 
 
 ;; ---------------------------------------------------------------------
@@ -93,6 +94,7 @@
   {:items [[(s/either NabvarNavSchema NabvarNavDropdownSchema)]]
    :selected s/Keyword
    :brand-image-url s/Str
+   (s/optional-key :container) (s/enum :default :fluid)
    :brand-title s/Str})
 
 
