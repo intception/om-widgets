@@ -29,33 +29,33 @@
                     :role "dialog"
                     :tabIndex -1
                     :style #js {:display "block"}}
-               (dom/div #js {:className "overlay"})
-               (dom/div #js {:className "modal-box"}
-                        (dom/div #js {:className (str "modal-dialog " class-name)}
-                                 (dom/div #js {:className "modal-content"}
+               (dom/div #js {:className "om-widgets-overlay"})
+               (dom/div #js {:className "om-widgets-modal-box"}
+                        (dom/div #js {:className (str "om-widgets-modal-dialog " class-name)}
+                                 (dom/div #js {:className "om-widgets-modal-content"}
                                           (if (string? title)
-                                            (dom/div #js {:className "modal-header"}
-                                                     (dom/h4 #js {:className "modal-title"} title))
+                                            (dom/div #js {:className "om-widgets-modal-header"}
+                                                     (dom/h4 #js {:className "om-widgets-modal-title"} title))
                                             (when-let [title-seq (cond
                                                                   (fn? title) [(title close-fn target)]
                                                                   (seq? title) title
                                                                   (not= nil title) [title]
                                                                   :else nil)]
-                                              (apply dom/div #js {:className "modal-header"} title-seq)))
+                                              (apply dom/div #js {:className "om-widgets-modal-header"} title-seq)))
 
                                           (when-let [body-seq (cond
                                                                (fn? body) [(body close-fn target)]
                                                                (seq? body) body
                                                                (not= nil body) [body]
                                                                :else nil)]
-                                            (apply dom/div #js {:className "modal-body"} body-seq))
+                                            (apply dom/div #js {:className "om-widgets-modal-body"} body-seq))
 
                                           (when-let [footer-seq (cond
                                                                  (fn? footer) [(footer close-fn target)]
                                                                  (seq? footer) footer
                                                                  (not= nil footer) [footer]
                                                                  :else nil)]
-                                            (apply dom/div #js {:className "modal-footer"} footer-seq)))))))))
+                                            (apply dom/div #js {:className "om-widgets-modal-footer"} footer-seq)))))))))
 
 
 (defn modal-box

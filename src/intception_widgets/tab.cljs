@@ -9,7 +9,7 @@
     om/IRenderState
     (render-state [this state]
         (dom/li #js {:className (if (= (:current-page page) (:index page)) "active" "inactive")}
-          (dom/a #js {:className "tab-item"
+          (dom/a #js {:className "om-widgets-tab-item"
                       :href "#"
                       :onClick (fn[e]
                                   (let [parent-owner (:parent-owner page)
@@ -26,7 +26,7 @@
   (reify
     om/IRenderState
     (render-state [this state]
-        (dom/div #js {:className (if (= (:current-page page) (:index page)) "active-tab" "inactive-tab")}
+        (dom/div #js {:className (if (= (:current-page page) (:index page)) "om-widgets-active-tab" "om-widgets-inactive-tab")}
                   (:content page)))))
 
 (defn- tab-component
@@ -38,11 +38,11 @@
                                 :parent-owner owner
                                 :index %2})  pages (range))]
       (dom/div #js {:className "om-widgets-tab" :id id}
-        (dom/div #js {:className "top-row"}
-          (apply dom/ul #js {:className "nav nav-tabs" :role "tablist"}
+        (dom/div #js {:className "om-widgets-top-row"}
+          (apply dom/ul #js {:className "om-widgets-nav om-widgets-nav-tabs" :role "tablist"}
                 (conj (om/build-all tab-header opts)
                       (when right-panel
-                        (dom/li #js {:className "right-panel"}
+                        (dom/li #js {:className "om-widgets-right-panel"}
                           right-panel)))))
         (dom/div nil
                (om/build  tab-page (nth opts current-page))))))))

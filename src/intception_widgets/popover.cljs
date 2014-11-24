@@ -9,7 +9,7 @@
      {:visible false})
    om/IRenderState
    (render-state [this {:keys [label id disabled class-name visible body]}]
-     (dom/div #js {:className "popover-launcher"}
+     (dom/div #js {:className "om-widgets-popover-launcher"}
       (dom/a #js {:className class-name
                   :href "#"
                   :type "button"
@@ -22,11 +22,11 @@
                   } label)
 
       (when visible
-        (dom/div #js {:className "click-handler" :onClick #(do (om/set-state! owner :visible false)
+        (dom/div #js {:className "om-widgets-click-handler" :onClick #(do (om/set-state! owner :visible false)
                                                             false)}))
 
       (when visible
-        (apply dom/div #js {:className "popover"
+        (apply dom/div #js {:className "om-widgets-popover"
                             :onClick (fn[e]
                                       (println "OnClick !"))}
             (cond
@@ -34,7 +34,7 @@
               (seq? body) body
               :else [body])))))))
 
-(defn  popover [label body {:keys [class-name id disabled ] :or {class-name "popover-button"}}]
+(defn  popover [label body {:keys [class-name id disabled ] :or {class-name "om-widgets-popover-button"}}]
  ;; entry point
   (om/build popover-component nil {:state {:label label
                                           :id (or id label)

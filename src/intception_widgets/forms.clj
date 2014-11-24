@@ -36,41 +36,40 @@
              intception-widgets.forms/*entity* ~entity
              intception-widgets.forms/*owner* ~owner
              intception-widgets.forms/*validation-rules* ~validation]
-     (dom/div (cljs.core/clj->js {:className "container container-fluid form"})
+     (dom/div (cljs.core/clj->js {:className "om-widgets-container om-widgets-container-fluid om-widgets-form"})
 
               (when (om/get-state ~owner :saving)
-                (dom/div (cljs.core/clj->js {:className "overlay"})))
+                (dom/div (cljs.core/clj->js {:className "om-widgets-overlay"})))
 
               (when (om/get-state ~owner :saving)
-                (dom/div (cljs.core/clj->js {:className "wait-logo"})))
+                (dom/div (cljs.core/clj->js {:className "om-widgets-wait-logo"})))
 
               ;;form header section
               (when ~title
-                (dom/div (cljs.core/clj->js {:className "panel-heading"})
-                         (dom/h3 (cljs.core/clj->js {:className "panel-title"})
+                (dom/div (cljs.core/clj->js {:className "om-widgets-panel-heading"})
+                         (dom/h3 (cljs.core/clj->js {:className "om-widgets-panel-title"})
                                  ~title)
                          dom/small nil ~subtitle))
               ;;form body section
-              (dom/div (cljs.core/clj->js {:className "panel-body"})
-                       (dom/form (cljs.core/clj->js {:sclassName "form-horizontal right"
-                                                     :role "form"})
+              (dom/div (cljs.core/clj->js {:className "om-widgets-panel-body"})
+                       (dom/form (cljs.core/clj->js {:role "om-widgets-form"})
                                  ~@body))
               (when (om/get-state ~owner :general-error)
-                (dom/p (cljs.core/clj->js {:className "bg-danger"})
+                (dom/p (cljs.core/clj->js {:className "om-widgets-bg-danger"})
                        (om/get-state ~owner :general-error))))))
 
 (defmacro section
   "Macro to create a header field section (also known as fieldset)"
   [title & body]
-  `(dom/div (cljs.core/clj->js {:className "form-group"})
+  `(dom/div (cljs.core/clj->js {:className "om-widgets-form-group"})
             (dom/h3 nil ~title)))
 
 (defmacro helper-input
   "If a bootstrap helper plugin is specified input field is rendered inside a helper div"
   [helper body]
   `(if ~helper
-     (dom/div (cljs.core/clj->js {:className "input-group"})
-              (dom/div (cljs.core/clj->js {:className "input-group-addon"}) ~helper)
+     (dom/div (cljs.core/clj->js {:className "om-widgets-input-group"})
+              (dom/div (cljs.core/clj->js {:className "om-widgets-input-group-addon"}) ~helper)
               ~body)
      ~body))
 
@@ -88,7 +87,7 @@
                   :disabled ~disabled
                   :multiline ~multiline
                   :read-only ~read-only
-                  :input-class "form-control"
+                  :input-class "om-widgets-form-control"
                   :input-format ~input-format
                   ;;a partial trick is done here in order to evaluate
                   ;;the binded atributes when the function is defined
@@ -106,7 +105,7 @@
   [key {:keys [options read-only disabled on-blur on-change]}]
   `(intception-widgets.combobox/combobox
     intception-widgets.forms/*entity* ~key
-    :class-name "form-control"
+    :class-name "om-widgets-form-control"
      :id ~key
      :disabled ~disabled
      :read-only ~read-only
@@ -118,7 +117,7 @@
   [key {:keys [options read-only disabled]}]
   `(intception-widgets.radiobutton/radiobutton-group
     intception-widgets.forms/*entity* ~key
-     :class-name "form-control"
+     :class-name "om-widgets-form-control"
      :id ~key
      :disabled ~disabled
      :options ~options ))
@@ -146,7 +145,7 @@
                      :required ~required
                      :extra-class ~extra-class}
                     (when ~label
-                        (dom/label (cljs.core/clj->js {:className "control-label"
+                        (dom/label (cljs.core/clj->js {:className "om-widgets-control-label"
                                                        :for ~key})
                                    ~label))
                     ~(create-field key options)))
@@ -188,7 +187,7 @@
 
 (defmacro row
   [& cols]
-  `(dom/div (cljs.core/clj->js {:className "row"})
+  `(dom/div (cljs.core/clj->js {:className "om-widgets-row"})
     ~@cols))
 
 (defmacro column
