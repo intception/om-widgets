@@ -1,4 +1,4 @@
-(defproject intception-widgets "0.1.10-SNAPSHOT"
+(defproject intception-widgets "0.1.11-SNAPSHOT"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
 
@@ -10,8 +10,7 @@
                  [prismatic/dommy "0.1.3"]
                  [com.palletops/thread-expr "1.3.0"]
                  [com.andrewmcveigh/cljs-time "0.2.1"]
-                 [prismatic/schema "0.2.6"]]
-
+                 [prismatic/schema "0.3.3"]]
 
   :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]]
   :source-paths ["src"]
@@ -20,9 +19,16 @@
               :source-paths ["src"]
               :compiler {
                 :output-to "intception_widgets.js"
-                :output-dir "out"
+                :output-dir "out/intception_widgets"
                 :optimizations :none
                 :source-map true}}
+             {:id "navbar"
+              :source-paths ["src" "examples/navbar/src"]
+              :compiler {
+                         :output-to "examples/navbar/main.js"
+                         :output-dir "examples/navbar/out"
+                         :source-map true
+                         :optimizations :none}}
              {:id "datepicker"
               :source-paths ["src" "examples/datepicker/src"]
               :compiler {

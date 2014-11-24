@@ -1,8 +1,10 @@
 (ns intception-widgets.navbar
-  (:require
-    [intception-widgets.dropdown :refer [dropdown-menu]]
-    [om.core :as om :include-macros true]
-    [om.dom :as dom :include-macros true]))
+  (:require [intception-widgets.dropdown :refer [dropdown EntrySchema DividerSchema]]
+            [schema.core :as s :include-macros true]
+            [om.core :as om :include-macros true]
+            [om.dom :as dom :include-macros true]))
+
+(enable-console-print!)
 
 ;; TODO support collapse button
 ;; (dom/button #js {:className "navbar-toggle collapsed" :type "button"}
@@ -15,12 +17,13 @@
     (display-name[_] "NavBarEntry")
 
     om/IRenderState
-    (render-state [this {:keys [entry selected]}]
-
+    (render-state [_ {:keys [entry selected]}]
                   (dom/li #js {:className (when (= selected (:id entry)) "active")}
-
                           (if (:items entry)
-                            (dropdown-menu app (:id entry) (:text entry) (:items entry))
+                            (dropdown app {:id (:id entry)
+                                           :type :menu
+                                           :title (:text entry)
+                                           :items (:items entry)})
                             (dom/a #js {:href (str "#/" (name (:id entry)))
                                         :className (:className entry)}
                                    (dom/span #js {:className (:iconClassName entry)})
@@ -33,12 +36,13 @@
 
     om/IRenderState
     (render-state [this {:keys [navbar selected]}]
-                  (apply dom/ul #js {:className (str "nav navbar-nav" (when (:right-position (first navbar))
-                                                                        " navbar-right"))}
-                          (map #(om/build entry app {:state {:selected selected :entry %}})
-                               navbar)))))
+                  (apply dom/ul #js {:className (str "nav navbar-nav"
+                                                     (when (:right-position (first navbar))
+                                                       " navbar-right"))}
+                         (map #(om/build entry app {:state {:selected selected :entry %}})
+                              navbar)))))
 
-(defn- nav-header []
+(defn- nav-header [app owner]
   (reify
     om/IDisplayName
     (display-name[_] "NavBarHeader")
@@ -47,8 +51,10 @@
     (render-state [this state]
                   (dom/div #js {:className "navbar-header"}
                            (dom/a #js {:className "navbar-brand" :href "#"}
-                                  (dom/img #js {:src (:brand-image-url state) :alt (:brand-title state)
-                                                :height "100%"}) (str " " (:brand-title state)))))))
+                                  (dom/img #js {:src (:brand-image-url state)
+                                                :alt (:brand-title state)
+                                                :height "100%"})
+                                  (str " " (:brand-title state)))))))
 
 (defn- navbar-container [app owner]
   (reify
@@ -58,20 +64,42 @@
     om/IRenderState
     (render-state [this state]
                   (dom/nav #js {:className "navbar navbar-default" :role "navigation" }
-                           (dom/div #js {:className "container" }
+                           (dom/div #js {:className "container-fluid"}
                                     (om/build nav-header app {:state {:brand-image-url (:brand-image-url state)
                                                                       :brand-title (:brand-title state)}})
                                     (apply dom/div #js {:className "navbar-collapse"}
                                            (map #(om/build navbar-nav app {:state {:selected (:selected state)
-                                                                               :navbar %}})
+                                                                                   :navbar %}})
                                                 (:items state))))))))
 
-(defn navbar
-  "items example:
 
-  {:home {:text 'Home'}
-  :about {:text 'About'
-  :items [{:team 'Team'}]}}
-  "
+;; ---------------------------------------------------------------------
+;; Schema
+
+(def NabvarNavSchema
+  {:text s/Str
+   :id s/Keyword
+   (s/optional-key :className) s/Str
+   (s/optional-key :iconClassName) s/Str
+   :url s/Str})
+
+(def NabvarNavDropdownSchema
+  {:text s/Str
+   :id s/Keyword
+   (s/optional-key :right-position) s/Bool
+   :items [(s/either EntrySchema DividerSchema)]})
+
+(def NavbarSchema
+  {:items [[(s/either NabvarNavSchema NabvarNavDropdownSchema)]]
+   :selected s/Keyword
+   :brand-image-url s/Str
+   :brand-title s/Str})
+
+
+;; ---------------------------------------------------------------------
+;; Public
+
+(defn navbar
   [app {:keys [items selected brand-image-url brand-title] :as options}]
+  (s/validate NavbarSchema options)
   (om/build navbar-container app {:state options}))

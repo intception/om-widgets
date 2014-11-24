@@ -1,12 +1,17 @@
 (ns intception-widgets.dropdown
-  (:require
-    [om.core :as om :include-macros true]
-    [om.dom :as dom :include-macros true]))
+  (:require [schema.core :as s :include-macros true]
+            [om.core :as om :include-macros true]
+            [om.dom :as dom :include-macros true]))
 
 ;; TODO support headings: <li class="dropdown-header">Nav header</li>
-;; TODO support dividers: <li class="divider"></li>
 
-(defn- dropdown-entry [item]
+
+;; ---------------------------------------------------------------------
+;; Dropdown entry and divider
+
+(defmulti build-entry (fn [entry app] (:type entry)))
+
+(defmethod build-entry :entry [entry app]
   (reify
     om/IDisplayName
     (display-name[_] "DropdownEntry")
@@ -14,25 +19,66 @@
     om/IRenderState
     (render-state [this state]
                   (dom/li nil
-                          (dom/a #js {:href (:url item)} (:text item))))))
+                          (dom/a #js {:href (:url entry)} (:text entry))))))
+
+(defmethod build-entry :divider [entry app]
+  (reify
+    om/IDisplayName
+    (display-name[_] "DropdownDivider")
+
+    om/IRenderState
+    (render-state [this state]
+                  (dom/li #js {:className "divider"}))))
+
+
+;; ---------------------------------------------------------------------
+;; Build class multimethod
+
+(defmulti build-dropdown-class (fn [_ size] size))
+
+(defmethod build-dropdown-class :default [opened _]
+  (str "dropdown" (when opened " open")))
+
+(defmethod build-dropdown-class :xs [opened _]
+  (str "dropdown btn-group-xs" (when opened " open")))
+
+(defmethod build-dropdown-class :sm [opened _]
+  (str "dropdown btn-group-sm" (when opened " open")))
+
+(defmethod build-dropdown-class :lg [opened _]
+  (str "dropdown btn-group-lg" (when opened " open")))
+
+
+;; ---------------------------------------------------------------------
+;; Dropdown containers
 
 (defn- dropdown-menu-container [app owner]
   (reify
     om/IDisplayName
-    (display-name[_] "DropdownMenu")
+    (display-name[_] "Dropdown")
 
     om/IInitState
     (init-state [_]
                 {:opened false})
+
     om/IRenderState
-    (render-state [this {:keys [id title items] :as state}]
-                  (dom/li #js {:className (str "dropdown " (when (:opened state) "open"))
-                               :onClick #(om/set-state! owner :opened (not (:opened state)))}
+    (render-state [_ {:keys [id title items type size opened] :as state}]
+                  (dom/li #js {:className (build-dropdown-class opened size)
+                               :onClick #(om/set-state! owner :opened (not opened))
+                               :onBlur #(om/set-state! owner :opened false)
+                               :id (str "dropdown-" (name id))}
+
                           (dom/a #js {:className "dropdown-toggle"
-                                      :data-toggle "dropdown"} title
+                                      :data-toggle "dropdown"
+                                      :aria-expanded "false"
+                                      :role "button"}
+                                 title
                                  (dom/span #js {:className "caret"}))
-                          (apply dom/ul #js {:className "dropdown-menu" :role "menu"}
-                                 (om/build-all dropdown-entry (:items state)))))))
+
+                          (apply dom/ul #js {:className "dropdown-menu"
+                                             :aria-labelledby (str "dropdown-" (name id))
+                                             :role "menu"}
+                                 (om/build-all build-entry (:items state)))))))
 
 (defn- dropdown-container [app owner]
   (reify
@@ -42,40 +88,58 @@
     om/IInitState
     (init-state [_]
                 {:opened false})
+
     om/IRenderState
-    (render-state [this {:keys [id title items] :as state}]
-                  (dom/div #js {:className (str "dropdown " (when (:opened state) "open"))
-                                :onClick #(om/set-state! owner :opened (not (:opened state)))}
+    (render-state [_ {:keys [id title items type size opened] :as state}]
+                  (dom/div #js {:className (build-dropdown-class opened size)
+                                :onClick #(om/set-state! owner :opened (not opened))
+                                :onBlur #(om/set-state! owner :opened false)
+                                :id (str "dropdown-" (name id))}
 
-                           (dom/button #js {:className "btn btn-default btn-xs dropdown-toggle"
+                           (dom/button #js {:className "btn btn-default dropdown-toggle"
                                             :type "button"
-                                            :id (str "dropdown-" id)
-                                            :data-toggle "dropdown"} title
+                                            :data-toggle "dropdown"}
+                                       title
                                        (dom/span #js {:className "caret"}))
+
                            (apply dom/ul #js {:className "dropdown-menu"
-                                              :aria-labelledby (str "dropdown-" id)
+                                              :aria-labelledby (str "dropdown-" (name id))
                                               :role "menu"}
-                                  (om/build-all dropdown-entry (:items state)))))))
+                                  (om/build-all build-entry (:items state)))))))
 
-(defn dropdown
-  "items example:
 
-  [{:id :logout
-  :text 'Logout'
-  :url '#/logout'}
+;; ---------------------------------------------------------------------
+;; Schema
 
-  {:id :profile
-  :text 'Profile'
-  :url '#/profile'}]
-  "
-  [app id title items]
-  (om/build dropdown-container app {:state {:id id
-                                            :title title
-                                            :items items}}))
+(def EntrySchema
+  "Schema for a dropdown entry"
+  {:id s/Keyword
+   :text s/Str
+   :type (s/enum :entry)
+   :url s/Str})
 
-(defn dropdown-menu
-  "Same as dropdown but with a few markup differences"
-  [app id title items]
-  (om/build dropdown-menu-container app {:state {:id id
-                                                 :title title
-                                                 :items items}}))
+(def DividerSchema
+  "Schema for a dropdown divider"
+  {:type (s/enum :divider)})
+
+(def DropdownSchema
+  {:id s/Keyword
+   :items [(s/either EntrySchema DividerSchema)]
+   :title s/Str
+   (s/optional-key :type) (s/enum :default :menu)
+   (s/optional-key :size) (s/enum :default :sm :xs :lg)})
+
+
+;; ---------------------------------------------------------------------
+;; Public
+
+(defmulti dropdown
+  (fn [app {:keys [id title items type size] :as options :or {size :default type :default}}]
+    (s/validate DropdownSchema options)
+    (:type options)))
+
+(defmethod dropdown :menu [app options]
+  (om/build dropdown-menu-container app {:state options}))
+
+(defmethod dropdown :default [app options]
+  (om/build dropdown-container app {:state options}))
