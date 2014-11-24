@@ -323,7 +323,7 @@
           dom/input
           dom/textarea) (clj->js {:id (:id state)
                                   :name (:id state)
-                                  :className (clojure.string/join " " ["input-text"  (:input-class state)])
+                                  :className (clojure.string/join " " ["om-widgets-input-text"  (:input-class state)])
                                   :autoComplete (:auto-complete state)
                                   :readOnly (:read-only state)
                                   :onKeyDown #(handlekeydown target owner state %)

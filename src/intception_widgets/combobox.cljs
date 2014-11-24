@@ -26,9 +26,9 @@
                                              (when (:onChange state)
                                                ((:onChange state) (:value value)))))
 
-                      :className (clojure.string/join " " ["combobox"  (:class-name state)
+                      :className (clojure.string/join " " ["om-widgets-combobox"  (:class-name state)
                                                            (when (and (not (:disabled state)) (:read-only state))
-                                                            "combobox-readonly")])
+                                                            "om-widgets-combobox-readonly")])
                       :disabled (or (:disabled state) (if (:read-only state) true false))
                       :onBlur (:onBlur state)
                       :value (pr-str {:value value})

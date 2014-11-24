@@ -8,7 +8,7 @@
    om/IRenderState
    (render-state [this {:keys [label id path disabled on-change class-name]}]
      (dom/div #js {:className class-name}
-        (dom/label #js {:className "label"}
+        (dom/label #js {:className "om-widgets-label"}
           (dom/input #js {:type "checkbox"
                           :id id
                           :disabled disabled
@@ -20,7 +20,7 @@
                                       (when on-change (on-change (.. e -target -checked))))}
                      label))))))
 
-(defn checkbox [app path {:keys [label id disabled class-name on-change] :or {class-name "checkbox"}}]
+(defn checkbox [app path {:keys [label id disabled class-name on-change] :or {class-name "om-widgets-checkbox"}}]
  ;; entry point
   (om/build check app { :state {:label label
                                 :id (or id path)

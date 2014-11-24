@@ -37,7 +37,8 @@
       top:0;
   }
   .popover-launcher {
-    position:relative;
+    position: relative;
+    display: inline !important;
   }
 
   .popover {
@@ -130,29 +131,29 @@
 
 
 
-  .checkbox {
+  .om-widgets-checkbox {
     font: small arial,sans-serif;
     font-size:12px;
     color: #404040;
     line-height:20px;
   }
-  .checkbox input {
+  .om-widgets-checkbox input {
     vertical-align:middle;
   }
 
-  .radio {
+  .om-widgets-radio {
     font: small arial,sans-serif;
     font-size:12px;
 
     color: #404040;
     line-height:20px;
   }
-  .radio input {
+  .om-widgets-radio input {
     top:2px;
     position:relative;
   }
 
-  .input-text,.combobox {
+  .om-widgets-input-text,.om-widgets-combobox {
     font: small arial,sans-serif;
     font-size:12px;
     background:white;
@@ -167,30 +168,30 @@
     transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
 
    }
-   input.input-text[disabled]{
+   input.om-widgets-input-text[disabled]{
     background:#aaaaaa !important;
     color:#aaaaaa !important;
    }
 
-   input.input-text[readonly]{
+   input.om-widgets-input-text[readonly]{
       background:#fcfcfc ;
       color:#808080;
 
    }
 
-  .combobox-readonly[disabled] {
+  .om-widgets-combobox-readonly[disabled] {
     background:#fcfcfc !important;
     color:#606060 !important;
 
   }
-  select.combobox[disabled] {
+  select.om-widgets-combobox[disabled] {
     background:#aaaaaa;
     color:#aaaaaa;
 
   }
 
 
-  .grid .dummy-col {
+  .om-widgets-grid .dummy-col {
     background:white !important;
     color:white !important;
     border:none;
@@ -203,7 +204,7 @@
     -ms-user-select: none;
     user-select: none;
   }
-  .grid {
+  .om-widgets-grid {
     border: 1px solid gray;
     border-radius: 5px;
     box-shadow: 3px 3px 2px #dddddd;
@@ -215,54 +216,54 @@
     min-width: 330px;
 
   }
-  .grid .table {
+  .om-widgets-grid .table {
     table-layout: fixed !important;
     width: 100%;
     max-width: 100%;
     border-spacing: 0;
     border-collapse: collapse;
   }
-  .grid .table>thead>tr>th {
+  .om-widgets-grid .table>thead>tr>th {
     vertical-align: bottom;
     border-bottom: 2px solid #bababa;
   }
 
-  .grid .scrollable {
+  .om-widgets-grid .scrollable {
     overflow-y:auto;
   }
-  .grid .scrollable thead {
+  .om-widgets-grid .scrollable thead {
     display:block;
     margin-top:-25px;
 
   }
 
-  .grid td,th{
+  .om-widgets-grid td,th{
     text-align:left;
     padding:4px;
     font-size:12px;
     cursor:pointer;
   }
-  .grid tr.success td {
+  .om-widgets-grid tr.success td {
     background:#CEE2EC;
   }
 
-  .grid th:hover {
+  .om-widgets-grid th:hover {
       cursor: pointer;
   }
 
-  .grid table {
+  .om-widgets-grid table {
     table-layout:fixed ;
   }
-  .grid .header {
+  .om-widgets-grid .header {
     overflow: hidden;
     background: rgb(232, 232, 232);
     border-radius: 5px 5px 0 0;
   }
-  .grid .pager {
+  .om-widgets-grid .pager {
     text-align:center;
 
   }
-  .grid .pager li {
+  .om-widgets-grid .pager li {
     padding-left:3px;
     cursor:pointer;
     -webkit-user-select: none; /* Chrome/Safari */
@@ -275,7 +276,7 @@
     display:inline;
 
   }
-  .grid .pager li>a {
+  .om-widgets-grid .pager li>a {
     display: inline-block;
     padding: 5px 14px;
     background-color: #fff;
@@ -284,12 +285,12 @@
     width:70px;
     margin:3px;
   }
-  .grid .pager li.disabled {
+  .om-widgets-grid .pager li.disabled {
       color: #777;
       cursor: not-allowed;
       background-color: #fff;
   }
-  .grid .pager .totals {
+  .om-widgets-grid .pager .totals {
     margin:3px;
     border-radius:4px;
     width:50px;
@@ -297,16 +298,16 @@
     padding: 2px 10px;
     float:right;
   }
-  .grid .pagination a {
+  .om-widgets-grid .pagination a {
     color:rgb(128, 128, 128);
   }
-  .tab {
+  .om-widgets-tab {
     width:100%;
     margin:3px;
     margin-bottom:5px;
     overflow:hidden;
   }
-  .tab .active-tab {
+  .om-widgets-tab .active-tab {
     display:block;
     width:100%;
     height:100%;
@@ -317,16 +318,16 @@
     border-right: 1px solid #ddd;
     */
   }
-  .tab .nav-tabs {
+  .om-widgets-tab .nav-tabs {
      display:table;
      border-bottom: 1px solid #ddd;
      width:100%;
   }
-  .tab .right-panel {
+  .om-widgets-tab .right-panel {
     float:right;
     position:relative
   }
-  .tab .left-panel {
+  .om-widgets-tab .left-panel {
     float:left;
     position:relative
   }
@@ -367,10 +368,10 @@
   }
 
 
-  .tab .inactive-tab {
+  .om-widgets-tab .inactive-tab {
     display:none;
   }
-  .tab .nav-tabs {
+  .om-widgets-tab .nav-tabs {
     border-bottom: 1px solid #ddd;
     padding-left: 0;
     margin-bottom: 0;
@@ -411,14 +412,14 @@
     border: none;
     padding-top: 5px;
   }
-  .form-group.required .control-label:not(.radio-label):before {
+  .form-group.required .control-label:not(.om-widgets-radio-label):before {
     content: \"*\";
     margin: 3px;
     vertical-align: middle;
     color: red;
   }
 
-  .form-group.required .checkbox label :before {
+  .form-group.required .om-widgets-checkbox label :before {
     content: \"*\";
     vertical-align: middle;
     margin-left:-10px;
@@ -426,10 +427,10 @@
     font-size:17px;
     color: red;
   }
-  .form-group.required .checkbox {
+  .form-group.required .om-widgets-checkbox {
     margin-left: 10px;
   }
-  .form-group .checkbox label.label ,.form-group .radio label.label{
+  .form-group .om-widgets-checkbox label.label ,.form-group .om-widgets-radio label.label{
     max-width: 100%;
     margin-bottom: 5px;
     font-weight: 700;

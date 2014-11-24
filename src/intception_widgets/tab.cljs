@@ -37,7 +37,7 @@
      (let [opts (map #(merge % {:current-page current-page
                                 :parent-owner owner
                                 :index %2})  pages (range))]
-      (dom/div #js {:className "tab" :id id}
+      (dom/div #js {:className "om-widgets-tab" :id id}
         (dom/div #js {:className "top-row"}
           (apply dom/ul #js {:className "nav nav-tabs" :role "tablist"}
                 (conj (om/build-all tab-header opts)

@@ -13,7 +13,7 @@
                      :onClick onClick
                      } label ))))
 
-(defn  button [label {:keys [class-name id disabled onClick] :or {class-name "button"}}]
+(defn  button [label {:keys [class-name id disabled onClick] :or {class-name "om-widgets-button"}}]
  ;; entry point
   (om/build button-component nil {:state {:label label
                                           :id (or id label)

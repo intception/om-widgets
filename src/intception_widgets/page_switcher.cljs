@@ -23,7 +23,7 @@
      (let [opts (map #(merge % {:current-page current-page
                                 :parent-owner owner
                                 :index %2})  pages (range))]
-      (dom/div #js {:className "page-switcher" :id id}
+      (dom/div #js {:className "om-widgets-page-switcher" :id id}
         (om/build page-switcher-page (nth opts current-page)))))))
 
 

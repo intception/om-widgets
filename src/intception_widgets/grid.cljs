@@ -120,7 +120,7 @@
         (let [ path (:path state)
                st (->> {}
                     (merge (when (:height state) {:height (:height state)})))]
-          (dom/div #js {:className "grid"}
+          (dom/div #js {:className "om-widgets-grid"}
 
             (om/build grid-header (:columns state))
             (dom/div #js {:className "scrollable" :style (clj->js st)}
