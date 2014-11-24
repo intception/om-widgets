@@ -153,21 +153,6 @@
     position:relative;
   }
 
-  .om-widgets-input-text,.om-widgets-combobox {
-    font: small arial,sans-serif;
-    font-size:12px;
-    background:white;
-    color: #404040;
-    border: 1px solid gray;
-    border-radius: 5px;
-    box-shadow: 3px 3px 2px #dddddd;
-    line-height:20px;
-    padding: 2px;
-    -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
-    -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
-    transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
-
-   }
    input.om-widgets-input-text[disabled]{
     background:#aaaaaa !important;
     color:#aaaaaa !important;
@@ -182,8 +167,8 @@
   .om-widgets-combobox-readonly[disabled] {
     background:#fcfcfc !important;
     color:#606060 !important;
-
   }
+
   select.om-widgets-combobox[disabled] {
     background:#aaaaaa;
     color:#aaaaaa;
