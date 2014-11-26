@@ -22,17 +22,10 @@
                 :output-dir "out/intception_widgets"
                 :optimizations :none
                 :source-map true}}
-             {:id "navbar"
-              :source-paths ["src" "examples/navbar/src"]
+             {:id "basic"
+              :source-paths ["src" "examples/basic/src"]
               :compiler {
-                         :output-to "examples/navbar/main.js"
-                         :output-dir "examples/navbar/out"
-                         :source-map true
-                         :optimizations :none}}
-             {:id "datepicker"
-              :source-paths ["src" "examples/datepicker/src"]
-              :compiler {
-                         :output-to "examples/datepicker/main.js"
-                         :output-dir "examples/datepicker/out"
+                         :output-to "examples/basic/main.js"
+                         :output-dir "examples/basic/out"
                          :source-map true
                          :optimizations :none}}]})
