@@ -48,13 +48,13 @@
     (display-name[_] "NavBarHeader")
 
     om/IRenderState
-    (render-state [this state]
+    (render-state [this {:keys [brand-title brand-image-url brand-image-expanded] :as state}]
                   (dom/div #js {:className "navbar-header"}
                            (dom/a #js {:className "navbar-brand" :href "#"}
-                                  (dom/img #js {:src (:brand-image-url state)
-                                                :alt (:brand-title state)
-                                                :height "100%"})
-                                  (str " " (:brand-title state)))))))
+                                  (dom/img #js {:src brand-image-url
+                                                :alt (or brand-title "brand-logo")
+                                                :height (if brand-image-expanded "100%" "")})
+                                  (str " " brand-title))))))
 
 (defn- navbar-container [app owner]
   (reify
@@ -62,11 +62,12 @@
     (display-name[_] "NavBarContainer")
 
     om/IRenderState
-    (render-state [this {:keys [container items brand-image-url brand-title selected] :as state}]
+    (render-state [this {:keys [container items brand-image-url brand-title brand-image-expanded selected] :as state}]
                   (dom/nav #js {:className "navbar navbar-default" :role "navigation" }
                            (dom/div #js {:className (str "container"
                                                          (when (= container :fluid) "-fluid"))}
                                     (om/build nav-header app {:state {:brand-image-url brand-image-url
+                                                                      :brand-image-expanded brand-image-expanded
                                                                       :brand-title brand-title}})
                                     (apply dom/div #js {:className "navbar-collapse"}
                                            (map #(om/build navbar-nav app {:state {:selected selected
@@ -94,6 +95,7 @@
   {:items [[(s/either NabvarNavSchema NabvarNavDropdownSchema)]]
    :selected s/Keyword
    :brand-image-url s/Str
+   (s/optional-key :brand-image-expanded) s/Bool
    (s/optional-key :container) (s/enum :default :fluid)
    :brand-title s/Str})
 
