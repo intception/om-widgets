@@ -4,6 +4,7 @@
   (:require [om.core :as om :include-macros true]
      [cljs.core.async :refer [put! chan <! alts! timeout]]
      [intception-widgets.translations :as translations]
+     [intception-widgets.utils :as u]
      [om.dom :as dom :include-macros true]))
 
 (defn- title-header-cell [{:keys [caption]}]
@@ -54,15 +55,15 @@
                                                                                 language
                                                                                 :default-pager/next-page)))
             (dom/span #js {:className "totals"}
-                        (format (translations/translate :grid
-                                                language
-                                                :default-pager/total-rows) total-rows))))))))
+                        (u/format (translations/translate :grid
+                                                          language
+                                                          :default-pager/total-rows) total-rows))))))))
 
-(defmulti grid-header (fn [header-definition _] (:type header-definition)))
+(defmulti grid-header (fn [header-definition _ _] (:type header-definition)))
 
 (defmethod grid-header :default
-  [header-definition state-and-options]
-    (om/build default-header header-definition state-and-options))
+  [header-definition state options]
+    (om/build default-header header-definition {:state state :opts options}))
 
 (defmethod grid-header :none [_ _ _])
 
@@ -84,10 +85,10 @@
 (defmulti grid-pager (fn [pager-definition _] (:type pager-definition)))
 
 (defmethod grid-pager :default
-  [pager-definition state-and-options]
-  (om/build default-pager pager-definition state-and-options))
+  [pager-definition state options]
+  (om/build default-pager pager-definition {:state state :opts options}))
 
-(defmethod grid-pager :none [_ _])
+(defmethod grid-pager :none [_ _ _])
 
 (defn- build-data [columns rows selected-row]
   (let [fields (map #(:field %) columns)]
@@ -140,7 +141,7 @@
                st (->> {}
                     (merge (when (:height state) {:height (:height state)})))]
           (dom/div #js {:className "grid"}
-            (grid-header (:header state) {:opts opts})
+            (grid-header (:header state) {} opts)
             (dom/div #js {:className "scrollable" :style (clj->js st)}
               (om/build grid-data
                         {:parent owner
@@ -151,7 +152,7 @@
                                  (:height state))
                          :target (:target state)}
                          {:opts opts}))
-            (grid-pager (:pager state) {:state {:total-rows (:total-rows source)} :opts opts}))))))
+            (grid-pager (:pager state) {:total-rows (:total-rows source)} opts))))))
 
 (defn grid [source target & {:keys [id onChange events-channel height header pager] :as definition}]
   (let [src (if (or (seq? source) (vector? source))

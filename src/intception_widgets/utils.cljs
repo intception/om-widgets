@@ -2,14 +2,19 @@
   (:require [om.core :as om :include-macros true]
   			    [om.dom :as dom :include-macros true]
             [cljs.reader :as reader]
+            [goog.string :as gstring]
+            [goog.string.format]
             [cljs-time.core :as time]
             [cljs-time.format :as timef]))
 
 
+(defn format
+  [fmt & args]
+  (apply gstring/format fmt args))
+
 (defn atom? [x]
   (and (satisfies? cljs.core/IDeref x)
         (not (satisfies? om/ICursor x))))
-
 
 (defn om-update! [tgt key value]
   (if (atom? tgt)
