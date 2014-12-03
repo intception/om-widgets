@@ -17,15 +17,19 @@
     (display-name[_] "NavBarEntry")
 
     om/IRenderState
-    (render-state [_ {:keys [entry selected]}]
+    (render-state [_ {:keys [entry selected on-selection]}]
                   (dom/li #js {:className (when (= selected (:id entry)) "active")}
                           (if (:items entry)
                             (dropdown app {:id (:id entry)
                                            :type :menu
                                            :title (:text entry)
+                                           :on-selection on-selection
                                            :items (:items entry)})
-                            (dom/a #js {:href (str "#/" (name (:id entry)))
-                                        :className (:className entry)}
+                            (dom/a (cljs.core/clj->js (->> {}
+                                                           (merge (when (:url entry)
+                                                                    {:href (:url entry)}))
+                                                           (merge (when on-selection
+                                                                    {:onClick #(on-selection (:id @entry))}))))
                                    (dom/span #js {:className (:iconClassName entry)})
                                    (:text entry)))))))
 
@@ -35,11 +39,13 @@
     (display-name[_] "NavBarNav")
 
     om/IRenderState
-    (render-state [this {:keys [navbar selected]}]
+    (render-state [this {:keys [navbar selected on-selection]}]
                   (apply dom/ul #js {:className (str "nav navbar-nav"
                                                      (when (:right-position (first navbar))
                                                        " navbar-right"))}
-                         (map #(om/build entry app {:state {:selected selected :entry %}})
+                         (map #(om/build entry app {:state {:selected selected
+                                                            :entry %
+                                                            :on-selection on-selection}})
                               navbar)))))
 
 (defn- nav-header [app owner]
@@ -62,7 +68,7 @@
     (display-name[_] "NavBarContainer")
 
     om/IRenderState
-    (render-state [this {:keys [container items brand-image-url brand-title brand-image-expanded selected] :as state}]
+    (render-state [this {:keys [container items brand-image-url brand-title brand-image-expanded selected on-selection] :as state}]
                   (dom/nav #js {:className "navbar navbar-default" :role "navigation" }
                            (dom/div #js {:className (str "container"
                                                          (when (= container :fluid) "-fluid"))}
@@ -71,6 +77,7 @@
                                                                       :brand-title brand-title}})
                                     (apply dom/div #js {:className "navbar-collapse"}
                                            (map #(om/build navbar-nav app {:state {:selected selected
+                                                                                   :on-selection on-selection
                                                                                    :navbar %}})
                                                 items)))))))
 
@@ -95,15 +102,16 @@
   {:items [[(s/either NabvarNavSchema NabvarNavDropdownSchema)]]
    :selected s/Keyword
    :brand-image-url s/Str
+   :brand-title s/Str
    (s/optional-key :brand-image-expanded) s/Bool
    (s/optional-key :container) (s/enum :default :fluid)
-   :brand-title s/Str})
+   (s/optional-key :on-selection) (s/pred fn?)})
 
 
 ;; ---------------------------------------------------------------------
 ;; Public
 
 (defn navbar
-  [app {:keys [items selected brand-image-url brand-title] :as options}]
+  [app {:keys [items selected brand-image-url brand-title on-selection] :as options}]
   (s/validate NavbarSchema options)
   (om/build navbar-container app {:state options}))

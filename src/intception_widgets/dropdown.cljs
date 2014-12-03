@@ -17,13 +17,14 @@
     (display-name[_] "DropdownEntry")
 
     om/IRenderState
-    (render-state [this state]
+    (render-state [this {:keys [on-selection] :as state}]
                   (dom/li nil
                           (dom/a (cljs.core/clj->js (->> {}
                                                          (merge (when (:url entry)
                                                                   {:href (:url entry)}))
-                                                         (merge (when (:on-click entry)
-                                                                  {:onClick (:on-click entry)}))))
+                                                         (merge (when on-selection
+                                                                  {:onClick #(on-selection (:id @entry))}))
+                                                         ))
                             (:text entry))))))
 
 (defmethod build-entry :divider [entry app]
@@ -67,7 +68,7 @@
                 {:opened false})
 
     om/IRenderState
-    (render-state [_ {:keys [id title items type size opened] :as state}]
+    (render-state [_ {:keys [id title items type size opened on-selection] :as state}]
                   (dom/li #js {:className (build-dropdown-class opened size)
                                :onClick #(om/set-state! owner :opened (not opened))
                                :onBlur #(om/set-state! owner :opened false)
@@ -83,7 +84,9 @@
                           (apply dom/ul #js {:className "dropdown-menu"
                                              :aria-labelledby (str "dropdown-" (name id))
                                              :role "menu"}
-                                 (om/build-all build-entry (:items state)))))))
+                                 (om/build-all build-entry
+                                               (:items state)
+                                               {:state {:on-selection on-selection}}))))))
 
 (defn- dropdown-container [app owner]
   (reify
@@ -95,7 +98,7 @@
                 {:opened false})
 
     om/IRenderState
-    (render-state [_ {:keys [id title items type size opened] :as state}]
+    (render-state [_ {:keys [id title items type size opened on-selection] :as state}]
                   (dom/div #js {:className (build-dropdown-class opened size)
                                 :onClick #(om/set-state! owner :opened (not opened))
                                 :onBlur #(om/set-state! owner :opened false)
@@ -110,7 +113,9 @@
                            (apply dom/ul #js {:className "dropdown-menu"
                                               :aria-labelledby (str "dropdown-" (name id))
                                               :role "menu"}
-                                  (om/build-all build-entry (:items state)))))))
+                                  (om/build-all build-entry
+                                                (:items state)
+                                                {:state {:on-selection on-selection}}))))))
 
 
 ;; ---------------------------------------------------------------------
@@ -121,8 +126,7 @@
   {:id s/Keyword
    :text s/Str
    :type (s/enum :entry)
-   (s/optional-key :url) s/Str
-   (s/optional-key :on-click) (s/pred fn?)})
+   (s/optional-key :url) s/Str})
 
 (def DividerSchema
   "Schema for a dropdown divider"
@@ -132,6 +136,7 @@
   {:id s/Keyword
    :items [(s/either EntrySchema DividerSchema)]
    :title s/Str
+   (s/optional-key :on-selection) (s/pred fn?)
    (s/optional-key :type) (s/enum :default :menu)
    (s/optional-key :size) (s/enum :default :sm :xs :lg)})
 

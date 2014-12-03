@@ -27,7 +27,7 @@
                             {:id :logout
                              :type :entry
                              :text "Logout"
-                             :on-click (fn [e] (println "do logout stuff!"))}]}]]}))
+                             }]}]]}))
 
 (defn- datepicker-sample
   [app owner]
@@ -107,6 +107,7 @@
                   (dom/div nil
                            (w/navbar app-state {:items (get-in app [:menu-items])
                                                 :selected (get-in app [:menu-selected])
+                                                :on-selection #(println "selected item: " %)
                                                 :brand-image-url "images/logo.png"
                                                 :brand-image-expanded true
                                                 :brand-title "Navbar Sample"})
