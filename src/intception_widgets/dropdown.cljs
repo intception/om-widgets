@@ -19,7 +19,12 @@
     om/IRenderState
     (render-state [this state]
                   (dom/li nil
-                          (dom/a #js {:href (:url entry)} (:text entry))))))
+                          (dom/a (cljs.core/clj->js (->> {}
+                                                         (merge (when (:url entry)
+                                                                  {:href (:url entry)}))
+                                                         (merge (when (:on-click entry)
+                                                                  {:onClick (:on-click entry)}))))
+                            (:text entry))))))
 
 (defmethod build-entry :divider [entry app]
   (reify
@@ -116,7 +121,8 @@
   {:id s/Keyword
    :text s/Str
    :type (s/enum :entry)
-   :url s/Str})
+   (s/optional-key :url) s/Str
+   (s/optional-key :on-click) (s/pred fn?)})
 
 (def DividerSchema
   "Schema for a dropdown divider"
