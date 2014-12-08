@@ -10,8 +10,9 @@
     om/IRenderState
     (render-state [this state]
         (dom/div #js {:className (if (= (:current-page page) (:index page)) "active-page" "inactive-page")}
-                 (dom/div #js {:className "page-header"}
-                          (:label page))
+                 (when (:label page)
+                  (dom/div #js {:className "page-header"}
+                            (:label page)))
                  (dom/div #js {:className "page-content"}
                   (:content page))))))
 
