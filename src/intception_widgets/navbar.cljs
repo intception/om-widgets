@@ -26,6 +26,8 @@
                                            :on-selection on-selection
                                            :items (:items entry)})
                             (dom/a (cljs.core/clj->js (->> {}
+                                                           (#(when (:className entry)
+                                                               (merge {:className (:className entry)} %)))
                                                            (#(when (:url entry)
                                                                (merge {:href (:url entry)} %)))
                                                            (#(when on-selection
