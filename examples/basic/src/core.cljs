@@ -2,7 +2,9 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [widgets.layouts :as layout :include-macros true]
-            [intception-widgets.core :as w]))
+            [intception-widgets.core :as w]
+            [intception-widgets.grid :refer [row-builder]]))
+
 
 (enable-console-print!)
 
@@ -10,6 +12,20 @@
   (atom
     {:birth-date #inst "1991-01-25"
      :sex :male
+     :grid {:source {:rows [{:name "Seba" :username "kernelp4nic"}
+                            {:name "Guille" :username "guilespi"}
+                            {:name "Fabian" :username "fapenia"}
+                            {:name "Alexis" :username "_axs_"}
+                            {:name "Martin" :username "nartub"}]}
+            :source-custom {:rows [{:name "Seba" :username "kernelp4nic" :row-type :users}
+                                   {:name "Guille" :username "guilespi" :row-type :users}
+                                   {:name "Fabian" :username "fapenia" :row-type :users}
+                                   {:name "Alexis" :username "_axs_" :row-type :users}
+                                   {:name "Martin" :username "nartub" :row-type :users}]}
+            :selected {}
+            :columns [{:caption "Name" :field :name}
+                      {:caption "Username" :field :username}]
+            }
      :menu-selected :dashboard
      :menu-items [[{:text "Dashbaord"
                     :id :dashboard
@@ -96,6 +112,57 @@
                                                                                :label " Female"
                                                                                :id "female"})))))))))
 
+(defn- grid-sample
+  [app owner]
+  (reify
+    om/IDisplayName
+    (display-name[_] "GridSample")
+
+    om/IRenderState
+    (render-state [this state]
+                  (dom/div #js {:className "panel panel-default"}
+                           (dom/div #js {:className "panel-heading"} (str "Grid"
+                                                                          " (selected cursor value: "
+                                                                          (:name (get-in app [:selected]))
+                                                                          " )"))
+                           (dom/div #js {:className "panel-body"}
+                                    (dom/div #js {:className ""}
+                                             (w/grid (vec (get-in app [:source :rows]))
+                                                     (get-in app [:selected])
+                                                     :container-class-name ""
+                                                     :header {:type :default
+                                                              :columns (get-in app [:columns])})))))))
+
+(defmethod row-builder :users
+  [row-data _ _]
+  (reify
+    om/IDisplayName
+      (display-name[_] "DefaultRow")
+    om/IRenderState
+    (render-state [this state]
+                  (let [n (get-in row-data [:row :name])
+                        u (get-in row-data [:row :username])]
+                    (dom/div nil
+                           (dom/label #js {:className ""} (str n " / " u))
+                           (dom/a #js {:href (str "http://twitter.com/" u)
+                                       :className "pull-right"} "Twitter profile"))))))
+
+(defn- grid-custom-row-sample
+  [app owner]
+  (reify
+    om/IDisplayName
+    (display-name[_] "GridCustomRowSample")
+
+    om/IRenderState
+    (render-state [this state]
+                  (dom/div #js {:className "panel panel-default"}
+                           (dom/div #js {:className "panel-heading"} "Grid Custom Row")
+                           (dom/div #js {:className "panel-body"}
+                                    (dom/div #js {:className ""}
+                                             (w/grid (seq (get-in app [:source-custom :rows]))
+                                                     (get-in app [:selected])
+                                                     :container-class-name ""
+                                                     :header {:type :none})))))))
 
 (defn my-app [app owner]
   (reify
@@ -114,11 +181,10 @@
 
                            (om/build datepicker-sample app)
                            (om/build radiobutton-sample app)
-
-                           )
-
-                  )))
+                           (om/build grid-sample (get-in app [:grid]))
+                           (om/build grid-custom-row-sample (get-in app [:grid]))))))
 
 (om/root my-app
          app-state
          {:target (.getElementById js/document "app")})
+
