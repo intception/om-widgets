@@ -26,10 +26,11 @@
                                            :on-selection on-selection
                                            :items (:items entry)})
                             (dom/a (cljs.core/clj->js (->> {}
-                                                           (merge (when (:url entry)
-                                                                    {:href (:url entry)}))
-                                                           (merge (when on-selection
-                                                                    {:onClick #(on-selection (:id @entry))}))))
+                                                           (#(when (:url entry)
+                                                               (merge {:href (:url entry)} %)))
+                                                           (#(when on-selection
+                                                               (merge {:onClick (fn [e]
+                                                                                  (on-selection (:id @entry)))} %)))))
                                    (dom/span #js {:className (:iconClassName entry)})
                                    (:text entry)))))))
 

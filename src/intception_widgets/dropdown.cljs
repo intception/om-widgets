@@ -20,12 +20,12 @@
     (render-state [this {:keys [on-selection] :as state}]
                   (dom/li nil
                           (dom/a (cljs.core/clj->js (->> {}
-                                                         (merge (when (:url entry)
-                                                                  {:href (:url entry)}))
-                                                         (merge (when on-selection
-                                                                  {:onClick #(on-selection (:id @entry))}))
-                                                         ))
-                            (:text entry))))))
+                                                         (#(when (:url entry)
+                                                             (merge {:href (:url entry)} %)))
+                                                         (#(when on-selection
+                                                             (merge {:onClick (fn [e]
+                                                                                (on-selection (:id @entry)))} %)))))
+                                 (:text entry))))))
 
 (defmethod build-entry :divider [entry app]
   (reify
