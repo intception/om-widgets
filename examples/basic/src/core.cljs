@@ -12,12 +12,7 @@
   (atom
     {:birth-date #inst "1991-01-25"
      :sex :male
-     :grid {:source {:rows [{:name "Seba" :username "kernelp4nic"}
-                            {:name "Guille" :username "guilespi"}
-                            {:name "Fabian" :username "fapenia"}
-                            {:name "Alexis" :username "_axs_"}
-                            {:name "Martin" :username "nartub"}]}
-            :source-custom {:rows [{:name "Seba" :username "kernelp4nic" :row-type :users}
+     :grid {:source-custom {:rows [{:name "Seba" :username "kernelp4nic" :row-type :users}
                                    {:name "Guille" :username "guilespi" :row-type :users}
                                    {:name "Fabian" :username "fapenia" :row-type :users}
                                    {:name "Alexis" :username "_axs_" :row-type :users}
@@ -127,25 +122,27 @@
                                                                           " )"))
                            (dom/div #js {:className "panel-body"}
                                     (dom/div #js {:className ""}
-                                             (w/grid (vec (get-in app [:source :rows]))
+                                             (w/grid [{:name "Seba" :username "kernelp4nic"}
+                                                      {:name "Guille" :username "guilespi"}
+                                                      {:name "Fabian" :username "fapenia"}
+                                                      {:name "Alexis" :username "_axs_"}
+                                                      {:name "Martin" :username "nartub"}]
                                                      (get-in app [:selected])
                                                      :container-class-name ""
                                                      :header {:type :default
                                                               :columns (get-in app [:columns])})))))))
 
 (defmethod row-builder :users
-  [row-data _ _]
+  [row _ _]
   (reify
     om/IDisplayName
       (display-name[_] "DefaultRow")
     om/IRenderState
     (render-state [this state]
-                  (let [n (get-in row-data [:row :name])
-                        u (get-in row-data [:row :username])]
                     (dom/div nil
-                           (dom/label #js {:className ""} (str n " / " u))
-                           (dom/a #js {:href (str "http://twitter.com/" u)
-                                       :className "pull-right"} "Twitter profile"))))))
+                           (dom/label #js {:className ""} (str (:name row) " / " (:username row)))
+                           (dom/a #js {:href (str "http://twitter.com/" (:username row))
+                                       :className "pull-right"} "Twitter profile")))))
 
 (defn- grid-custom-row-sample
   [app owner]
@@ -161,7 +158,6 @@
                                     (dom/div #js {:className ""}
                                              (w/grid (seq (get-in app [:source-custom :rows]))
                                                      (get-in app [:selected])
-                                                     :container-class-name ""
                                                      :header {:type :none})))))))
 
 (defn my-app [app owner]
@@ -178,7 +174,6 @@
                                                 :brand-image-url "images/logo.png"
                                                 :brand-image-expanded true
                                                 :brand-title "Navbar Sample"})
-
                            (om/build datepicker-sample app)
                            (om/build radiobutton-sample app)
                            (om/build grid-sample (get-in app [:grid]))

@@ -8,25 +8,41 @@
             [intception-widgets.utils :as u]))
 
 
+;; ---------------------------------------------------------------------
+;; TODOS
+;;
+;; * row selection is broken when we use a vec from a cursor
+;;
+;; * rethink API and normalize input
+;;
+;; * rethink markup, why we use two tables instead of one?
+;;
+;; * if you call the grid with an empty vec source, row-builder is called a lot
+;; of times with garbage ({:row -1, :row-type nil, :projection {}, :class success})
+;;
+;; * inconsistence between row-builder and grid-header multimethods, one needs to return
+;; a valid om component and the other one is just a function that makes the build.
+
+
 (defn- title-header-cell [{:keys [caption]}]
   (om/component
     (dom/th #js {} caption)))
 
 (defn- header [columns]
   (om/component
-    (dom/thead #js {:className "title-header-row"}
+    (dom/thead #js {:className "om-widgets-title-header-row"}
       (apply dom/tr nil
         (om/build-all title-header-cell columns)))))
 
 (defn- data-cell [text]
   (om/component
-    (dom/td #js {:className "data-cell"} text)))
+    (dom/td #js {:className "om-widgets-data-cell"} text)))
 
 (defn- default-header [header-definition owner opts]
   (reify
     om/IRenderState
     (render-state [this state]
-       (dom/table #js{:className "table header"}
+       (dom/table #js{:className "om-widgets-table om-widgets-header"}
             (om/build header (:columns header-definition))))))
 
 (defn- default-pager [pager-definition owner opts]
@@ -43,8 +59,8 @@
                                       "disabled")}
               (dom/a #js {:onClick #(when (> current-page 0)
                                       (om/set-state! owner :current-page (dec current-page))
-                                      false)} (translate language
-                                                         :grid.pager/previous-page))
+                                      false)} (translate language :grid.pager/previous-page))
+
             ;; next page
             (dom/li #js {:className (when (= current-page max-pages)
                                       "disabled")}
@@ -53,8 +69,20 @@
                                             false)} (translate language :grid.pager/next-page)))
             ;; total label
             (dom/span #js {:className "totals"}
-                      (u/format (translate language
-                                           :grid.pager/total-rows) total-rows))))))))
+                      (u/format (translate language :grid.pager/total-rows) total-rows))))))))
+
+(defn- build-data [columns row selected-row]
+  (let [fields (map #(:field %) columns)]
+    (merge {} {:projection (select-keys row fields)
+               :class (if (= selected-row row) "success" "")})))
+
+
+;; ---------------------------------------------------------------------
+;; Grid Header Multimethod
+;;
+;; NOTE: we just implement the default method, and the :none method, if you want a custom
+;; header, you just need to require grid-header ([intception-widgets.grid :refer [grid-header]])
+;; and provide a custom implementation
 
 (defmulti grid-header (fn [header-definition _ _] (:type header-definition)))
 
@@ -72,20 +100,30 @@
 ;; row, you just need to require row-builder ([intception-widgets.grid :refer [row-builder]])
 ;; and extend the multimethod with a valid om component.
 
-(defmulti row-builder (fn [row-data _ _] (:row-type row-data)))
+(defmulti row-builder (fn [row owner opts] (:row-type row)))
 
 (defmethod row-builder :default
-  [row-data _ _]
+  [row owner opts]
   (reify
     om/IDisplayName
       (display-name[_] "DefaultRow")
+
     om/IRenderState
     (render-state [this state]
-      (apply dom/tr #js{:className (:class row-data)
-                        :onMouseDown (fn [e]
-                                       (om/update! (:target (:parent-state state)) (:row row-data))
+      (let [row-data (build-data (:columns opts) row (:target opts))]
+        (apply dom/tr #js {:className (:class row-data)
+                         :onMouseDown (fn [e]
+                                       (om/update! (:target (:parent-state state)) row)
                                        (om/refresh! (:parent state)))}
-             (om/build-all data-cell (vals (:projection row-data)))))))
+             (om/build-all data-cell (vals (:projection row-data))))))))
+
+
+;; ---------------------------------------------------------------------
+;; Grid Pager Multimethod
+;;
+;; NOTE: we just implement the default method, and the :none method, if you want a custom
+;; pager, you just need to require grid-pager ([intception-widgets.grid :refer [grid-pager]])
+;; and provide a custom implementation
 
 (defmulti grid-pager (fn [pager-definition _] (:type pager-definition)))
 
@@ -95,24 +133,17 @@
 
 (defmethod grid-pager :none [_ _ _])
 
-(defn- build-data [columns rows selected-row]
-  (let [fields (map #(:field %) columns)]
-   (->>
-      rows
-      (map #(assoc {} :row % :row-type (:row-type %)))
-      (map #(assoc % :projection (select-keys (:row %) fields)))
-      (map #(assoc % :class (if (= (select-keys selected-row fields) (:projection %)) "success" ""))))))
 
 (defn- grid-data [data owner opts]
   (reify
     om/IRenderState
     (render-state [this state]
-      (let [rows (build-data (:columns (:header (om/get-state (:parent data))))
-                             (:rows data)
-                             (:target data))]
         (dom/table #js {:className "table data"}
           (apply dom/tbody #js {}
-            (om/build-all row-builder rows {:state {:parent owner :parent-state data} :opts opts})))))))
+            (om/build-all row-builder (:rows data) {:state {:parent owner :parent-state data}
+                                                    :opts (merge opts
+                                                                 {:columns (:columns (:header (om/get-state (:parent data))))
+                                                                  :target (:target data)})}))))))
 
 (defn- data-page [source current-page page-size events-channel fixed-height]
   (let [rows (vec (:rows source))
@@ -144,7 +175,7 @@
     (render-state [this state]
         (let [style (->> {}
                          (merge (when (:height state) {:height (:height state)})))]
-          (dom/div #js {:className (or (:container-class-name state) "om-widgets-grid")
+          (dom/div #js {:className "om-widgets-grid"
                         :id (:id state)}
             (grid-header (:header state) {} opts)
             (dom/div #js {:className "scrollable" :style (clj->js style)}
@@ -180,7 +211,6 @@
 
 (def GridSchema
   {(s/optional-key :id) s/Str
-   (s/optional-key :container-class-name) s/Str
    (s/optional-key :onChange) (s/pred fn?)
    (s/optional-key :events-channel) s/Any
    (s/optional-key :height) s/Num
@@ -191,13 +221,7 @@
 ;; ---------------------------------------------------------------------
 ;; Public
 
-
-;; TODO row selection is broken when we use a vec from a cursor
-;; TODO rethink API and normalize input
-;; TODO rethink markup, why we use two tables instead of one?
-(defn grid [source target & {:keys [id onChange events-channel height
-                                    header pager container-class-name
-                                    language]
+(defn grid [source target & {:keys [id onChange events-channel height header pager language]
                              :as definition}]
   (let [src (if (or (seq? source) (vector? source))
                  {:index 0 :rows source :total-rows (count source)}
@@ -213,7 +237,6 @@
                      :pager (or pager {:type :default})
                      :id id
                      :events-channel events-channel
-                     :container-class-name container-class-name
                      :max-pages (calculate-max-pages (:total-rows src) page-size)
                      :page-size page-size
                      :onChange onChange
