@@ -178,7 +178,7 @@
           (dom/div #js {:className "om-widgets-grid"
                         :id (:id state)}
             (grid-header (:header state) {} opts)
-            (dom/div #js {:className "scrollable" :style (clj->js style)}
+            (dom/div #js {:className "om-widgets-content" :style (clj->js style)}
               (om/build grid-data
                         {:parent owner
                          :rows (data-page source

@@ -213,15 +213,6 @@
     border-bottom: 2px solid #bababa;
   }
 
-  .om-widgets-grid .scrollable {
-    overflow-y:auto;
-  }
-  .om-widgets-grid .scrollable thead {
-    display:block;
-    margin-top:-25px;
-
-  }
-
   .om-widgets-grid td,th{
     text-align:left;
     padding:4px;
