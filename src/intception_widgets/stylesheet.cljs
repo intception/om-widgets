@@ -190,16 +190,6 @@
     user-select: none;
   }
   .om-widgets-grid {
-    border: 1px solid gray;
-    border-radius: 5px;
-    box-shadow: 3px 3px 2px #dddddd;
-    color: #404040;
-    font: small arial,sans-serif;
-    font-size: 12px;
-    text-align: center;
-    background: white;
-    min-width: 330px;
-
   }
   .om-widgets-grid .table {
     table-layout: fixed !important;
@@ -255,22 +245,12 @@
   .om-widgets-grid .pager li>a {
     display: inline-block;
     padding: 5px 14px;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    width:70px;
-    margin:3px;
   }
   .om-widgets-grid .pager li.disabled {
       color: #777;
       cursor: not-allowed;
-      background-color: #fff;
   }
   .om-widgets-grid .pager .totals {
-    margin:3px;
-    border-radius:4px;
-    width:50px;
-    border: 1px solid #ddd;
     padding: 2px 10px;
     float:right;
   }
