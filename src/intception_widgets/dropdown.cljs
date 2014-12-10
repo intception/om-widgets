@@ -20,11 +20,15 @@
     (render-state [this {:keys [on-selection] :as state}]
                   (dom/li nil
                           (dom/a (cljs.core/clj->js (->> {}
-                                                         (#(when (:url entry)
-                                                             (merge {:href (:url entry)} %)))
-                                                         (#(when on-selection
+                                                         ;; TODO write a macro like pallet.thread-expr
+                                                         ;; but that works on clojurescript
+                                                         (#(if (:url entry)
+                                                             (merge {:href (:url entry)} %)
+                                                             %))
+                                                         (#(if on-selection
                                                              (merge {:onClick (fn [e]
-                                                                                (on-selection (:id @entry)))} %)))))
+                                                                                (on-selection (:id @entry)))} %)
+                                                             %))))
                                  (:text entry))))))
 
 (defmethod build-entry :divider [entry app]

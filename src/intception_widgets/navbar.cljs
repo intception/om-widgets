@@ -26,13 +26,18 @@
                                            :on-selection on-selection
                                            :items (:items entry)})
                             (dom/a (cljs.core/clj->js (->> {}
-                                                           (#(when (:className entry)
-                                                               (merge {:className (:className entry)} %)))
-                                                           (#(when (:url entry)
-                                                               (merge {:href (:url entry)} %)))
-                                                           (#(when on-selection
+                                                           ;; TODO write a macro like pallet.thread-expr
+                                                           ;; but that works on clojurescript
+                                                           (#(if (:className entry)
+                                                               (merge {:className (:className entry)} %)
+                                                               %))
+                                                           (#(if (:url entry)
+                                                               (merge {:href (:url entry)} %)
+                                                               %))
+                                                           (#(if on-selection
                                                                (merge {:onClick (fn [e]
-                                                                                  (on-selection (:id @entry)))} %)))))
+                                                                                  (on-selection (:id @entry)))} %)
+                                                               %))))
                                    (dom/span #js {:className (:iconClassName entry)})
                                    (:text entry)))))))
 
