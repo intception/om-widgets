@@ -21,6 +21,32 @@
             :columns [{:caption "Name" :field :name}
                       {:caption "Username" :field :username}]
             }
+     :dropdown [{:id :duplicate
+                 :type :entry
+                 :text "Duplicate"
+                 :url "#/item/duplicate/1234"}
+                {:id :edit
+                 :type :entry
+                 :text "Edit"
+                 :url "#/item/edit/1234"}
+
+                {:type :divider}
+
+                {:id :history
+                 :type :entry
+                 :text "History"
+                 :url "#/item/history/1234"}
+                {:id :analysis
+                 :type :entry
+                 :text "Analysis"
+                 :url "#/item/analysis/1234"}
+
+                {:type :divider}
+
+                {:id :trash
+                 :type :entry
+                 :text "Trash"
+                 :url "#/item/trash/1234"}]
      :menu-selected :dashboard
      :menu-items [[{:text "Dashbaord"
                     :id :dashboard
@@ -107,6 +133,24 @@
                                                                                :label " Female"
                                                                                :id "female"})))))))))
 
+(defn- dropdown-sample
+  [app owner]
+  (reify
+    om/IDisplayName
+    (display-name [_] "DropdownSample")
+
+    om/IRenderState
+    (render-state [this state]
+                  (dom/div #js {:className "panel panel-default"}
+                           (dom/div #js {:className "panel-heading"} "Dropdown")
+                           (dom/div #js {:className "panel-body"}
+                                    (w/dropdown nil {:id :testing
+                                                     :title "Item Actions"
+                                                     :size :sm
+                                                     :items (get-in app [:dropdown])})
+
+                                    )))))
+
 (defn- grid-sample
   [app owner]
   (reify
@@ -136,10 +180,10 @@
   [row _ _]
   (reify
     om/IDisplayName
-      (display-name[_] "DefaultRow")
+    (display-name[_] "DefaultRow")
     om/IRenderState
     (render-state [this state]
-                    (dom/div nil
+                  (dom/div nil
                            (dom/label #js {:className ""} (str (:name row) " / " (:username row)))
                            (dom/a #js {:href (str "http://twitter.com/" (:username row))
                                        :className "pull-right"} "Twitter profile")))))
@@ -176,6 +220,7 @@
                                                 :brand-title "Navbar Sample"})
                            (om/build datepicker-sample app)
                            (om/build radiobutton-sample app)
+                           (om/build dropdown-sample app)
                            (om/build grid-sample (get-in app [:grid]))
                            (om/build grid-custom-row-sample (get-in app [:grid]))))))
 
