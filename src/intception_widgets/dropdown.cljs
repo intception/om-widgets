@@ -98,11 +98,8 @@
     om/IRenderState
     (render-state [this {:keys [channel items] :as state}]
                   (html
-                    [:ul {:class "dropdown-menu"}
-                     (om/build-all build-entry items {:state {:channel channel}})
-                     ]
-                    )
-                  )))
+                     (vec (concat [:ul {:class "dropdown-menu"}]
+                                  (map #(om/build build-entry % {:state {:channel channel}}) items)))))))
 
 ;; TODO merge with basic dropdown?
 (defn- DropdownMenuContainer [cursor owner]
