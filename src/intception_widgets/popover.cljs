@@ -17,7 +17,6 @@
                   :disabled disabled
                   :onClick #(do
                               (om/set-state! owner :visible (not visible))
-
                               false)
                   } label)
 
@@ -26,11 +25,10 @@
                                                             false)}))
 
       (when visible
-        (apply dom/div #js {:className "om-widgets-popover"
-                            :onClick (fn[e]
-                                      (println "OnClick !"))}
+        (apply dom/div #js {:className "om-widgets-popover"}
             (cond
-              (fn? body)[(body)]
+              (fn? body)[(body (fn[]
+                                  (om/set-state! owner :visible false))]
               (seq? body) body
               :else [body])))))))
 
