@@ -131,23 +131,12 @@
 
 
 
-  .om-widgets-checkbox {
-    font: small arial,sans-serif;
-    font-size:12px;
-    color: #404040;
-    line-height:20px;
-  }
+  .om-widgets-checkbox {}
   .om-widgets-checkbox input {
     vertical-align:middle;
   }
 
-  .om-widgets-radio {
-    font: small arial,sans-serif;
-    font-size:12px;
-
-    color: #404040;
-    line-height:20px;
-  }
+  .om-widgets-radio {}
   .om-widgets-radio input {
     top:2px;
     position:relative;
@@ -204,9 +193,6 @@
   }
 
   .om-widgets-grid td,th{
-    text-align:left;
-    padding:4px;
-    font-size:12px;
     cursor:pointer;
   }
   .om-widgets-grid tr.success td {
@@ -272,7 +258,7 @@
     border-bottom: 1px solid #ddd;
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
-    */
+*/
   }
   .om-widgets-tab .om-widgets-nav-tabs {
      display:table;
@@ -312,11 +298,12 @@
     border-color: #eee #eee #ddd;
 
   }
+
 /*
   .om-widgets-nav-tabs>li>a:hover {
     border-color: #eee #eee #ddd;
   }
-  */
+*/
 
   .om-widgets-tab-item:hover, .om-widgets-tab-item:focus {
     text-decoration: none;
