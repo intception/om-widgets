@@ -4,7 +4,7 @@
      [intception-widgets.utils :as utils]))
 
 
-(defn- radio [entity]
+(defn- radio [entity owner]
  (reify
    om/IRenderState
    (render-state [this {:keys [label id path checked-value disabled class-name label-class]}]
@@ -15,7 +15,10 @@
                           :disabled disabled
                           :checked (= (utils/om-get entity [path]) checked-value)
                           :onChange (fn [e]
-                                      (utils/om-update! entity path checked-value ))} label))))))
+                                      (utils/om-update! entity path checked-value )
+                                      (when (utils/atom? entity)
+                                        (om/refresh! owner)))}
+                      label))))))
 
 (defn radiobutton [entity path  {:keys [label class-name id checked-value disabled label-class]
                                  :or {checked-value true class-name "om-widgets-radio"}}]
