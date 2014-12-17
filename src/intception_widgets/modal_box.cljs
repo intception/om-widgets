@@ -119,6 +119,31 @@
        (om/set-state! owner :mb_config nil)
        result))))
 
+(defn modal-launcher-component
+  [_ owner opts]
+  (reify
+    om/IRenderState
+      (render-state [this {:keys [html-fn title-fn body-fn footer-fn visible channel] :as state}]
+        (dom/div nil
+          (when visible
+            (om/build create-modal-box nil {:state {:body body-fn
+                                                    :close-fn (fn [res]
+                                                                  (om/set-state! owner :visible false)
+                                                                   (put! channel (or res false)))
+                                                    :footer footer-fn
+                                                    :title title-fn}}))
+          (html-fn (fn []
+                      (go (let [channel (chan)]
+                            (om/update-state! owner (fn[st]
+                                                      (merge st {:visible true
+                                                                :channel channel})))
+                            (<! channel)))))))))
+(defn modal-launcher
+  [html title body footer]
+  (om/build modal-launcher-component nil {:state {:html-fn html
+                                                 :title-fn title
+                                                 :body-fn body
+                                                 :footer-fn footer}}))
 
 (defn do-modal
   [owner title body footer {:keys [class-name]}]
