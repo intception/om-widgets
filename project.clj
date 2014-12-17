@@ -1,4 +1,4 @@
-(defproject intception-widgets "0.1.12-SNAPSHOT"
+(defproject intception-widgets "0.1.13-SNAPSHOT"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
 
