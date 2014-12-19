@@ -160,7 +160,8 @@
 (defmethod applymask! :unmasked
   [target owner state value]
   (when-let  [dom-node (:dom-node @(:private-state state))]
-    (set! (.-value dom-node)  value)))
+    (when-not  (= value (:prev-value @(:private-state state)))
+      (set! (.-value dom-node)  value))))
 
 (defmethod handlekeydown :unmasked
   [target owner state e]

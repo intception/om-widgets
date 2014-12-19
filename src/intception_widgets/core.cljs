@@ -35,6 +35,8 @@
 (def alert intception-widgets.modal-box/alert)
 (def ok-cancel intception-widgets.modal-box/ok-cancel)
 (def do-modal intception-widgets.modal-box/do-modal)
+(def modal-launcher  intception-widgets.modal-box/modal-launcher)
+
 (def page-switcher intception-widgets.page-switcher/page-switcher)
 (def om-get intception-widgets.utils/om-get)
 (def om-update! intception-widgets.utils/om-update!)
