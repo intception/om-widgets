@@ -118,14 +118,16 @@
 (defmulti applymask! mask-handler-selector)
 
 (defn- update-target
-       [target owner {:keys [cbtimeout typing-timeout input-format prev-value path private-state] :as state}]
+       [target owner {:keys [cbtimeout typing-timeout input-format prev-value path private-state onChange] :as state}]
   (let [prev-value (:prev-value @private-state )
         dom-node (:dom-node @private-state )
         value (convert-output input-format  (.-value dom-node))]
     (when (not= prev-value value)
       (do
         (swap! private-state assoc :cbtimeout nil :prev-value value)
-        (utils/om-update! target path value)))))
+        (utils/om-update! target path value)
+        (when onChange
+          (onChange value))))))
 
 (defn- fire-on-change
   [target owner {:keys [cbtimeout typing-timeout prev-value path  private-state] :as state}]
