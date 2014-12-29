@@ -77,7 +77,8 @@
 
     om/IRenderState
     (render-state [this {:keys [container items brand-image-url brand-title brand-image-expanded selected on-selection] :as state}]
-                  (dom/nav #js {:className "navbar navbar-default" :role "navigation" }
+                  (dom/nav #js {:className (str "navbar navbar-default"
+                                                (when (:fixed-top state) " navbar-fixed-top"))}
                            (dom/div #js {:className (str "container"
                                                          (when (= container :fluid) "-fluid"))}
                                     (om/build nav-header app {:state {:brand-image-url brand-image-url
@@ -111,6 +112,7 @@
    :selected s/Keyword
    :brand-image-url s/Str
    :brand-title s/Str
+   (s/optional-key :fixed-top) s/Bool
    (s/optional-key :brand-image-expanded) s/Bool
    (s/optional-key :container) (s/enum :default :fluid)
    (s/optional-key :on-selection) (s/pred fn?)})
