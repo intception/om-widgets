@@ -52,6 +52,7 @@
     outline: 0;
     -webkit-box-shadow: 0 3px 9px rgba(0,0,0,.5);
     box-shadow: 0 3px 9px rgba(0,0,0,.5);
+		left:0;
   }
 
   .om-widgets-modal-is-open {
