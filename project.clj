@@ -1,4 +1,4 @@
-(defproject intception-widgets "0.1.13-SNAPSHOT"
+(defproject intception-widgets "0.1.14-SNAPSHOT"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
 
@@ -17,18 +17,15 @@
 
   :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]]
   :source-paths ["src"]
-  :cljsbuild {
-    :builds [{:id "intception-widgets"
-              :source-paths ["src"]
-              :compiler {
-                :output-to "intception_widgets.js"
-                :output-dir "out/intception_widgets"
-                :optimizations :none
-                :source-map true}}
-             {:id "basic"
-              :source-paths ["src" "examples/basic/src"]
-              :compiler {
-                         :output-to "examples/basic/main.js"
-                         :output-dir "examples/basic/out"
-                         :source-map true
-                         :optimizations :none}}]})
+  :cljsbuild {:builds [{:id "intception-widgets"
+                        :source-paths ["src"]
+                        :compiler {:output-to "intception_widgets.js"
+                                   :output-dir "out/intception_widgets"
+                                   :optimizations :none
+                                   :source-map true}}
+                       {:id "basic"
+                        :source-paths ["src" "examples/basic/src"]
+                        :compiler {:output-to "examples/basic/main.js"
+                                   :output-dir "examples/basic/out"
+                                   :source-map true
+                                   :optimizations :none}}]})
