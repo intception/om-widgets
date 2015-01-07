@@ -1,9 +1,9 @@
 (ns intception-widgets.grid
-  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [schema.core :as s :include-macros true]
-            [cljs.core.async :refer [put! chan <! alts! timeout]]
+            [cljs.core.async :refer [put! chan <! alts! timeout close!]]
             [intception-widgets.translations :refer [translate]]
             [intception-widgets.utils :as u]))
 
@@ -42,7 +42,7 @@
   (reify
     om/IRenderState
     (render-state [this state]
-       (dom/table #js{:className "om-widgets-table om-widgets-header"}
+       (dom/table #js {:className "om-widgets-table om-widgets-header"}
             (om/build header (:columns header-definition))))))
 
 (defn- default-pager [pager-definition owner opts]
@@ -71,7 +71,7 @@
             (dom/span #js {:className "totals"}
                       (u/format (translate language :grid.pager/total-rows) total-rows))))))))
 
-(defn- build-data [columns row selected-row]
+(defn- build-row-data [columns row selected-row]
   (let [fields (map #(:field %) columns)]
     (merge {} {:projection (select-keys row fields)
                :class (if (= selected-row row) "success" "")})))
@@ -106,17 +106,16 @@
   [row owner opts]
   (reify
     om/IDisplayName
-      (display-name[_] "DefaultRow")
+    (display-name[_] "DefaultRow")
 
     om/IRenderState
     (render-state [this state]
-      (let [row-data (build-data (:columns opts) row (:target opts))]
-        (apply dom/tr #js {:className (:class row-data)
-                         :onMouseDown (fn [e]
-                                       (om/update! (:target (:parent-state state)) row)
-                                       (om/refresh! (:parent state)))}
-             (om/build-all data-cell (vals (:projection row-data))))))))
-
+                  (let [row-data (build-row-data (:columns opts) row (:target opts))]
+                    (apply dom/tr #js {:className (:class row-data)
+                                       :onMouseDown #(put! (:channel state) {:row (if (satisfies? IDeref row)
+                                                                                    @row
+                                                                                    row)})}
+                           (om/build-all data-cell (vals (:projection row-data))))))))
 
 ;; ---------------------------------------------------------------------
 ;; Grid Pager Multimethod
@@ -134,18 +133,34 @@
 (defmethod grid-pager :none [_ _ _])
 
 
-(defn- grid-data [data owner opts]
+(defn- grid-body
+  [target owner opts]
   (reify
-    om/IRenderState
-    (render-state [this state]
-        (dom/table #js {:className "table data"}
-          (apply dom/tbody #js {}
-            (om/build-all row-builder (:rows data) {:state {:parent owner :parent-state data}
-                                                    :opts (merge opts
-                                                                 {:columns (:columns (:header (om/get-state (:parent data))))
-                                                                  :target (:target data)})}))))))
+    om/IWillMount
+     (will-mount [_]
+                 (go-loop []
+                          (let [msg (<! (om/get-state owner :channel))]
+                            (when-not (= msg :quit)
+                              (om/update! target (:row msg))
+                              (recur)))))
+    om/IInitState
+    (init-state [_]
+                {:channel (chan)})
 
-(defn- data-page [source current-page page-size events-channel fixed-height]
+    om/IWillUnmount
+    (will-unmount[_]
+      (put! (om/get-state owner :channel) :quit))
+
+    om/IRenderState
+    (render-state [this {:keys [rows] :as state}]
+        (dom/table #js {:className "table data"}
+          (om/build header (:columns opts))
+          (apply dom/tbody #js {}
+                 (om/build-all row-builder rows {:state {:channel (:channel state)}
+                                                 :opts {:columns (:columns opts)
+                                                        :target target}}))))))
+
+(defn- data-page [source current-page page-size events-channel]
   (let [rows (vec (:rows source))
         top (count rows)
         start (* current-page page-size)
@@ -155,7 +170,9 @@
         end-gap (min page-size (if (> (- end (+ top (:index source))) 0)
                                    (- end (+ top (:index source)))
                                    0))
-        begin-gap (min page-size (max 0 (- (:index source) start)))]
+        begin-gap (min page-size (max 0 (- (:index source) start)))
+        drop-cut (max 0 (min top (+ (- start (:index source)) begin-gap)))
+        take-cut (max 0 (min top (+ (- end (:index source)) end-gap)))]
 
     (when (and events-channel (or (< (max 0 (- start (* 1 page-size))) index)
                                   (> (min total-rows (+ (+ start page-size) (* 2 page-size))) (+ index top))))
@@ -163,32 +180,27 @@
         (>! events-channel {:event-type :request-range
                             :start (min total-rows (max 0 (- start (* 4 page-size))))
                             :end (min total-rows (+ (+ start page-size) (* 5 page-size)))})))
+    (->> rows
+         (drop drop-cut)
+         (take take-cut)
+         (concat))))
 
-    (concat (repeat (min page-size begin-gap) -1)
-            (subvec rows (max 0 (min top (+ (- start  (:index source)) begin-gap))) (max 0 (min top (+ (- end  (:index source)) end-gap))))
-            (when (nil? fixed-height)
-                (repeat (min page-size end-gap) -1)))))
-
-(defn- create-grid [source owner opts]
+(defn- create-grid [target owner opts]
   (reify
     om/IRenderState
-    (render-state [this state]
-        (let [style (->> {}
-                         (merge (when (:height state) {:height (:height state)})))]
+    (render-state [this {:keys [header src] :as state}]
           (dom/div #js {:className "om-widgets-grid"
-                        :id (:id state)}
-            (grid-header (:header state) {} opts)
-            (dom/div #js {:className "om-widgets-content" :style (clj->js style)}
-              (om/build grid-data
-                        {:parent owner
-                         :rows (data-page source
-                                          (:current-page state)
-                                          (:page-size state)
-                                          (:events-channel state)
-                                          (:height state))
-                         :target (:target state)}
-                         {:opts opts}))
-            (grid-pager (:pager state) {:total-rows (:total-rows source)} opts))))))
+                        :id (:id opts)}
+                   (om/build grid-body
+                             target
+                             {:state {:rows (data-page src
+                                                       (:current-page state)
+                                                       (:page-size state)
+                                                       (:events-channel state))}
+                              :opts {:columns (:columns header)}})
+            (grid-pager (:pager state) {:total-rows (:total-rows src)} opts))
+
+          )))
 
 (defn- calculate-max-pages
   [total-rows page-size]
@@ -213,7 +225,6 @@
   {(s/optional-key :id) s/Str
    (s/optional-key :onChange) (s/pred fn?)
    (s/optional-key :events-channel) s/Any
-   (s/optional-key :height) s/Num
    (s/optional-key :header) HeaderSchema
    (s/optional-key :pager) (s/enum :default :none)
    (s/optional-key :language) (s/enum :en :es)})
@@ -221,25 +232,23 @@
 ;; ---------------------------------------------------------------------
 ;; Public
 
-(defn grid [source target & {:keys [id onChange events-channel height header pager language]
+;; TODO source should be a DataSource protocol
+(defn grid [source target & {:keys [id onChange events-channel header pager language]
                              :as definition}]
-  (let [src (if (or (seq? source) (vector? source))
-                 {:index 0 :rows source :total-rows (count source)}
-                 {:index (or (:index source) 0 )
-                  :total-rows (or (:total-rows source) (count (:rows source)))
-                  :rows (vec (:rows source))})
+  (let [src {:rows (or (:rows source) source)
+             :index (or (:index source) 0)
+             :total-rows (or (:total-rows source) (count source))}
           page-size (or (:page-size definition) 5)]
   (om/build create-grid
-            src
+            target
             {:init-state {:current-page (int (/ (:index src) page-size))}
-             :state {:target target
+             :state {:src src
                      :header (or header {:type :default})
                      :pager (or pager {:type :default})
-                     :id id
                      :events-channel events-channel
                      :max-pages (calculate-max-pages (:total-rows src) page-size)
                      :page-size page-size
-                     :onChange onChange
-                     :height height}
-             :opts {:language (or (:language definition) :en)}})))
+                     :onChange onChange}
+             :opts {:language (or (:language definition) :en)
+                    :id id}})))
 

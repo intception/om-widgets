@@ -12,15 +12,19 @@
   (atom
     {:birth-date #inst "1991-01-25"
      :sex :male
-     :grid {:source-custom {:rows [{:name "Seba" :username "kernelp4nic" :row-type :users}
+     :grid {:source-simple [{:name "Seba" :username "kernelp4nic"}
+                            {:name "Guille" :username "guilespi"}
+                            {:name "Fabian" :username "fapenia"}
+                            {:name "Alexis" :username "_axs_"}
+                            {:name "Martin" :username "nartub"}]
+            :source-custom {:rows [{:name "Seba" :username "kernelp4nic" :row-type :users}
                                    {:name "Guille" :username "guilespi" :row-type :users}
                                    {:name "Fabian" :username "fapenia" :row-type :users}
                                    {:name "Alexis" :username "_axs_" :row-type :users}
                                    {:name "Martin" :username "nartub" :row-type :users}]}
             :selected {}
             :columns [{:caption "Name" :field :name}
-                      {:caption "Username" :field :username}]
-            }
+                      {:caption "Username" :field :username}]}
      :dropdown [{:id :duplicate
                  :type :entry
                  :text "Duplicate"
@@ -47,23 +51,27 @@
                  :type :entry
                  :text "Trash"
                  :url "#/item/trash/1234"}]
-     :menu-selected :dashboard
-     :menu-items [[{:text "Dashbaord"
-                    :id :dashboard
-                    :url "#/dashboard"}
-                   {:id :getting-started
-                    :text "Gettin Started"
-                    :url "#/getting-started"}]
-                  [{:text "Profile"
-                    :right-position true
-                    :id :profile
-                    :items [{:id :profile
+     :selected-dropdown :edit
+     :menu-selected :grid
+     :menu-items [[{:text "Dropdown"
+                    :id :dropdown
+                    :url "#/dropdown"}
+                   {:id :datepicker
+                    :text "Datepicker"
+                    :url "#/datepicker"}
+                   {:id :radiobutton
+                    :text "Radiobutton"
+                    :url "#/radiobutton"}
+                   ]
+                  [{:text "Grid"
+                    :id :grid-sample
+                    :items [{:id :grid
                              :type :entry
-                             :text "User profile"
-                             :url "#/profile"}
-                            {:id :logout
+                             :text "Grid Simple"
+                             :url "#/grid-simple"}
+                            {:id :grid-custom-row
                              :type :entry
-                             :text "Logout"
+                             :text "Grid Row Custom"
                              }]}]]}))
 
 (defn- datepicker-sample
@@ -134,7 +142,7 @@
                                                                                :id "female"})))))))))
 
 (defn- dropdown-sample
-  [app owner]
+  [cursor owner]
   (reify
     om/IDisplayName
     (display-name [_] "DropdownSample")
@@ -144,12 +152,12 @@
                   (dom/div #js {:className "panel panel-default"}
                            (dom/div #js {:className "panel-heading"} "Dropdown")
                            (dom/div #js {:className "panel-body"}
-                                    (w/dropdown nil {:id :testing
-                                                     :title "Item Actions"
-                                                     :size :sm
-                                                     :items (get-in app [:dropdown])})
-
-                                    )))))
+                                    (w/dropdown cursor
+                                                :selected-dropdown
+                                                {:id :testing
+                                                 :title "Item Actions"
+                                                 :size :sm
+                                                 :items (get-in cursor [:dropdown])}))))))
 
 (defn- grid-sample
   [app owner]
@@ -166,11 +174,7 @@
                                                                           " )"))
                            (dom/div #js {:className "panel-body"}
                                     (dom/div #js {:className ""}
-                                             (w/grid [{:name "Seba" :username "kernelp4nic"}
-                                                      {:name "Guille" :username "guilespi"}
-                                                      {:name "Fabian" :username "fapenia"}
-                                                      {:name "Alexis" :username "_axs_"}
-                                                      {:name "Martin" :username "nartub"}]
+                                             (w/grid (get-in app [:source-simple])
                                                      (get-in app [:selected])
                                                      :container-class-name ""
                                                      :header {:type :default
@@ -200,7 +204,7 @@
                            (dom/div #js {:className "panel-heading"} "Grid Custom Row")
                            (dom/div #js {:className "panel-body"}
                                     (dom/div #js {:className ""}
-                                             (w/grid (seq (get-in app [:source-custom :rows]))
+                                             (w/grid (get-in app [:source-custom :rows])
                                                      (get-in app [:selected])
                                                      :header {:type :none})))))))
 
@@ -212,19 +216,24 @@
     om/IRenderState
     (render-state [this state]
                   (dom/div nil
-                           (w/navbar app-state {:items (get-in app [:menu-items])
-                                                :selected (get-in app [:menu-selected])
-                                                :on-selection #(println "selected item: " %)
-                                                :brand-image-url "images/logo.png"
-                                                :brand-image-expanded true
-                                                :brand-title "Navbar Sample"})
-                           (om/build datepicker-sample app)
-                           (om/build radiobutton-sample app)
-                           (om/build dropdown-sample app)
-                           (om/build grid-sample (get-in app [:grid]))
-                           (om/build grid-custom-row-sample (get-in app [:grid]))))))
+                           (w/navbar app
+                                     :menu-selected
+                                     {:items (get-in app [:menu-items])
+                                      :on-selection #(println "selected item: " %)
+                                      :brand-image-url "images/logo.png"
+                                      :brand-image-expanded true
+                                      :brand-title "Navbar Sample"})
 
-(om/root my-app
-         app-state
-         {:target (.getElementById js/document "app")})
+                           (condp = (:menu-selected app)
+                             :dropdown (om/build dropdown-sample app)
+                             :datepicker (om/build datepicker-sample app)
+                             :grid (om/build grid-sample (get-in app [:grid]))
+                             :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
+                             :radiobutton (om/build radiobutton-sample app)
+                             )))))
+
+(om/root
+  my-app
+  app-state
+  {:target (.getElementById js/document "app")})
 

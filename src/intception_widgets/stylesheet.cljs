@@ -165,20 +165,6 @@
 
   }
 
-
-  .om-widgets-grid .dummy-col {
-    background:white !important;
-    color:white !important;
-    border:none;
-    cursor: default;
-    border-top: 1px solid white !important;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
   .om-widgets-grid {
   }
   .om-widgets-grid .table {
