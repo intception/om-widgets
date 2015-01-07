@@ -27,7 +27,7 @@
   (condp = input-type
     "date" (try
              (string-from-date value date-local-format)
-             (catch  js/Error e
+             (catch js/Error e
                value))
     value))
 
@@ -86,7 +86,8 @@
                39	;; right arrow
                40	;; down arrow
                45	;; insert
-               144	} char-code));; num lock;
+               144} ;; num lock;
+             char-code))
 
 (defn- get-selection-start ;; assume modern browser IE9 and up
   [control]
@@ -118,9 +119,9 @@
 (defmulti applymask! mask-handler-selector)
 
 (defn- update-target
-       [target owner {:keys [cbtimeout typing-timeout input-format prev-value path onChange private-state ] :as state} bInternal]
-  (let [prev-value (:prev-value @private-state )
-        dom-node (:dom-node @private-state )
+  [target owner {:keys [cbtimeout typing-timeout input-format prev-value path onChange private-state ]:as state} bInternal]
+  (let [prev-value (:prev-value @private-state)
+        dom-node (:dom-node @private-state)
         value (convert-output input-format  (.-value dom-node))]
     (when (not= prev-value value)
       (do
@@ -134,7 +135,8 @@
   (let [cbtimeout (:cbtimeout @private-state )]
     (when cbtimeout
       (.clearTimeout js/window cbtimeout))
-    (swap! private-state assoc :cbtimeout (.setTimeout js/window #(update-target target owner state) (or typing-timeout 500)))))
+    (swap! private-state assoc :cbtimeout (.setTimeout js/window #(update-target target owner state false)
+                                                       (or typing-timeout 500)))))
 
 (defmethod handlekeydown :unmasked
   [target owner state e]
