@@ -21,11 +21,12 @@
                   (dom/li #js {:className (when (= (get-in cursor [set-path])
                                                    (:id entry)) "active")}
                           (if (:items entry)
-                            (dropdown cursor set-path {:id (:id entry)
-                                                       :type :menu
-                                                       :title (:text entry)
-                                                       :on-selection on-selection
-                                                       :items (:items entry)})
+                            (dropdown cursor {:id (:id entry)
+                                              :set-path set-path
+                                              :type :menu
+                                              :title (:text entry)
+                                              :on-selection on-selection
+                                              :items (:items entry)})
                             (dom/a (cljs.core/clj->js (->> {}
                                                            ;; TODO write a macro like pallet.thread-expr
                                                            ;; but that works on clojurescript
