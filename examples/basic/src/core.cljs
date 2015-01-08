@@ -25,33 +25,21 @@
             :selected {}
             :columns [{:caption "Name" :field :name}
                       {:caption "Username" :field :username}]}
-     :dropdown [{:id :duplicate
-                 :type :entry
-                 :text "Duplicate"
-                 :url "#/item/duplicate/1234"}
-                {:id :edit
-                 :type :entry
-                 :text "Edit"
-                 :url "#/item/edit/1234"}
-
-                {:type :divider}
-
-                {:id :history
-                 :type :entry
-                 :text "History"
-                 :url "#/item/history/1234"}
-                {:id :analysis
-                 :type :entry
-                 :text "Analysis"
-                 :url "#/item/analysis/1234"}
-
-                {:type :divider}
-
-                {:id :trash
-                 :type :entry
-                 :text "Trash"
-                 :url "#/item/trash/1234"}]
-     :selected-dropdown :edit
+     :dropdown {:items [{:id :duplicate
+                         :type :entry
+                         :text "Duplicate"
+                         :url "#/item/duplicate/1234"}
+                        {:type :divider}
+                        {:id :analysis
+                         :type :entry
+                         :text "Analysis"
+                         :url "#/item/analysis/1234"}
+                        {:type :divider}
+                        {:id :trash
+                         :type :entry
+                         :text "Trash"
+                         :url "#/item/trash/1234"}]
+                :selected-dropdown :edit}
      :menu-selected :grid
      :menu-items [[{:text "Dropdown"
                     :id :dropdown
@@ -150,14 +138,17 @@
     om/IRenderState
     (render-state [this state]
                   (dom/div #js {:className "panel panel-default"}
-                           (dom/div #js {:className "panel-heading"} "Dropdown")
+                           (dom/div #js {:className "panel-heading"}
+                                    (str "Dropdown (selected cursor value: "
+                                         (get-in cursor [:selected-dropdown])
+                                         " )"))
                            (dom/div #js {:className "panel-body"}
                                     (w/dropdown cursor
-                                                :selected-dropdown
                                                 {:id :testing
                                                  :title "Item Actions"
+                                                 :set-path :selected-dropdown
                                                  :size :sm
-                                                 :items (get-in cursor [:dropdown])}))))))
+                                                 :items (get-in cursor [:items])}))))))
 
 (defn- grid-sample
   [app owner]
@@ -225,12 +216,11 @@
                                       :brand-title "Navbar Sample"})
 
                            (condp = (:menu-selected app)
-                             :dropdown (om/build dropdown-sample app)
+                             :dropdown (om/build dropdown-sample (get-in app [:dropdown]))
                              :datepicker (om/build datepicker-sample app)
                              :grid (om/build grid-sample (get-in app [:grid]))
                              :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
-                             :radiobutton (om/build radiobutton-sample app)
-                             )))))
+                             :radiobutton (om/build radiobutton-sample app))))))
 
 (om/root
   my-app

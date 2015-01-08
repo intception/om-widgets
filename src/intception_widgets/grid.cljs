@@ -47,6 +47,9 @@
 
 (defn- default-pager [pager-definition owner opts]
   (reify
+    om/IDisplayName
+     (display-name[_] "GridPager")
+
     om/IRenderState
       (render-state [this state]
         (let [current-page (om/get-state owner :current-page)
@@ -136,6 +139,9 @@
 (defn- grid-body
   [target owner opts]
   (reify
+    om/IDisplayName
+     (display-name[_] "GridBody")
+
     om/IWillMount
      (will-mount [_]
                  (go-loop []
@@ -187,6 +193,9 @@
 
 (defn- create-grid [target owner opts]
   (reify
+    om/IDisplayName
+     (display-name[_] "Grid")
+
     om/IRenderState
     (render-state [this {:keys [header src] :as state}]
           (dom/div #js {:className "om-widgets-grid"
@@ -198,9 +207,7 @@
                                                        (:page-size state)
                                                        (:events-channel state))}
                               :opts {:columns (:columns header)}})
-            (grid-pager (:pager state) {:total-rows (:total-rows src)} opts))
-
-          )))
+            (grid-pager (:pager state) {:total-rows (:total-rows src)} opts)))))
 
 (defn- calculate-max-pages
   [total-rows page-size]

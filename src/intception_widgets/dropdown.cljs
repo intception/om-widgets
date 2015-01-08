@@ -25,10 +25,10 @@
                     [:li
                      ;; we use OnMouseDown because onBlour is triggered before
                      ;; onClick event, we use onBlour to close the dropdown
-                     [:a (->> {:onMouseDown #(put! channel
-                                                   {:type :entry-click
-                                                    :value (:id @entry)
-                                                    :link (:url @entry)})}
+                     [:a (->> {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
+                                               (put! channel {:type :entry-click
+                                                              :value (:id e)
+                                                              :link (:url e)}))}
                               (#(if (:url entry)
                                   (merge {:href (:url entry)} %)
                                   %)))
@@ -93,7 +93,7 @@
                (recur)))))
 
 (defn- dropdown-menu
-  [app owner]
+  [cursor owner]
   (reify
     om/IDisplayName
     (display-name [_] "dropdown-menu")
@@ -110,20 +110,19 @@
     om/IDisplayName
     (display-name [_] "dropdown-menu-container")
 
-    om/IWillMount
-    (will-mount [_] (channel-processing cursor owner))
-
     om/IInitState
     (init-state [_]
                 {:opened false
                  :channel (chan)})
 
+    om/IWillMount
+    (will-mount [_] (channel-processing cursor owner))
+
     om/IRenderState
     (render-state [_ {:keys [title items channel] :as state}]
                   (html
                     [:li (build-dropdown-js-options state)
-                     [:a {:class "dropdown-toggle"
-                          :title title}
+                     [:a {:class "dropdown-toggle" :title title}
                       title
                       [:span {:class "caret"}]]
                      (om/build dropdown-menu cursor {:state {:channel channel
@@ -135,13 +134,13 @@
     om/IDisplayName
     (display-name[_] "dropdown-container")
 
-    om/IWillMount
-    (will-mount [_] (channel-processing cursor owner))
-
     om/IInitState
     (init-state [_]
                 {:opened false
                  :channel (chan)})
+
+    om/IWillMount
+    (will-mount [_] (channel-processing cursor owner))
 
     om/IRenderState
     (render-state [_ {:keys [title items channel] :as state}]
@@ -168,9 +167,10 @@
   {:type (s/enum :divider)})
 
 (def DropdownSchema
-  {:id s/Keyword
-   :items [(s/either EntrySchema DividerSchema)]
+  {:items [(s/either EntrySchema DividerSchema)]
    :title s/Str
+   (s/optional-key :id) s/Keyword
+   (s/optional-key :set-path) s/Keyword ;; cursor path where we are going to update! selected item
    (s/optional-key :on-selection) (s/pred fn?)
    (s/optional-key :type) (s/enum :default :menu)
    (s/optional-key :size) (s/enum :default :sm :xs :lg)})
@@ -180,13 +180,13 @@
 ;; Public
 
 (defmulti dropdown
-  (fn [cursor set-path {:keys [id title items type size] :as options
-                        :or {size :default type :default}}]
+  (fn [cursor {:keys [id title items type size]:as options
+               :or {size :default type :default}}]
     (s/validate DropdownSchema options)
     (:type options)))
 
-(defmethod dropdown :menu [cursor set-path options]
-  (om/build dropdown-menu-container cursor {:state (merge {:set-path set-path} options)}))
+(defmethod dropdown :menu [cursor options]
+  (om/build dropdown-menu-container cursor {:state options}))
 
-(defmethod dropdown :default [cursor set-path options]
-  (om/build dropdown-container cursor {:state (merge {:set-path set-path} options)}))
+(defmethod dropdown :default [cursor options]
+  (om/build dropdown-container cursor {:state options}))
