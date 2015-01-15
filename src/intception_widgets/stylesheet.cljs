@@ -534,6 +534,11 @@
     left: auto;
   }
 
+  .om-widgets-dropdown .dropdown-toggle {
+    cursor:pointer;
+  }
+  .om-widgets-dropdown li>a {
+    cursor:pointer;
+  }
 }
-
 ")

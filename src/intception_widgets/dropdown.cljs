@@ -50,16 +50,16 @@
 (defmulti build-dropdown-class (fn [opened size] size))
 
 (defmethod build-dropdown-class :default [opened size]
-  (str "dropdown" (when opened " open")))
+  (str "om-widgets-dropdown dropdown" (when opened " open")))
 
 (defmethod build-dropdown-class :xs [opened size]
-  (str "dropdown btn-group btn-group-xs" (when opened " open")))
+  (str "om-widgets-dropdown dropdown btn-group btn-group-xs" (when opened " open")))
 
 (defmethod build-dropdown-class :sm [opened size]
-  (str "dropdown btn-group btn-group-sm" (when opened " open")))
+  (str "om-widgets-dropdown dropdown btn-group btn-group-sm" (when opened " open")))
 
 (defmethod build-dropdown-class :lg [opened size]
-  (str "dropdown btn-group btn-group-lg" (when opened " open")))
+  (str "om-widgets-dropdown dropdown btn-group btn-group-lg" (when opened " open")))
 
 
 ;; ---------------------------------------------------------------------
