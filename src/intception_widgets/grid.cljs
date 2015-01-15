@@ -77,7 +77,9 @@
 (defn- build-row-data [columns row selected-row]
   (let [fields (map #(:field %) columns)]
     (merge {} {:projection (select-keys row fields)
-               :class (if (= selected-row row) "success" "")})))
+               :class (str "om-widgets-default-row"
+                           (when (= selected-row row)
+                             " success"))})))
 
 
 ;; ---------------------------------------------------------------------

@@ -179,14 +179,13 @@
     border-bottom: 2px solid #bababa;
   }
 
-  .om-widgets-grid td,th{
+  .om-widgets-default-row {
     cursor:pointer;
   }
-  .om-widgets-grid tr.success td {
+  .om-widgets-default-row.success {
     background:#CEE2EC;
   }
-
-  .om-widgets-grid th:hover {
+  .om-widgets-default-row:hover {
       cursor: pointer;
   }
 
