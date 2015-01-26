@@ -1,4 +1,4 @@
-(ns intception-widgets.tab
+(ns om-widgets.tab
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [cljs.reader :as reader]))

@@ -1,11 +1,11 @@
-(ns intception-widgets.grid
+(ns om-widgets.grid
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [schema.core :as s :include-macros true]
             [cljs.core.async :refer [put! chan <! alts! timeout close!]]
-            [intception-widgets.translations :refer [translate]]
-            [intception-widgets.utils :as u]))
+            [om-widgets.translations :refer [translate]]
+            [om-widgets.utils :as u]))
 
 
 ;; ---------------------------------------------------------------------
@@ -86,7 +86,7 @@
 ;; Grid Header Multimethod
 ;;
 ;; NOTE: we just implement the default method, and the :none method, if you want a custom
-;; header, you just need to require grid-header ([intception-widgets.grid :refer [grid-header]])
+;; header, you just need to require grid-header ([om-widgets.grid :refer [grid-header]])
 ;; and provide a custom implementation
 
 (defmulti grid-header (fn [header-definition _ _] (:type header-definition)))
@@ -102,7 +102,7 @@
 ;; Row Builder Multimethod
 ;;
 ;; NOTE: we just implement the default method, if you want a custom
-;; row, you just need to require row-builder ([intception-widgets.grid :refer [row-builder]])
+;; row, you just need to require row-builder ([om-widgets.grid :refer [row-builder]])
 ;; and extend the multimethod with a valid om component.
 
 (defmulti row-builder (fn [row owner opts] (:row-type row)))
@@ -126,7 +126,7 @@
 ;; Grid Pager Multimethod
 ;;
 ;; NOTE: we just implement the default method, and the :none method, if you want a custom
-;; pager, you just need to require grid-pager ([intception-widgets.grid :refer [grid-pager]])
+;; pager, you just need to require grid-pager ([om-widgets.grid :refer [grid-pager]])
 ;; and provide a custom implementation
 
 (defmulti grid-pager (fn [pager-definition _] (:type pager-definition)))

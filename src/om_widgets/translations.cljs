@@ -1,4 +1,4 @@
-(ns intception-widgets.translations
+(ns om-widgets.translations
   (:use [net.unit8.tower :only [t]]))
 
 (def widgets-translations

@@ -1,7 +1,7 @@
-(ns intception-widgets.textinput
+(ns om-widgets.textinput
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [intception-widgets.utils :as utils]
+            [om-widgets.utils :as utils]
             [cljs-time.format :as time-format ]
             [cljs-time.core :as time]
             [cljs-time.local :as time-local]

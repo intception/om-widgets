@@ -1,5 +1,5 @@
-(ns intception-widgets.navbar
-  (:require [intception-widgets.dropdown :refer [dropdown EntrySchema DividerSchema]]
+(ns om-widgets.navbar
+  (:require [om-widgets.dropdown :refer [dropdown EntrySchema DividerSchema]]
             [schema.core :as s :include-macros true]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))

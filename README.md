@@ -1,4 +1,4 @@
-# Intception-widgets
+# om-widgets
 
 A Clojure clojurescript library that implement om/react widgets.
 
@@ -23,7 +23,7 @@ your option) any later version.
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [schema.core :as s]
-            [intception-widgets.core :as widgets]))
+            [om-widgets.core :as widgets]))
 
 
 (def app-state (atom {:text #inst "2012-06-01" :current-item {}}))
@@ -42,12 +42,12 @@ your option) any later version.
 
 
 ```clj
-(ns intception-widgets-tests.screen
+(ns om-widgets-tests.screen
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [schema.core :as s]
-            [intception-widgets.core :as widgets]
-            [intception-widgets.forms :as f :include-macros true]))
+            [om-widgets.core :as widgets]
+            [om-widgets.forms :as f :include-macros true]))
 
 (def Rules
   {:name (s/pred #(not (empty? %)) 'RequiredName)})

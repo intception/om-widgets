@@ -1,7 +1,7 @@
-(ns intception-widgets.datepicker
+(ns om-widgets.datepicker
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [intception-widgets.utils :as utils]
+            [om-widgets.utils :as utils]
             [cljs.reader :as reader]
             [cljs-time.core :as time]
             [cljs-time.coerce :as timec]))

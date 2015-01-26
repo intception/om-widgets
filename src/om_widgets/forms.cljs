@@ -1,8 +1,8 @@
-(ns intception-widgets.forms
+(ns om-widgets.forms
   (:require [schema.core :as schema]
-            [intception-widgets.textinput :refer [textinput]]
-            [intception-widgets.combobox :refer [combobox]]
-            [intception-widgets.checkbox :refer [checkbox]]
+            [om-widgets.textinput :refer [textinput]]
+            [om-widgets.combobox :refer [combobox]]
+            [om-widgets.checkbox :refer [checkbox]]
             [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
 

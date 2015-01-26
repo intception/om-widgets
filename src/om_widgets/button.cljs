@@ -1,4 +1,4 @@
-(ns intception-widgets.button
+(ns om-widgets.button
   (:require [om.core :as om :include-macros true]
      [om.dom :as dom :include-macros true]))
 

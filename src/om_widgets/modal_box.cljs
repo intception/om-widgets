@@ -1,8 +1,8 @@
-(ns intception-widgets.modal-box
+(ns om-widgets.modal-box
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [intception-widgets.forms :as f :include-macros true]
+            [om-widgets.forms :as f :include-macros true]
             [dommy.core :as dommy]
             [cljs.core.async :refer [put! chan <! alts! timeout]])
   (:use-macros [dommy.macros :only [sel1]]))

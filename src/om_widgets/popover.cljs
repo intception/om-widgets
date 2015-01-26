@@ -1,4 +1,4 @@
-(ns intception-widgets.popover
+(ns om-widgets.popover
   (:require [om.core :as om :include-macros true]
      [om.dom :as dom :include-macros true]))
 

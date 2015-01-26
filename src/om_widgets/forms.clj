@@ -1,4 +1,4 @@
-(ns intception-widgets.forms
+(ns om-widgets.forms
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [pallet.thread-expr :refer [when-> when->>]]))
@@ -32,10 +32,10 @@
   "Macro to create a form, binds errors and entity to be accesible
    inside the form by every rendered component."
   [entity owner {:keys [title subtitle errors validation]} & body]
-  `(binding [intception-widgets.forms/*errors* ~errors
-             intception-widgets.forms/*entity* ~entity
-             intception-widgets.forms/*owner* ~owner
-             intception-widgets.forms/*validation-rules* ~validation]
+  `(binding [om-widgets.forms/*errors* ~errors
+             om-widgets.forms/*entity* ~entity
+             om-widgets.forms/*owner* ~owner
+             om-widgets.forms/*validation-rules* ~validation]
      (dom/div (cljs.core/clj->js {:className "om-widgets-container om-widgets-container-fluid om-widgets-form"})
 
               (when (om/get-state ~owner :saving)
@@ -80,8 +80,8 @@
   [key {:keys [helper placeholder input-format
                validate-on-blur disabled read-only multiline]}]
   `(helper-input ~helper
-                 (intception-widgets.textinput/textinput
-                  intception-widgets.forms/*entity* ~key
+                 (om-widgets.textinput/textinput
+                  om-widgets.forms/*entity* ~key
                   :id ~key
                   :placeholder ~placeholder
                   :disabled ~disabled
@@ -93,18 +93,18 @@
                   ;;the binded atributes when the function is defined
                   ;;and not when it's called
                   :onBlur (when (and (not= false ~validate-on-blur)
-                                     intception-widgets.forms/*validation-rules*)
-                            (partial intception-widgets.forms/validate-key
-                                     intception-widgets.forms/*owner*
+                                     om-widgets.forms/*validation-rules*)
+                            (partial om-widgets.forms/validate-key
+                                     om-widgets.forms/*owner*
                                      ~key
-                                     intception-widgets.forms/*entity*
-                                     intception-widgets.forms/*validation-rules*)))))
+                                     om-widgets.forms/*entity*
+                                     om-widgets.forms/*validation-rules*)))))
 
 
 (defmethod create-field :combo
   [key {:keys [options read-only disabled on-blur on-change]}]
-  `(intception-widgets.combobox/combobox
-    intception-widgets.forms/*entity* ~key
+  `(om-widgets.combobox/combobox
+    om-widgets.forms/*entity* ~key
     :class-name "om-widgets-form-control"
      :id ~key
      :disabled ~disabled
@@ -115,8 +115,8 @@
 
 (defmethod create-field :radio
   [key {:keys [options read-only disabled]}]
-  `(intception-widgets.radiobutton/radiobutton-group
-    intception-widgets.forms/*entity* ~key
+  `(om-widgets.radiobutton/radiobutton-group
+    om-widgets.forms/*entity* ~key
      :class-name "om-widgets-form-control"
      :id ~key
      :disabled ~disabled
@@ -124,8 +124,8 @@
 
 (defmethod create-field :check
   [key {:keys [text caption disabled]}]
-  `(intception-widgets.checkbox/checkbox
-    intception-widgets.forms/*entity* ~key
+  `(om-widgets.checkbox/checkbox
+    om-widgets.forms/*entity* ~key
      :id ~key
      :disabled ~disabled
      :label ~caption))
@@ -141,7 +141,7 @@
   "Creates a form field with label, input type is created dynamically selected
    from type and extensible using create-field multimethod."
   [key {:keys [label required extra-class] :as options}]
-  `(field-component {:error-message (get intception-widgets.forms/*errors* ~key)
+  `(field-component {:error-message (get om-widgets.forms/*errors* ~key)
                      :required ~required
                      :extra-class ~extra-class}
                     (when ~label
@@ -169,11 +169,11 @@
                         ;;on-valid takes preference over on-click
                         ;;same partial trick as above to evaluate
                         ;;bindings on function definition
-                        :onClick (partial intception-widgets.forms/button-clicked
-                                          intception-widgets.forms/*owner*
-                                          intception-widgets.forms/*entity*
+                        :onClick (partial om-widgets.forms/button-clicked
+                                          om-widgets.forms/*owner*
+                                          om-widgets.forms/*entity*
                                           (when ~on-valid
-                                            intception-widgets.forms/*validation-rules*)
+                                            om-widgets.forms/*validation-rules*)
                                           ~(or on-valid
                                                on-click))})
     (dom/span (cljs.core/clj->js {:className (str ""
@@ -182,7 +182,7 @@
 
 (defmacro with-owner
   [owner & body]
-  `(binding [intception-widgets.forms/*owner* ~owner]
+  `(binding [om-widgets.forms/*owner* ~owner]
      ~@body))
 
 (defmacro row

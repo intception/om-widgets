@@ -2,8 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [widgets.layouts :as layout :include-macros true]
-            [intception-widgets.core :as w]
-            [intception-widgets.grid :refer [row-builder]]))
+            [om-widgets.core :as w]
+            [om-widgets.grid :refer [row-builder]]))
 
 
 (enable-console-print!)

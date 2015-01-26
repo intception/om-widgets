@@ -1,4 +1,4 @@
-(ns intception-widgets.page-switcher
+(ns om-widgets.page-switcher
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [cljs.reader :as reader]))

@@ -1,7 +1,7 @@
-(ns intception-widgets.checkbox
+(ns om-widgets.checkbox
   (:require [om.core :as om :include-macros true]
      [om.dom :as dom :include-macros true]
-     [intception-widgets.utils :as utils]))
+     [om-widgets.utils :as utils]))
 
 (defn- check [app owner]
  (reify
