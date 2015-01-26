@@ -1,43 +1,43 @@
-(ns intception-widgets.core
+(ns om-widgets.core
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
 
-            [intception-widgets.stylesheet]
-            [intception-widgets.textinput]
-            [intception-widgets.checkbox]
-            [intception-widgets.dropdown]
-            [intception-widgets.navbar]
-            [intception-widgets.datepicker]
-            [intception-widgets.radiobutton]
-            [intception-widgets.combobox]
-            [intception-widgets.grid]
-            [intception-widgets.modal-box]
-            [intception-widgets.button]
-            [intception-widgets.tab]
-            [intception-widgets.page-switcher]
-            [intception-widgets.popover]
+            [om-widgets.stylesheet]
+            [om-widgets.textinput]
+            [om-widgets.checkbox]
+            [om-widgets.dropdown]
+            [om-widgets.navbar]
+            [om-widgets.datepicker]
+            [om-widgets.radiobutton]
+            [om-widgets.combobox]
+            [om-widgets.grid]
+            [om-widgets.modal-box]
+            [om-widgets.button]
+            [om-widgets.tab]
+            [om-widgets.page-switcher]
+            [om-widgets.popover]
 
-            [intception-widgets.utils]))
+            [om-widgets.utils]))
 
-(def textinput intception-widgets.textinput/textinput)
-(def checkbox intception-widgets.checkbox/checkbox)
-(def dropdown intception-widgets.dropdown/dropdown)
-(def navbar intception-widgets.navbar/navbar)
-(def datepicker intception-widgets.datepicker/datepicker)
-(def radiobutton intception-widgets.radiobutton/radiobutton)
-(def radiobutton-group intception-widgets.radiobutton/radiobutton-group)
-(def combobox intception-widgets.combobox/combobox)
-(def button intception-widgets.button/button)
-(def grid intception-widgets.grid/grid)
-(def tab intception-widgets.tab/tab)
-(def popover intception-widgets.popover/popover)
-(def install-modal-box! intception-widgets.modal-box/install-modal-box!)
-(def alert intception-widgets.modal-box/alert)
-(def ok-cancel intception-widgets.modal-box/ok-cancel)
-(def do-modal intception-widgets.modal-box/do-modal)
-(def modal-launcher  intception-widgets.modal-box/modal-launcher)
+(def textinput om-widgets.textinput/textinput)
+(def checkbox om-widgets.checkbox/checkbox)
+(def dropdown om-widgets.dropdown/dropdown)
+(def navbar om-widgets.navbar/navbar)
+(def datepicker om-widgets.datepicker/datepicker)
+(def radiobutton om-widgets.radiobutton/radiobutton)
+(def radiobutton-group om-widgets.radiobutton/radiobutton-group)
+(def combobox om-widgets.combobox/combobox)
+(def button om-widgets.button/button)
+(def grid om-widgets.grid/grid)
+(def tab om-widgets.tab/tab)
+(def popover om-widgets.popover/popover)
+(def install-modal-box! om-widgets.modal-box/install-modal-box!)
+(def alert om-widgets.modal-box/alert)
+(def ok-cancel om-widgets.modal-box/ok-cancel)
+(def do-modal om-widgets.modal-box/do-modal)
+(def modal-launcher  om-widgets.modal-box/modal-launcher)
 
-(def page-switcher intception-widgets.page-switcher/page-switcher)
-(def om-get intception-widgets.utils/om-get)
-(def om-update! intception-widgets.utils/om-update!)
+(def page-switcher om-widgets.page-switcher/page-switcher)
+(def om-get om-widgets.utils/om-get)
+(def om-update! om-widgets.utils/om-update!)
 

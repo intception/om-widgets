@@ -1,7 +1,7 @@
 (ns examples.basic.core
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [widgets.layouts :as layout :include-macros true]
+            [om-widgets.layouts :as layout :include-macros true]
             [om-widgets.core :as w]
             [om-widgets.grid :refer [row-builder]]))
 

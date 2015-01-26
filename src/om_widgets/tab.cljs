@@ -1,7 +1,7 @@
 (ns om-widgets.tab
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [intception-widgets.utils :as utils]
+            [om-widgets.utils :as utils]
             [cljs.reader :as reader]))
 
 (defn- tab-header

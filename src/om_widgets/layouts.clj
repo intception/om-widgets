@@ -1,4 +1,4 @@
-(ns widgets.layouts
+(ns om-widgets.layouts
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
 
