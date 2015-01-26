@@ -1,6 +1,7 @@
 (ns om-widgets.tab
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            [intception-widgets.utils :as utils]
             [cljs.reader :as reader]))
 
 (defn- tab-header
@@ -14,10 +15,11 @@
                       :onClick (fn[e]
                                   (let [parent-owner (:parent-owner page)
                                         on-change (om/get-state parent-owner :on-change)]
-                                  (when (and on-change (not= (om/get-state parent-owner :current-page) (:index page)))
-                                        (on-change (:index page)))
-                                  (om/set-state! parent-owner :current-page (:index page)))
-
+                                    (when (and on-change (not= (or (utils/om-get (om/get-props parent-owner) :current-page) 0) (:index page)))
+                                          (on-change (:index page)))
+                                    (utils/om-update! (om/get-props parent-owner) (om/get-state parent-owner :path) (:index page))
+                                    (when (utils/atom? (om/get-props parent-owner))
+                                          (om/refresh! parent-owner)))
                                   false)}
                 (:label page))))))
 
@@ -30,11 +32,12 @@
                   (:content page)))))
 
 (defn- tab-component
-  [_ owner]
+  [cursor owner]
  (reify
    om/IRenderState
-   (render-state [this {:keys [current-page pages id right-panel]}]
-     (let [opts (map #(merge % {:current-page current-page
+   (render-state [this {:keys [pages id right-panel path]}]
+     (let [current-page (or (utils/om-get cursor path) 0)
+           opts (map #(merge % {:current-page current-page
                                 :parent-owner owner
                                 :index %2})  pages (range))]
       (dom/div #js {:className "om-widgets-tab" :id id}
@@ -45,10 +48,14 @@
                         (dom/li #js {:className "om-widgets-right-panel"}
                           right-panel)))))
         (dom/div nil
-               (om/build  tab-page (nth opts current-page))))))))
+            (om/build  tab-page (nth opts current-page))))))))
 
 
 (defn tab
-  [{:keys [id current-page on-change right-panel] :or {current-page 0} } & pages]
-  (om/build tab-component nil {:state {:id id :pages pages :current-page current-page :on-change on-change :right-panel right-panel}}))
+  [cursor path {:keys [id current-page on-change right-panel]} & pages]
+  (om/build tab-component cursor {:state {:id id
+                                          :path  path
+                                          :pages pages
+                                          :on-change on-change
+                                          :right-panel right-panel}}))
 
