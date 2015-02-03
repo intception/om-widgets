@@ -16,7 +16,12 @@
                             {:name "Guille" :username "guilespi"}
                             {:name "Fabian" :username "fapenia"}
                             {:name "Alexis" :username "_axs_"}
-                            {:name "Martin" :username "nartub"}]
+                            {:name "Martin" :username "nartub"}
+                            {:name "Jose" :username "jose"}
+                            {:name "Jorge" :username "jorge"}
+                            {:name "Marcela" :username "marcel"}
+                            {:name "Raquel" :username "raquel"}
+                            ]
             :source-custom {:rows [{:name "Seba" :username "kernelp4nic" :row-type :users}
                                    {:name "Guille" :username "guilespi" :row-type :users}
                                    {:name "Fabian" :username "fapenia" :row-type :users}
@@ -60,7 +65,11 @@
                             {:id :grid-custom-row
                              :type :entry
                              :text "Grid Row Custom"
-                             }]}]]}))
+                             }]}]
+                  [{:text "Popup Window"
+                    :id :popup-window
+                    :url "#/popupwindow" }
+                  ]]}))
 
 (defn- datepicker-sample
   [app owner]
@@ -199,6 +208,50 @@
                                                      (get-in app [:selected])
                                                      :header {:type :none})))))))
 
+(defn- popup-window-sample
+  [app owner]
+  (reify
+    om/IDisplayName
+    (display-name [_] "Popup Window Sample")
+    om/IRenderState
+    (render-state [this state]
+      (dom/div #js {:className "panel panel-default"}
+        (dom/div #js {:className "panel-heading"} "Popup window sample")
+        (dom/div #js {:className "panel-body" :style #js {:overflow "scroll" :height "600"}}
+          (w/grid (get-in app [:grid :source-simple])
+                  (get-in app [:grid :selected])
+                  :container-class-name ""
+                  :header {:type :default
+                          :columns (get-in app [:grid :columns])})
+
+          (w/popover "Pop over!"
+            (fn [close-window]
+                  (dom/div #js {:className ""}
+                    (w/grid (get-in app [:grid :source-simple])
+                            (get-in app [:grid :selected])
+                            :page-size 4
+                            :container-class-name ""
+                            :header {:type :default
+                                    :columns (get-in app [:grid :columns])}))))
+
+           (w/popup-window
+            (fn [show-window]
+              (dom/button #js {:id "pup" :onClick #(show-window)} "Popup Window!"))
+
+            (fn [close-window]
+                  (dom/div #js {:className ""}
+                    (w/grid (get-in app [:grid :source-simple])
+                            (get-in app [:grid :selected])
+                            :page-size 4
+                            :container-class-name ""
+                            :header {:type :default
+                                    :columns (get-in app [:grid :columns])})
+                    (dom/button #js {:onClick #(close-window)} "Close")))
+            :prefered-side :bottom
+            :from :#pup )
+          )))))
+
+
 (defn my-app [app owner]
   (reify
     om/IDisplayName
@@ -220,7 +273,8 @@
                              :datepicker (om/build datepicker-sample app)
                              :grid (om/build grid-sample (get-in app [:grid]))
                              :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
-                             :radiobutton (om/build radiobutton-sample app))))))
+                             :radiobutton (om/build radiobutton-sample app)
+                             :popup-window (om/build popup-window-sample app))))))
 
 (om/root
   my-app
