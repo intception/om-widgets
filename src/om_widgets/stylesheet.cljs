@@ -533,7 +533,7 @@
   position:fixed;
   left:0px;
   top:0px;
-  z-index:1059;
+  z-index:25000;
   background:gray;
   height:100%;
   width:100%;
@@ -554,8 +554,7 @@
   position: absolute;
   top: 0;
   left: -10000px;
-  z-index: 1060;
-  max-width: 276px;
+  z-index: 25001;
   padding: 1px;
   text-align: left;
   white-space: normal;
