@@ -16,7 +16,6 @@
             [om-widgets.tab]
             [om-widgets.page-switcher]
             [om-widgets.popover]
-            [om-widgets.popup-window]
             [om-widgets.utils]))
 
 (def textinput om-widgets.textinput/textinput)
@@ -31,7 +30,6 @@
 (def grid om-widgets.grid/grid)
 (def tab om-widgets.tab/tab)
 (def popover om-widgets.popover/popover)
-(def popup-window om-widgets.popup-window/popup-window)
 
 (def install-modal-box! om-widgets.modal-box/install-modal-box!)
 (def alert om-widgets.modal-box/alert)

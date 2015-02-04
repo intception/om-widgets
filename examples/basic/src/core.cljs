@@ -232,9 +232,10 @@
                             :page-size 4
                             :container-class-name ""
                             :header {:type :default
-                                    :columns (get-in app [:grid :columns])}))))
+                                    :columns (get-in app [:grid :columns])})))
+            {:prefered-side :right})
 
-           (w/popup-window
+           (w/popover
             (fn [show-window]
               (dom/button #js {:id "pup" :onClick #(show-window)} "Popup Window!"))
 
@@ -247,9 +248,24 @@
                             :header {:type :default
                                     :columns (get-in app [:grid :columns])})
                     (dom/button #js {:onClick #(close-window)} "Close")))
-            :prefered-side :bottom
-            :from :#pup )
-          )))))
+            {:prefered-side :bottom
+              :from :#pup} )
+
+           (w/popover
+            (fn [show-window]
+              (dom/a #js {:id "pup2" :onMouseOver #(show-window)} "Mouse Over!"))
+
+            (fn [close-window]
+                  (dom/div #js {:className ""}
+                    (w/grid (get-in app [:grid :source-simple])
+                            (get-in app [:grid :selected])
+                            :page-size 4
+                            :container-class-name ""
+                            :header {:type :default
+                                    :columns (get-in app [:grid :columns])})
+                    (dom/button #js {:onClick #(close-window)} "Close")))
+            {:prefered-side :bottom
+              :from :#pup2}))))))
 
 
 (defn my-app [app owner]
