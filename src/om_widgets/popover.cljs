@@ -28,6 +28,18 @@
                                                           :scroll-y (.-scrollTop js/document)}
               (not (nil? (.-scrollTop js/document.documentElement))) {:scroll-x (.-scrollLeft js/document.documentElement)
                                                                        :scroll-y (.-scrollTop js/document.documentElement)})))
+(defn client-rects
+  [el]
+  (let [rs (js->clj (.getClientRects el))]
+      (map (fn[i]
+            (let [r (.item rs i)]
+              {:top (.-top r)
+              :bottom (.-bottom r)
+              :left (.-left r)
+              :right (.-right r)
+              :width (.-width r)
+              :height (.-height r)})) (range (.-length rs)))))
+
 (defn app-root []
   (sel1 "div [data-reactid=\".0\"]"))
 
@@ -64,8 +76,8 @@
     (did-mount [this]
        (let [node (om.core/get-node owner)
              parent (dommy/remove! node)
-             target (if (:from opts)
-                        (sel1 (:from opts))
+             target (if (:for opts)
+                        (or (sel1 (keyword (str "#" (:for opts)))) parent)
                         parent)
              arrow (sel1 node ".arrow")]
        (dommy/append! (app-root) node)
@@ -80,7 +92,8 @@
                                 (max o (- m))
                                 (min o m)))
                   wz (window-size)
-                  trect (dommy/bounding-client-rect target)
+                  trect (first (client-rects target) );;(dommy/bounding-client-rect target)
+
                   target-pos (merge trect
                                     {:top (+ (:top trect) (:scroll-y wz))
                                      :bottom (+ (:bottom trect) (:scroll-y wz))
@@ -145,18 +158,20 @@
   (reify
     om/IRenderState
     (render-state [this {:keys [visible-content-fn popup-content-fn visible prefered-side channel] :as state}]
-      (dom/div nil
-        (when visible
-          (dom/div nil
-            (om/build popover-overlay nil {:state {:mouse-down #(om/set-state! owner :visible false)}})
-            (om/build popover-container nil {:state {:content-fn popup-content-fn
-                                                          :prefered-side prefered-side}
-                                                  :opts {:from (:from opts)
-                                                         :close-fn #(om/set-state! owner :visible false)}})))
-
-          (visible-content-fn (fn []
-                              (om/update-state! owner (fn[st]
-                                                    (merge st {:visible true})))))))))
+      (html
+        [:div
+          (when visible
+            (dom/div nil
+              (om/build popover-overlay nil {:state {:mouse-down #(om/set-state! owner :visible false)}})
+              (om/build popover-container nil {:state {:content-fn popup-content-fn
+                                                            :prefered-side prefered-side}
+                                                    :opts {:for (:for opts)
+                                                           :close-fn #(go
+                                                                       (<! (timeout 10))
+                                                                       (om/set-state! owner :visible false))}})))
+            (visible-content-fn (fn []
+                                (om/update-state! owner (fn[st]
+                                                      (merge st {:visible true})))))]))))
 
 
 
@@ -182,7 +197,9 @@
                   label
                   (when visible (om/build popover-overlay nil {:state {:mouse-down #(om/set-state! owner :visible false)}}))
                   (when visible (om/build popover-container nil {:state {:content-fn body :prefered-side prefered-side}
-                                                                         :opts {:close-fn #(om/set-state! owner :visible false)}})))))))
+                                                                         :opts {:close-fn #(go
+                                                                                             (<! (timeout 10))
+                                                                                             (om/set-state! owner :visible false))}})))))))
 
 
 ;; ---------------------------------------------------------------------
@@ -195,26 +212,24 @@
   class-name id and disabled works only when front-face is a string
   prefered-side :top, :bottom, :right, :left default = :bottom
   "
-
   [front-face popup-body {:keys [class-name
                                 id
                                 disabled
-                                from
+                                for
                                 prefered-side]
                       :or {class-name "om-widgets-popover-button"
                            prefered-side :bottom}}]
-
   (cond
-
-    (string? front-face)
+    (fn? front-face)
+      (om/build popover-component nil {:state {:visible-content-fn front-face
+                                               :popup-content-fn popup-body
+                                               :prefered-side prefered-side}
+                                        :opts {:for for}})
+    :else
       (om/build labeled-popover-component nil {:state {:label front-face
                                                        :id (or id front-face)
                                                        :disabled disabled
                                                        :class-name class-name
                                                        :prefered-side prefered-side
-                                                       :body popup-body}})
-    :else
-      (om/build popover-component nil {:state {:visible-content-fn front-face
-                                               :popup-content-fn popup-body
-                                               :prefered-side prefered-side}
-                                        :opts {:from from}})))
+                                                       :body popup-body}})))
+
