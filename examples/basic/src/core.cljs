@@ -87,17 +87,23 @@
                            (dom/div #js {:className "panel-heading"} "Datepicker")
                            (dom/div #js {:className "panel-body"}
                                     (dom/div #js {:className "well"}
-                                             (dom/div #js {:className "input-group"}
-                                                      (dom/span #js {:className "input-group-btn"}
-                                                                (dom/button #js {:className "btn btn-primary pull-right"
-                                                                                 :type "button"
-                                                                                 :onClick (fn [e]
-                                                                                            (om/set-state! owner :hide-dropdown (not (:hide-dropdown state))))}
-                                                                            (dom/span #js {:className "glyphicon glyphicon-calendar"})))
-                                                      (w/datepicker app :birth-date {:hidden (:hide-dropdown state)})
-                                                      (w/textinput app :birth-date {:input-class "form-control"
-                                                                                    :input-format "date"
-                                                                                    :placeholder "MM/DD/YYYY"}))))))))
+                                             (w/popover
+                                               (fn [show]
+                                                  (dom/div #js {:className "input-group"}
+                                                            (dom/span #js {:className "input-group-btn"}
+                                                                      (dom/button #js {:className "btn btn-primary pull-right"
+                                                                                      :type "button"
+                                                                                      :id "btn-cal"
+                                                                                      :onClick (fn [e]
+                                                                                                  (show))}
+                                                                                  (dom/span #js {:className "glyphicon glyphicon-calendar"})))
+                                                            (w/textinput app :birth-date {:input-class "form-control"
+                                                                                          :input-format "date"
+
+                                                                                          :placeholder "MM/DD/YYYY"})))
+                                               (fn [close]
+                                                   (w/datepicker app :birth-date ))
+                                               {:for "btn-cal"})))))))
 
 (defn- radiobutton-sample
   [app owner]
@@ -224,7 +230,7 @@
                   :header {:type :default
                           :columns (get-in app [:grid :columns])})
 
-          (w/popover "Pop over!"
+          (w/popover "Popover con varias palabras que pueden afectarse por word wrapping!"
             (fn [close-window]
                   (dom/div #js {:className ""}
                     (w/grid (get-in app [:grid :source-simple])
@@ -233,11 +239,11 @@
                             :container-class-name ""
                             :header {:type :default
                                     :columns (get-in app [:grid :columns])})))
-            {:prefered-side :right})
+            {:prefered-side :bottom})
 
            (w/popover
             (fn [show-window]
-              (dom/button #js {:id "pup" :onClick #(show-window)} "Popup Window!"))
+              (dom/button #js {:id "pup" :onClick #(show-window)} "Popup"))
 
             (fn [close-window]
                   (dom/div #js {:className ""}
@@ -249,7 +255,7 @@
                                     :columns (get-in app [:grid :columns])})
                     (dom/button #js {:onClick #(close-window)} "Close")))
             {:prefered-side :bottom
-              :from :#pup} )
+              :for "pup"} )
 
            (w/popover
             (fn [show-window]
@@ -265,7 +271,7 @@
                                     :columns (get-in app [:grid :columns])})
                     (dom/button #js {:onClick #(close-window)} "Close")))
             {:prefered-side :bottom
-              :from :#pup2}))))))
+              :for "pup2"}))))))
 
 
 (defn my-app [app owner]
