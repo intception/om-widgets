@@ -3,9 +3,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [om-widgets.forms :as f :include-macros true]
-            [dommy.core :as dommy]
-            [cljs.core.async :refer [put! chan <! alts! timeout]])
-  (:use-macros [dommy.macros :only [sel1]]))
+            [dommy.core :as dommy :refer-macros [sel sel1]]
+            [cljs.core.async :refer [put! chan <! alts! timeout]]))
 
 (enable-console-print!)
 

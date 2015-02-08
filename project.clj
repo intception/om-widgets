@@ -8,24 +8,44 @@
                  [om "0.7.1"]
                  [com.palletops/thread-expr "1.3.0"]
                  [com.andrewmcveigh/cljs-time "0.2.1"]
-                 [prismatic/dommy "0.1.3"]
+                 [prismatic/dommy "1.0.0"]
                  [net.unit8/tower-cljs "0.1.0"] ;; translations
                  [sablono "0.2.22"]
                  [shodan "0.4.1"]
                  [com.andrewmcveigh/cljs-time "0.2.1"]
+                 [com.cemerick/clojurescript.test "0.3.3"]
                  [prismatic/schema "0.3.3"]]
 
-  :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]]
+  :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]
+            [com.cemerick/clojurescript.test "0.3.3"]]
   :source-paths ["src"]
+  :test-paths ["test"]
   :cljsbuild {:builds [{:id "om-widgets"
                         :source-paths ["src"]
                         :compiler {:output-to "target/om_widgets.js"
                                    :output-dir "target"
                                    :optimizations :none
                                    :source-map true}}
+                       {:id "test"
+                        :source-paths ["src" "test"]
+                        :compiler {:pretty-print true
+                                   :output-dir "target/test"
+                                   :output-to "target/test/unit-test.js"
+                                   :preamble ["react/react.js"]
+                                   :externs ["react/externs/react.js"]
+                                   :optimizations :whitespace}}
                        {:id "basic"
                         :source-paths ["src" "examples/basic/src"]
                         :compiler {:output-to "examples/basic/main.js"
                                    :output-dir "examples/basic/out"
                                    :optimizations :none
-                                   :source-map true}}]})
+                                   :source-map true}}]
+              :test-commands {"unit-tests" ["phantomjs" :runner
+                                            ; "window.literal_js_executed=true"
+                                            ; "test/vendor/bind-polyfill.js"
+                                            ; "test/vendor/react/react.js"
+                                            "test/vendor/es5-shim.js"
+                                            "test/vendor/es5-sham.js"
+                                            ; "test/vendor/syn.js"
+                                            ; "test/vendor/console-polyfill.js"
+                                            "target/test/unit-test.js"]}})

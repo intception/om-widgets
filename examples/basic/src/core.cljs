@@ -16,7 +16,8 @@
                             {:name "Guille" :username "guilespi"}
                             {:name "Fabian" :username "fapenia"}
                             {:name "Alexis" :username "_axs_"}
-                            {:name "Martin" :username "nartub"}]
+                            {:name "Martin" :username "nartub"}
+                            {:name "Intception" :username "intception"}]
             :source-custom {:rows [{:name "Seba" :username "kernelp4nic" :row-type :users}
                                    {:name "Guille" :username "guilespi" :row-type :users}
                                    {:name "Fabian" :username "fapenia" :row-type :users}
@@ -168,6 +169,7 @@
                                              (w/grid (get-in app [:source-simple])
                                                      (get-in app [:selected])
                                                      :container-class-name ""
+                                                     :page-size 2
                                                      :header {:type :default
                                                               :columns (get-in app [:columns])})))))))
 
