@@ -17,32 +17,32 @@
 (defmethod build-entry :entry [entry app]
   (reify
     om/IDisplayName
-    (display-name[_] "DropdownEntry")
+    (display-name [_] "DropdownEntry")
 
     om/IRenderState
     (render-state [this {:keys [channel] :as state}]
-                  (html
-                    [:li
+      (html
+       [:li
                      ;; we use OnMouseDown because onBlour is triggered before
                      ;; onClick event, we use onBlour to close the dropdown
-                     [:a (->> {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
-                                               (put! channel {:type :entry-click
-                                                              :value (:id e)
-                                                              :link (:url e)}))}
-                              (#(if (:url entry)
-                                  (merge {:href (:url entry)} %)
-                                  %)))
-                      (:text entry)]]))))
+        [:a (->> {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
+                                  (put! channel {:type :entry-click
+                                                 :value (:id e)
+                                                 :link (:url e)}))}
+                 (#(if (:url entry)
+                     (merge {:href (:url entry)} %)
+                     %)))
+         (:text entry)]]))))
 
 (defmethod build-entry :divider [entry app]
   (reify
     om/IDisplayName
-    (display-name[_] "DropdownDivider")
+    (display-name [_] "DropdownDivider")
 
     om/IRenderState
     (render-state [this state]
-                  (html
-                    [:li {:class "divider"}]))))
+      (html
+       [:li {:class "divider"}]))))
 
 ;; ---------------------------------------------------------------------
 ;; Build class multimethod
@@ -78,19 +78,19 @@
         on-selection (om/get-state owner :on-selection)
         set-path (om/get-state owner :set-path)]
     (go-loop []
-             (let [msg (<! channel)]
-               (condp = (:type msg)
-                 :open-dropdown (om/set-state! owner :opened (not (om/get-state owner :opened)))
-                 :close-dropdown (om/set-state! owner :opened false)
-                 :entry-click (do
-                                (when (:link msg)
-                                  (set! (.-location js/window) (:link msg)))
-                                (when set-path
-                                  (om/update! cursor set-path (:value msg)))
-                                (when on-selection
-                                  (on-selection (:value msg)))
-                                (put! channel {:type :close-dropdown})))
-               (recur)))))
+      (let [msg (<! channel)]
+        (condp = (:type msg)
+          :open-dropdown (om/set-state! owner :opened (not (om/get-state owner :opened)))
+          :close-dropdown (om/set-state! owner :opened false)
+          :entry-click (do
+                         (when (:link msg)
+                           (set! (.-location js/window) (:link msg)))
+                         (when set-path
+                           (om/update! cursor set-path (:value msg)))
+                         (when on-selection
+                           (on-selection (:value msg)))
+                         (put! channel {:type :close-dropdown})))
+        (recur)))))
 
 (defn- dropdown-menu
   [cursor owner]
@@ -100,9 +100,9 @@
 
     om/IRenderState
     (render-state [this {:keys [channel items] :as state}]
-                  (html
-                    (vec (concat [:ul {:class "dropdown-menu"}]
-                                 (map #(om/build build-entry % {:state {:channel channel}}) items)))))))
+      (html
+       (vec (concat [:ul {:class "dropdown-menu"}]
+                    (map #(om/build build-entry % {:state {:channel channel}}) items)))))))
 
 ;; TODO merge with basic dropdown?
 (defn- dropdown-menu-container [cursor owner]
@@ -112,45 +112,45 @@
 
     om/IInitState
     (init-state [_]
-                {:opened false
-                 :channel (chan)})
+      {:opened false
+       :channel (chan)})
 
     om/IWillMount
     (will-mount [_] (channel-processing cursor owner))
 
     om/IRenderState
     (render-state [_ {:keys [title items channel] :as state}]
-                  (html
-                    [:li (build-dropdown-js-options state)
-                     [:a {:class "dropdown-toggle" :title title}
-                      title
-                      [:span {:class "caret"}]]
-                     (om/build dropdown-menu cursor {:state {:channel channel
-                                                             :items items}})]))))
+      (html
+       [:li (build-dropdown-js-options state)
+        [:a {:class "dropdown-toggle" :title title}
+         title
+         [:span {:class "caret"}]]
+        (om/build dropdown-menu cursor {:state {:channel channel
+                                                :items items}})]))))
 
 ;; TODO merge with menu dropdown?
 (defn- dropdown-container [cursor owner]
   (reify
     om/IDisplayName
-    (display-name[_] "dropdown-container")
+    (display-name [_] "dropdown-container")
 
     om/IInitState
     (init-state [_]
-                {:opened false
-                 :channel (chan)})
+      {:opened false
+       :channel (chan)})
 
     om/IWillMount
     (will-mount [_] (channel-processing cursor owner))
 
     om/IRenderState
     (render-state [_ {:keys [title items channel] :as state}]
-                  (html
-                    [:div (build-dropdown-js-options state)
-                     [:button {:class "btn btn-default dropdown-toggle" :type "button"}
-                      (str title " ")
-                      [:span {:class "caret"}]]
-                     (om/build dropdown-menu cursor {:state {:channel channel
-                                                             :items items}})]))))
+      (html
+       [:div (build-dropdown-js-options state)
+        [:button {:class "btn btn-default dropdown-toggle" :type "button"}
+         (str title " ")
+         [:span {:class "caret"}]]
+        (om/build dropdown-menu cursor {:state {:channel channel
+                                                :items items}})]))))
 
 ;; ---------------------------------------------------------------------
 ;; Schema
@@ -180,7 +180,7 @@
 ;; Public
 
 (defmulti dropdown
-  (fn [cursor {:keys [id title items type size]:as options
+  (fn [cursor {:keys [id title items type size] :as options
                :or {size :default type :default}}]
     (s/validate DropdownSchema options)
     (:type options)))

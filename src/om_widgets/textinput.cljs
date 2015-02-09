@@ -2,7 +2,7 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [om-widgets.utils :as utils]
-            [cljs-time.format :as time-format ]
+            [cljs-time.format :as time-format]
             [cljs-time.core :as time]
             [cljs-time.local :as time-local]
             [cljs-time.coerce :as timec]))
@@ -64,7 +64,7 @@
 
 (defn- next-available-position
   [mask-vector pos]
-  (if (and (> (count mask-vector) pos ) (string? (nth mask-vector pos)))
+  (if (and (> (count mask-vector) pos) (string? (nth mask-vector pos)))
     (recur mask-vector (inc pos))
     pos))
 
@@ -91,15 +91,15 @@
 
 (defn- get-selection-start ;; assume modern browser IE9 and up
   [control]
-  ( .-selectionStart control ))
+  (.-selectionStart control))
 
 (defn- get-selection-end ;; assume modern browser IE9 and up
   [control]
-  ( .-selectionEnd control ))
+  (.-selectionEnd control))
 
 (defn- set-caret-pos
   [control pos]
-  ( .setSelectionRange control pos pos ))
+  (.setSelectionRange control pos pos))
 
 (defn- mask-handler-selector
   [target owner state]
@@ -119,7 +119,7 @@
 (defmulti applymask! mask-handler-selector)
 
 (defn- update-target
-  [target owner {:keys [cbtimeout typing-timeout input-format prev-value path onChange private-state ]:as state} bInternal]
+  [target owner {:keys [cbtimeout typing-timeout input-format prev-value path onChange private-state] :as state} bInternal]
   (let [prev-value (:prev-value @private-state)
         dom-node (:dom-node @private-state)
         value (convert-output input-format  (.-value dom-node))]
@@ -132,7 +132,7 @@
 
 (defn- fire-on-change
   [target owner {:keys [cbtimeout typing-timeout prev-value path  private-state onChange] :as state}]
-  (let [cbtimeout (:cbtimeout @private-state )]
+  (let [cbtimeout (:cbtimeout @private-state)]
     (when cbtimeout
       (.clearTimeout js/window cbtimeout))
     (swap! private-state assoc :cbtimeout (.setTimeout js/window #(update-target target owner state false)
@@ -187,25 +187,25 @@
 
 (defmethod handlekeyup :mask
   [target owner state e]
-  (let [ k (.-which e)]
+  (let [k (.-which e)]
     (if (special-key? k)
       true)
-      false))
+    false))
 
 (defmethod handlekeypress :mask
   [target owner state e]
-  (let [ private-state (:private-state state)
-         dom-node (:dom-node @private-state)
-         mask-vector (:mask-vector @private-state)
-         entered-values (:entered-values @private-state)
-         mi (nth mask-vector (min (get-selection-start dom-node) (dec (count mask-vector))))
-         pos (next-available-position mask-vector (get-selection-start dom-node))
-         char-code (.-which e)
-         new-char (.fromCharCode js/String char-code)
-         entered-values (:entered-values @private-state)]
+  (let [private-state (:private-state state)
+        dom-node (:dom-node @private-state)
+        mask-vector (:mask-vector @private-state)
+        entered-values (:entered-values @private-state)
+        mi (nth mask-vector (min (get-selection-start dom-node) (dec (count mask-vector))))
+        pos (next-available-position mask-vector (get-selection-start dom-node))
+        char-code (.-which e)
+        new-char (.fromCharCode js/String char-code)
+        entered-values (:entered-values @private-state)]
 
     (when (and pos (> (count mask-vector) pos))
-      (let [ m (nth mask-vector pos)]
+      (let [m (nth mask-vector pos)]
         (if (re-matches m new-char)
           (let [new-entered-values (replace-item-at-pos entered-values pos new-char)]
             (swap! private-state assoc :entered-values new-entered-values)
@@ -219,11 +219,11 @@
 
 (defmethod handlepaste :mask
   [target owner state k]
-  (.setTimeout js/window (fn[]
+  (.setTimeout js/window (fn []
                            (let [private-state (:private-state state)
                                  dom-node (:dom-node @private-state)]
                              (applymask! target owner state (.-value dom-node))))
-                         1)
+               1)
   true)
 
 (defmethod handle-custom-keys! :mask
@@ -239,21 +239,19 @@
         (if (= sel-start sel-end)
           (condp = k
             8 (let [pos (dec sel-start)] ;; Backspace
-                (when (>= pos 0)
-                  (do
-                    (when-not (string? (nth mask-vector pos))
-                      (let [new-entered-values (replace-item-at-pos entered-values pos \_)]
-                        (swap! private-state assoc :entered-values new-entered-values)
-                        (set! (.-value dom-node)  (apply str new-entered-values))
-                        ))
-                    (set-caret-pos dom-node pos))))
+                   (when (>= pos 0)
+                     (do
+                       (when-not (string? (nth mask-vector pos))
+                         (let [new-entered-values (replace-item-at-pos entered-values pos \_)]
+                           (swap! private-state assoc :entered-values new-entered-values)
+                           (set! (.-value dom-node)  (apply str new-entered-values))))
+                       (set-caret-pos dom-node pos))))
             46 (when (< sel-start (count mask-vector))
                  (do
                    (when-not (string? (nth mask-vector sel-start))
                      (let [new-entered-values (replace-item-at-pos entered-values sel-start \_)]
                        (swap! private-state assoc :entered-values new-entered-values)
-                       (set! (.-value dom-node)  (apply str new-entered-values))
-                       )))
+                       (set! (.-value dom-node)  (apply str new-entered-values)))))
                  (set-caret-pos dom-node (inc sel-start))))
           ;; Selection
           (let [new-entered-values (erase-selection mask-vector entered-values sel-start sel-end)]
@@ -265,42 +263,42 @@
 
 (defmethod initmask! :mask
   [target owner state]
-  (let [ private-state (:private-state state)
-         input-mask (:input-mask state)
-         mask (vec (map #(condp = %
-                           \0 #"^[0-9]$"
-                           \# #"^[0-9s%.]$"
-                           \L #"^[a-zA-Z]$"
-                           \A #"^[0-9a-zA-Z]$"
-                           \& #"."
-                           \\ nil
-                           %) input-mask))]
+  (let [private-state (:private-state state)
+        input-mask (:input-mask state)
+        mask (vec (map #(condp = %
+                          \0 #"^[0-9]$"
+                          \# #"^[0-9s%.]$"
+                          \L #"^[a-zA-Z]$"
+                          \A #"^[0-9a-zA-Z]$"
+                          \& #"."
+                          \\ nil
+                          %) input-mask))]
     (swap! private-state assoc :entered-values (map #(when (string? %) %) mask)
-                               :mask-vector (remove nil? mask))))
+           :mask-vector (remove nil? mask))))
 
 (defmethod applymask! :mask
   [target owner state value]
-  (let [ private-state (:private-state state)
-         entered-values ((fn [mv cv & s]
-                           (let [ r (vec s)
-                                  m (first mv)
-                                  c (or (first cv) \_)]
-                             (if m
-                               (if (string? m)
-                                 (if (= m c)
-                                   (recur (next mv) (next cv) (conj r m))
-                                   (recur (next (next mv)) (next cv) (conj r m c)))
-                                 (recur (next mv) (next cv) (conj r (if (re-matches m c) c \_))))
-                               r)))
-                         (:mask-vector @private-state)
-                         (vec (convert-input (:input-format state) value)))
-         prev-value (:prev-value @private-state)
-         new-value (apply str entered-values)
-         dom-node (:dom-node @private-state)]
+  (let [private-state (:private-state state)
+        entered-values ((fn [mv cv & s]
+                          (let [r (vec s)
+                                m (first mv)
+                                c (or (first cv) \_)]
+                            (if m
+                              (if (string? m)
+                                (if (= m c)
+                                  (recur (next mv) (next cv) (conj r m))
+                                  (recur (next (next mv)) (next cv) (conj r m c)))
+                                (recur (next mv) (next cv) (conj r (if (re-matches m c) c \_))))
+                              r)))
+                        (:mask-vector @private-state)
+                        (vec (convert-input (:input-format state) value)))
+        prev-value (:prev-value @private-state)
+        new-value (apply str entered-values)
+        dom-node (:dom-node @private-state)]
     (when (and (not= prev-value new-value) dom-node)
       (do
         (swap! private-state assoc :entered-values entered-values
-                                   :prev-value new-value)
+               :prev-value new-value)
         (set! (.-value dom-node)  new-value)))))
 
 (defn- create-textinput [target owner]
@@ -315,43 +313,43 @@
 
     om/IDidMount
     (did-mount [this]
-       (let [state (om/get-state owner)
-             private-state (:private-state state)]
-         (swap! private-state assoc :dom-node (om.core/get-node owner))
-         (applymask! target owner state (utils/om-get target (:path state) ))))
+      (let [state (om/get-state owner)
+            private-state (:private-state state)]
+        (swap! private-state assoc :dom-node (om.core/get-node owner))
+        (applymask! target owner state (utils/om-get target (:path state)))))
 
 
     om/IRenderState
     (render-state [this state]
       (applymask! target owner state (utils/om-get target (:path state)))
       ((if (not (:multiline state))
-          dom/input
-          dom/textarea) (clj->js {:id (:id state)
-                                  :name (:id state)
-                                  :className (clojure.string/join " " ["om-widgets-input-text"  (:input-class state)])
-                                  :autoComplete (:auto-complete state)
-                                  :readOnly (:read-only state)
-                                  :onKeyDown #(handlekeydown target owner state %)
-                                  :onKeyUp #(handlekeyup target owner state %)
-                                  :onKeyPress #(handlekeypress target owner state %)
-                                  :onBlur (fn [e]
-                                            (update-target target owner state true)
-                                            (when (:onBlur state)
-                                              ((:onBlur state)))
-                                            false)
+         dom/input
+         dom/textarea) (clj->js {:id (:id state)
+                                 :name (:id state)
+                                 :className (clojure.string/join " " ["om-widgets-input-text"  (:input-class state)])
+                                 :autoComplete (:auto-complete state)
+                                 :readOnly (:read-only state)
+                                 :onKeyDown #(handlekeydown target owner state %)
+                                 :onKeyUp #(handlekeyup target owner state %)
+                                 :onKeyPress #(handlekeypress target owner state %)
+                                 :onBlur (fn [e]
+                                           (update-target target owner state true)
+                                           (when (:onBlur state)
+                                             ((:onBlur state)))
+                                           false)
 
-                                  :onPaste #(handlepaste target owner state %)
-                                  :placeholder (:placeholder state)
-                                  :disabled (:disabled state)
+                                 :onPaste #(handlepaste target owner state %)
+                                 :placeholder (:placeholder state)
+                                 :disabled (:disabled state)
 
-                                  :type (if (= (:input-format state) "password")
-                                    "password"
-                                    "text")
-                                  :style {:text-align (:align state)}})))))
+                                 :type (if (= (:input-format state) "password")
+                                         "password"
+                                         "text")
+                                 :style {:text-align (:align state)}})))))
 
 (defn textinput [target path {:keys [dont-update-cursor input-class input-format multiline onBlur
                                      placeholder id decimals align onChange auto-complete read-only disabled onKeyPress]
-                              :or {input-class "" } } ]
+                              :or {input-class ""}}]
   (om/build create-textinput target
             {:state {:path path
                      :dont-update-cursor dont-update-cursor
@@ -363,15 +361,15 @@
                      :disabled disabled
                      :read-only read-only
                      :input-mask (cond
-                                  (= input-format "numeric") "numeric"
-                                  (= input-format "integer") "numeric"
-                                  (= input-format "currency") "numeric"
-                                  (= input-format "date") date-local-mask
-                                  :else input-format)
+                                   (= input-format "numeric") "numeric"
+                                   (= input-format "integer") "numeric"
+                                   (= input-format "currency") "numeric"
+                                   (= input-format "date") date-local-mask
+                                   :else input-format)
                      :decimals (cond
-                                (= input-format "currency") (if (not decimals) 2 decimals)
-                                (= input-format "numeric") (if (not decimals) 2 decimals)
-                                :else 0)
+                                 (= input-format "currency") (if (not decimals) 2 decimals)
+                                 (= input-format "numeric") (if (not decimals) 2 decimals)
+                                 :else 0)
                      :currency (if (= input-format "currency") true false)
                      :align (cond (= input-format "numeric") "right"
                                   (= input-format "integer") "right"

@@ -26,50 +26,50 @@
 
 (defn- title-header-cell [{:keys [caption]}]
   (om/component
-    (dom/th #js {} caption)))
+   (dom/th #js {} caption)))
 
 (defn- header [columns]
   (om/component
-    (dom/thead #js {:className "om-widgets-title-header-row"}
-      (apply dom/tr nil
-        (om/build-all title-header-cell columns)))))
+   (dom/thead #js {:className "om-widgets-title-header-row"}
+              (apply dom/tr nil
+                     (om/build-all title-header-cell columns)))))
 
 (defn- data-cell [text]
   (om/component
-    (dom/td #js {:className "om-widgets-data-cell"} text)))
+   (dom/td #js {:className "om-widgets-data-cell"} text)))
 
 (defn- default-header [header-definition owner opts]
   (reify
     om/IRenderState
     (render-state [this state]
-       (dom/table #js {:className "om-widgets-table om-widgets-header"}
-            (om/build header (:columns header-definition))))))
+      (dom/table #js {:className "om-widgets-table om-widgets-header"}
+                 (om/build header (:columns header-definition))))))
 
 (defn- default-pager
   [pager-definition owner {:keys [language] :as opts}]
   (reify
     om/IDisplayName
-     (display-name[_] "GridPager")
+    (display-name [_] "GridPager")
 
     om/IRenderState
-      (render-state [this {:keys [current-page max-pages total-rows] :as state}]
-          (dom/ul #js {:className "pager"}
+    (render-state [this {:keys [current-page max-pages total-rows] :as state}]
+      (dom/ul #js {:className "pager"}
             ;; previous page
-            (dom/li #js {:className (when (= 0 current-page) "disabled")}
-              (dom/a #js {:onClick #(when (> current-page 0)
-                                      (put! (:channel state) {:new-page (dec current-page)})
-                                      false)}
-                     (translate language :grid.pager/previous-page))
+              (dom/li #js {:className (when (= 0 current-page) "disabled")}
+                      (dom/a #js {:onClick #(when (> current-page 0)
+                                              (put! (:channel state) {:new-page (dec current-page)})
+                                              false)}
+                             (translate language :grid.pager/previous-page))
 
             ;; next page
-            (dom/li #js {:className (when (= current-page max-pages) "disabled")}
-                    (dom/a #js {:onClick #(when (< current-page max-pages)
-                                            (put! (:channel state) {:new-page (inc current-page)})
-                                            false)}
-                           (translate language :grid.pager/next-page)))
+                      (dom/li #js {:className (when (= current-page max-pages) "disabled")}
+                              (dom/a #js {:onClick #(when (< current-page max-pages)
+                                                      (put! (:channel state) {:new-page (inc current-page)})
+                                                      false)}
+                                     (translate language :grid.pager/next-page)))
             ;; total label
-            (dom/span #js {:className "totals"}
-                      (u/format (translate language :grid.pager/total-rows) total-rows)))))))
+                      (dom/span #js {:className "totals"}
+                                (u/format (translate language :grid.pager/total-rows) total-rows)))))))
 
 (defn- build-row-data [columns row selected-row]
   (let [fields (map #(:field %) columns)]
@@ -90,7 +90,7 @@
 
 (defmethod grid-header :default
   [header-definition state options]
-    (om/build default-header header-definition {:state state :opts options}))
+  (om/build default-header header-definition {:state state :opts options}))
 
 (defmethod grid-header :none [_ _ _])
 
@@ -108,16 +108,16 @@
   [row owner opts]
   (reify
     om/IDisplayName
-    (display-name[_] "DefaultRow")
+    (display-name [_] "DefaultRow")
 
     om/IRenderState
     (render-state [this state]
-                  (let [row-data (build-row-data (:columns opts) row (:target opts))]
-                    (apply dom/tr #js {:className (:class row-data)
-                                       :onMouseDown #(put! (:channel state) {:row (if (satisfies? IDeref row)
-                                                                                    @row
-                                                                                    row)})}
-                           (om/build-all data-cell (vals (:projection row-data))))))))
+      (let [row-data (build-row-data (:columns opts) row (:target opts))]
+        (apply dom/tr #js {:className (:class row-data)
+                           :onMouseDown #(put! (:channel state) {:row (if (satisfies? IDeref row)
+                                                                        @row
+                                                                        row)})}
+               (om/build-all data-cell (vals (:projection row-data))))))))
 
 ;; ---------------------------------------------------------------------
 ;; Grid Pager Multimethod
@@ -139,31 +139,31 @@
   [target owner opts]
   (reify
     om/IDisplayName
-     (display-name[_] "GridBody")
+    (display-name [_] "GridBody")
 
     om/IWillMount
-     (will-mount [_]
-                 (go-loop []
-                          (let [msg (<! (om/get-state owner :channel))]
-                            (when-not (= msg :quit)
-                              (om/update! target (:row msg))
-                              (recur)))))
+    (will-mount [_]
+      (go-loop []
+        (let [msg (<! (om/get-state owner :channel))]
+          (when-not (= msg :quit)
+            (om/update! target (:row msg))
+            (recur)))))
     om/IInitState
     (init-state [_]
-                {:channel (chan)})
+      {:channel (chan)})
 
     om/IWillUnmount
-    (will-unmount[_]
+    (will-unmount [_]
       (put! (om/get-state owner :channel) :quit))
 
     om/IRenderState
     (render-state [this {:keys [rows] :as state}]
-        (dom/table #js {:className "table data"}
-          (om/build header (:columns opts))
-          (apply dom/tbody #js {}
-                 (om/build-all row-builder rows {:state {:channel (:channel state)}
-                                                 :opts {:columns (:columns opts)
-                                                        :target target}}))))))
+      (dom/table #js {:className "table data"}
+                 (om/build header (:columns opts))
+                 (apply dom/tbody #js {}
+                        (om/build-all row-builder rows {:state {:channel (:channel state)}
+                                                        :opts {:columns (:columns opts)
+                                                               :target target}}))))))
 
 ;; This function where private but we cannot test it from outside given the lack of #' reader
 ;; https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#the-reader
@@ -174,8 +174,8 @@
         end  (+ start page-size)
         total-rows (:total-rows source)
         end-gap (min page-size (if (> (- end (+ top (:index source))) 0)
-                                   (- end (+ top (:index source)))
-                                   0))
+                                 (- end (+ top (:index source)))
+                                 0))
         begin-gap (min page-size (max 0 (- (:index source) start)))
         drop-cut (max 0 (min top (+ (- start (:index source)) begin-gap)))
         take-cut (max 0 (min top (+ (- end (:index source)) end-gap)))]
@@ -195,35 +195,35 @@
 (defn- create-grid [target owner opts]
   (reify
     om/IDisplayName
-    (display-name[_] "Grid")
+    (display-name [_] "Grid")
 
     om/IInitState
     (init-state [_]
-                {:channel (chan)})
+      {:channel (chan)})
 
     om/IWillMount
     (will-mount [_]
-                (go-loop []
-                         (let [msg (<! (om/get-state owner :channel))]
-                           (when-not (= msg :quit)
-                             (om/set-state! owner :current-page (:new-page msg))
-                             (recur)))))
+      (go-loop []
+        (let [msg (<! (om/get-state owner :channel))]
+          (when-not (= msg :quit)
+            (om/set-state! owner :current-page (:new-page msg))
+            (recur)))))
 
     om/IRenderState
     (render-state [this {:keys [header src] :as state}]
-                  (dom/div #js {:className "om-widgets-grid"
-                                :id (:id opts)}
-                           (om/build grid-body
-                                     target
-                                     {:state {:rows (data-page src
-                                                               (:current-page state)
-                                                               (:page-size state)
-                                                               (:events-channel state))}
-                                      :opts {:columns (:columns header)}})
-                           (grid-pager (:pager state) {:total-rows (:total-rows src)
-                                                       :channel (:channel state)
-                                                       :current-page (:current-page state)
-                                                       :max-pages (:max-pages state)} opts)))))
+      (dom/div #js {:className "om-widgets-grid"
+                    :id (:id opts)}
+               (om/build grid-body
+                         target
+                         {:state {:rows (data-page src
+                                                   (:current-page state)
+                                                   (:page-size state)
+                                                   (:events-channel state))}
+                          :opts {:columns (:columns header)}})
+               (grid-pager (:pager state) {:total-rows (:total-rows src)
+                                           :channel (:channel state)
+                                           :current-page (:current-page state)
+                                           :max-pages (:max-pages state)} opts)))))
 
 ;; This function where private but we cannot test it from outside given the lack of #' reader
 ;; https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#the-reader
@@ -262,17 +262,17 @@
   (let [src {:rows (or (:rows source) source)
              :index (or (:index source) 0)
              :total-rows (or (:total-rows source) (count source))}
-          page-size (or (:page-size definition) 5)]
-  (om/build create-grid
-            target
-            {:init-state {:current-page (int (/ (:index src) page-size))}
-             :state {:src src
-                     :header (or header {:type :default})
-                     :pager (or pager {:type :default})
-                     :events-channel events-channel
-                     :max-pages (calculate-max-pages (:total-rows src) page-size)
-                     :page-size page-size
-                     :onChange onChange}
-             :opts {:language (or (:language definition) :en)
-                    :id id}})))
+        page-size (or (:page-size definition) 5)]
+    (om/build create-grid
+              target
+              {:init-state {:current-page (int (/ (:index src) page-size))}
+               :state {:src src
+                       :header (or header {:type :default})
+                       :pager (or pager {:type :default})
+                       :events-channel events-channel
+                       :max-pages (calculate-max-pages (:total-rows src) page-size)
+                       :page-size page-size
+                       :onChange onChange}
+               :opts {:language (or (:language definition) :en)
+                      :id id}})))
 

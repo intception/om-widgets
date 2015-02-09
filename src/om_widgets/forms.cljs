@@ -22,8 +22,8 @@
 (defn validate-key
   [owner key entity rules]
   (om/set-state! owner [:errors key] (get (validate (if (:pre-validation-transformation rules)
-                                                        ((:pre-validation-transformation rules) @entity)
-                                                         @entity)
+                                                      ((:pre-validation-transformation rules) @entity)
+                                                      @entity)
                                                     (:rules rules)
                                                     (:messages rules))
                                           key)))
@@ -32,8 +32,8 @@
   [owner entity rules continuation]
   (if rules
     (if-let [errors (validate (if (:pre-validation-transformation rules)
-                                  ((:pre-validation-transformation rules) @entity)
-                                                         @entity)
+                                ((:pre-validation-transformation rules) @entity)
+                                @entity)
                               (:rules rules)
                               (:messages rules))]
       (do
@@ -48,7 +48,7 @@
           (continuation))))
     (when continuation
       (continuation)))
-   false)
+  false)
 
 (defn set-error
   [owner error-msg]
@@ -57,9 +57,9 @@
 
 (defn set-success
   ([owner]
-     (set-success owner nil))
+   (set-success owner nil))
   ([owner msg]
-     (om/set-state! owner :saving false)
-     (when msg
-       (om/set-state! owner :success-message msg))
-     (.scrollTo js/window 0 0)))
+   (om/set-state! owner :saving false)
+   (when msg
+     (om/set-state! owner :success-message msg))
+   (.scrollTo js/window 0 0)))

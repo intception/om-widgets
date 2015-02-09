@@ -6,14 +6,14 @@
 (defmacro row
   [& cols]
   `(dom/div (cljs.core/clj->js {:className "row"})
-    ~@cols))
+            ~@cols))
 
 (defmacro column
   [width & fields]
-  `(dom/div nil ~@ (for[f fields]
-                (reverse (into '() (assoc-in (vec f)
-                                             [2 :extra-class]
-                                             (str "col-md-" width)))))))
+  `(dom/div nil ~@(for [f fields]
+                    (reverse (into '() (assoc-in (vec f)
+                                                 [2 :extra-class]
+                                                 (str "col-md-" width)))))))
 
 (defmacro dynamic-row
   [& fields]

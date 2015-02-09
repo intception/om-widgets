@@ -106,29 +106,29 @@
   `(om-widgets.combobox/combobox
     om-widgets.forms/*entity* ~key
     :class-name "om-widgets-form-control"
-     :id ~key
-     :disabled ~disabled
-     :read-only ~read-only
-     :options ~options
-     :onBlur ~on-blur
-     :onChange ~on-change))
+    :id ~key
+    :disabled ~disabled
+    :read-only ~read-only
+    :options ~options
+    :onBlur ~on-blur
+    :onChange ~on-change))
 
 (defmethod create-field :radio
   [key {:keys [options read-only disabled]}]
   `(om-widgets.radiobutton/radiobutton-group
     om-widgets.forms/*entity* ~key
-     :class-name "om-widgets-form-control"
-     :id ~key
-     :disabled ~disabled
-     :options ~options ))
+    :class-name "om-widgets-form-control"
+    :id ~key
+    :disabled ~disabled
+    :options ~options))
 
 (defmethod create-field :check
   [key {:keys [text caption disabled]}]
   `(om-widgets.checkbox/checkbox
     om-widgets.forms/*entity* ~key
-     :id ~key
-     :disabled ~disabled
-     :label ~caption))
+    :id ~key
+    :disabled ~disabled
+    :label ~caption))
 
 
 (defmethod create-field :default
@@ -145,9 +145,9 @@
                      :required ~required
                      :extra-class ~extra-class}
                     (when ~label
-                        (dom/label (cljs.core/clj->js {:className "om-widgets-control-label"
-                                                       :for ~key})
-                                   ~label))
+                      (dom/label (cljs.core/clj->js {:className "om-widgets-control-label"
+                                                     :for ~key})
+                                 ~label))
                     ~(create-field key options)))
 
 
@@ -188,12 +188,12 @@
 (defmacro row
   [& cols]
   `(dom/div (cljs.core/clj->js {:className "om-widgets-row"})
-    ~@cols))
+            ~@cols))
 
 (defmacro column
   [width & fields]
-  `(dom/div nil ~@ (for[f fields]
-                (reverse (into '() (assoc-in (vec f)
-                                             [2 :extra-class]
-                                             (str "col-" width)))))))
+  `(dom/div nil ~@(for [f fields]
+                    (reverse (into '() (assoc-in (vec f)
+                                                 [2 :extra-class]
+                                                 (str "col-" width)))))))
 

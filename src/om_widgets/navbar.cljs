@@ -14,84 +14,84 @@
 (defn- entry [cursor owner]
   (reify
     om/IDisplayName
-    (display-name[_] "NavBarEntry")
+    (display-name [_] "NavBarEntry")
 
     om/IRenderState
     (render-state [_ {:keys [entry set-path on-selection]}]
-                  (dom/li #js {:className (when (= (get-in cursor [set-path])
-                                                   (:id entry)) "active")}
-                          (if (:items entry)
-                            (dropdown cursor {:id (:id entry)
-                                              :set-path set-path
-                                              :type :menu
-                                              :title (:text entry)
-                                              :on-selection on-selection
-                                              :items (:items entry)})
-                            (dom/a (cljs.core/clj->js (->> {}
+      (dom/li #js {:className (when (= (get-in cursor [set-path])
+                                       (:id entry)) "active")}
+              (if (:items entry)
+                (dropdown cursor {:id (:id entry)
+                                  :set-path set-path
+                                  :type :menu
+                                  :title (:text entry)
+                                  :on-selection on-selection
+                                  :items (:items entry)})
+                (dom/a (cljs.core/clj->js (->> {}
                                                            ;; TODO write a macro like pallet.thread-expr
                                                            ;; but that works on clojurescript
-                                                           (#(if (:className entry)
-                                                               (merge {:className (:className entry)} %)
-                                                               %))
-                                                           (#(if (:url entry)
-                                                               (merge {:href (:url entry)} %)
-                                                               %))
-                                                           (#(if on-selection
-                                                               (merge {:onClick (fn [e]
-                                                                                  (om/update! cursor set-path (:id @entry))
-                                                                                  (on-selection (:id @entry)))} %)
-                                                               %))))
-                                   (dom/span #js {:className (:iconClassName entry)})
-                                   (:text entry)))))))
+                                               (#(if (:className entry)
+                                                   (merge {:className (:className entry)} %)
+                                                   %))
+                                               (#(if (:url entry)
+                                                   (merge {:href (:url entry)} %)
+                                                   %))
+                                               (#(if on-selection
+                                                   (merge {:onClick (fn [e]
+                                                                      (om/update! cursor set-path (:id @entry))
+                                                                      (on-selection (:id @entry)))} %)
+                                                   %))))
+                       (dom/span #js {:className (:iconClassName entry)})
+                       (:text entry)))))))
 
 (defn- navbar-nav [app owner]
   (reify
     om/IDisplayName
-    (display-name[_] "NavBarNav")
+    (display-name [_] "NavBarNav")
 
     om/IRenderState
     (render-state [this {:keys [navbar set-path on-selection]}]
-                  (apply dom/ul #js {:className (str "nav navbar-nav"
-                                                     (when (:right-position (first navbar))
-                                                       " navbar-right"))}
-                         (map #(om/build entry app {:state {:set-path set-path
-                                                            :entry %
-                                                            :on-selection on-selection}})
-                              navbar)))))
+      (apply dom/ul #js {:className (str "nav navbar-nav"
+                                         (when (:right-position (first navbar))
+                                           " navbar-right"))}
+             (map #(om/build entry app {:state {:set-path set-path
+                                                :entry %
+                                                :on-selection on-selection}})
+                  navbar)))))
 
 (defn- nav-header [app owner]
   (reify
     om/IDisplayName
-    (display-name[_] "NavBarHeader")
+    (display-name [_] "NavBarHeader")
 
     om/IRenderState
     (render-state [this {:keys [brand-title brand-image-url brand-image-expanded] :as state}]
-                  (dom/div #js {:className "navbar-header"}
-                           (dom/a #js {:className "navbar-brand" :href "#"}
-                                  (dom/img #js {:src brand-image-url
-                                                :alt (or brand-title "brand-logo")
-                                                :height (if brand-image-expanded "100%" "")})
-                                  (str " " brand-title))))))
+      (dom/div #js {:className "navbar-header"}
+               (dom/a #js {:className "navbar-brand" :href "#"}
+                      (dom/img #js {:src brand-image-url
+                                    :alt (or brand-title "brand-logo")
+                                    :height (if brand-image-expanded "100%" "")})
+                      (str " " brand-title))))))
 
 (defn- navbar-container [app owner]
   (reify
     om/IDisplayName
-    (display-name[_] "NavBarContainer")
+    (display-name [_] "NavBarContainer")
 
     om/IRenderState
     (render-state [this {:keys [container items brand-image-url brand-title brand-image-expanded set-path on-selection] :as state}]
-                  (dom/nav #js {:className (str "navbar navbar-default"
-                                                (when (:fixed-top state) " navbar-fixed-top"))}
-                           (dom/div #js {:className (str "container"
-                                                         (when (= container :fluid) "-fluid"))}
-                                    (om/build nav-header app {:state {:brand-image-url brand-image-url
-                                                                      :brand-image-expanded brand-image-expanded
-                                                                      :brand-title brand-title}})
-                                    (apply dom/div #js {:className "navbar-collapse"}
-                                           (map #(om/build navbar-nav app {:state {:set-path set-path
-                                                                                   :on-selection on-selection
-                                                                                   :navbar %}})
-                                                items)))))))
+      (dom/nav #js {:className (str "navbar navbar-default"
+                                    (when (:fixed-top state) " navbar-fixed-top"))}
+               (dom/div #js {:className (str "container"
+                                             (when (= container :fluid) "-fluid"))}
+                        (om/build nav-header app {:state {:brand-image-url brand-image-url
+                                                          :brand-image-expanded brand-image-expanded
+                                                          :brand-title brand-title}})
+                        (apply dom/div #js {:className "navbar-collapse"}
+                               (map #(om/build navbar-nav app {:state {:set-path set-path
+                                                                       :on-selection on-selection
+                                                                       :navbar %}})
+                                    items)))))))
 
 
 ;; ---------------------------------------------------------------------

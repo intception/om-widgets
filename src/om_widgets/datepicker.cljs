@@ -64,7 +64,7 @@
 
 (defn- day-header [day]
   (om/component
-    (dom/th #js {:className "dow"} day)))
+   (dom/th #js {:className "dow"} day)))
 
 (defmulti get-date-from-selected-day
   (fn [el previous-date selected-day]
@@ -106,84 +106,84 @@
 (defn- day-component [app owner]
   (reify
     om/IDisplayName
-       (display-name[_] "DatepickerDay")
+    (display-name [_] "DatepickerDay")
     om/IRenderState
-      (render-state [this {:keys [day date path onChange] :as state}]
-                    (dom/td #js {:className (build-day-class-name day (utils/om-get app [path]))
-                                 :data-belongs-to-month (:belongs-to-month day)
-                                 :onClick (fn [e]
-                                            (let [el (.. e -target)
-                                                  selected-day (js/parseInt (.. el -textContent))
-                                                  date-updated (get-date-from-selected-day el date selected-day)]
-                                              (utils/om-update! app path date-updated)
-                                              (when onChange (onChange date-updated))))} (:day day)))))
+    (render-state [this {:keys [day date path onChange] :as state}]
+      (dom/td #js {:className (build-day-class-name day (utils/om-get app [path]))
+                   :data-belongs-to-month (:belongs-to-month day)
+                   :onClick (fn [e]
+                              (let [el (.. e -target)
+                                    selected-day (js/parseInt (.. el -textContent))
+                                    date-updated (get-date-from-selected-day el date selected-day)]
+                                (utils/om-update! app path date-updated)
+                                (when onChange (onChange date-updated))))} (:day day)))))
 
 (defn- weeks-component [app owner]
   (reify
     om/IDisplayName
-       (display-name[_] "DatepickerWeeks")
+    (display-name [_] "DatepickerWeeks")
     om/IRenderState
-      (render-state [this {:keys [date path onChange] :as state}]
-                    (apply dom/tbody nil
-                           (map (fn [week]
-                                  (apply dom/tr nil
-                                         (map (fn [d]
-                                                (om/build day-component app {:state {:day d :path path :date date :onChange onChange}})) week)))
-                                (build-weeks date))))))
+    (render-state [this {:keys [date path onChange] :as state}]
+      (apply dom/tbody nil
+             (map (fn [week]
+                    (apply dom/tr nil
+                           (map (fn [d]
+                                  (om/build day-component app {:state {:day d :path path :date date :onChange onChange}})) week)))
+                  (build-weeks date))))))
 
 (defn- year-component [app owner]
   (reify
     om/IDisplayName
-       (display-name[_] "DatepickerYear")
+    (display-name [_] "DatepickerYear")
     om/IRenderState
     (render-state [this {:keys [parent date path] :as state}]
-        (dom/input #js {:className "datepicker-year"
-                        :placeholder (time/year date)
-                        :maxLength 4
-                        :value (time/year date)
-                        :belongs-to-month "text"
-                        :onChange (fn [e]
-                                    (let [current-value (.. e -target -value)
-                                          current-value-int (js/parseInt current-value)]
+      (dom/input #js {:className "datepicker-year"
+                      :placeholder (time/year date)
+                      :maxLength 4
+                      :value (time/year date)
+                      :belongs-to-month "text"
+                      :onChange (fn [e]
+                                  (let [current-value (.. e -target -value)
+                                        current-value-int (js/parseInt current-value)]
                                       ;; TODO what can we do with < 1000 years and still
                                       ;; have some kind of validation?
-                                      (when (= 4 (count current-value))
-                                        (om/set-state! parent
-                                                       :date
-                                                       (time/date-time current-value-int
-                                                                       (time/month date)
-                                                                       (time/day date) )))))}))))
+                                    (when (= 4 (count current-value))
+                                      (om/set-state! parent
+                                                     :date
+                                                     (time/date-time current-value-int
+                                                                     (time/month date)
+                                                                     (time/day date))))))}))))
 
 (defn- body-component [app owner]
   (reify
     om/IDisplayName
-       (display-name[_] "DatepickerBody")
+    (display-name [_] "DatepickerBody")
     om/IRenderState
     (render-state [this {:keys [path date onChange] :as state}]
       (dom/div #js {:className "datepicker datepicker-days" :style #js {:display "block"}}
-         (dom/table #js {:className "table-condensed"}
-            (dom/thead nil
-               (dom/tr nil
+               (dom/table #js {:className "table-condensed"}
+                          (dom/thead nil
+                                     (dom/tr nil
                        ;; previous month
-                       (dom/th #js {:className "prev"
-                                    :onClick (fn [e]
-                                               (om/set-state! owner :date (time/minus date (time/months 1))))} "<")
+                                             (dom/th #js {:className "prev"
+                                                          :onClick (fn [e]
+                                                                     (om/set-state! owner :date (time/minus date (time/months 1))))} "<")
                        ;; current month
-                       (dom/th #js {:colSpan "3"} (utils/get-hr-month date))
+                                             (dom/th #js {:colSpan "3"} (utils/get-hr-month date))
 
                        ;; current year
-                       (dom/th #js {:colSpan "2"}
-                               (om/build year-component app {:state {:path path :date date :parent owner}}))
+                                             (dom/th #js {:colSpan "2"}
+                                                     (om/build year-component app {:state {:path path :date date :parent owner}}))
 
                        ;; next month
-                       (dom/th #js {:className "next"
-                                    :onClick (fn [e]
-                                               (om/set-state! owner :date (time/plus date (time/months 1))))} ">" )
+                                             (dom/th #js {:className "next"
+                                                          :onClick (fn [e]
+                                                                     (om/set-state! owner :date (time/plus date (time/months 1))))} ">")
 
                        ;; datepicker body
-                       (apply dom/tr nil
-                              (om/build-all day-header days-short))
-                       (om/build weeks-component app {:state {:path path :date date :onChange onChange}}))))))))
+                                             (apply dom/tr nil
+                                                    (om/build-all day-header days-short))
+                                             (om/build weeks-component app {:state {:path path :date date :onChange onChange}}))))))))
 
 (defn datepicker
   "Datepicker public API
@@ -198,9 +198,9 @@
   "
   [app path {:keys [id hidden onChange] :or {hidden true}}]
   (om/build body-component app {:state {:id id
-                                         :hidden hidden
-                                         :date (if (instance? js/Date (utils/om-get app [path]))
-                                                 (time/date-time (utils/om-get app [path]))
-                                                 (time/now))
-                                         :path path
-                                         :onChange onChange}}))
+                                        :hidden hidden
+                                        :date (if (instance? js/Date (utils/om-get app [path]))
+                                                (time/date-time (utils/om-get app [path]))
+                                                (time/now))
+                                        :path path
+                                        :onChange onChange}}))
