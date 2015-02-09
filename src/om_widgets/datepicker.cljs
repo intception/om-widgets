@@ -109,13 +109,13 @@
        (display-name[_] "DatepickerDay")
     om/IRenderState
       (render-state [this {:keys [day date path onChange] :as state}]
-                    (dom/td #js {:className (build-day-class-name day (get-in app [path]))
+                    (dom/td #js {:className (build-day-class-name day (utils/om-get app [path]))
                                  :data-belongs-to-month (:belongs-to-month day)
                                  :onClick (fn [e]
                                             (let [el (.. e -target)
                                                   selected-day (js/parseInt (.. el -textContent))
                                                   date-updated (get-date-from-selected-day el date selected-day)]
-                                              (om/update! app path date-updated)
+                                              (utils/om-update! app path date-updated)
                                               (when onChange (onChange date-updated))))} (:day day)))))
 
 (defn- weeks-component [app owner]
@@ -199,8 +199,8 @@
   [app path {:keys [id hidden onChange] :or {hidden true}}]
   (om/build body-component app {:state {:id id
                                          :hidden hidden
-                                         :date (if (instance? js/Date (get-in app [path]))
-                                                 (time/date-time (get-in app [path]))
+                                         :date (if (instance? js/Date (utils/om-get app [path]))
+                                                 (time/date-time (utils/om-get app [path]))
                                                  (time/now))
                                          :path path
                                          :onChange onChange}}))
