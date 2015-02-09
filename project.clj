@@ -12,7 +12,6 @@
                  [net.unit8/tower-cljs "0.1.0"] ;; translations
                  [sablono "0.2.22"]
                  [shodan "0.4.1"]
-                 [com.andrewmcveigh/cljs-time "0.2.1"]
                  [com.cemerick/clojurescript.test "0.3.3"]
                  [prismatic/schema "0.3.3"]]
 
