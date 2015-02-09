@@ -108,25 +108,27 @@
     om/IDisplayName
        (display-name[_] "DatepickerDay")
     om/IRenderState
-      (render-state [this {:keys [day date path] :as state}]
-                    (dom/td #js {:className (build-day-class-name day (get-in app [path]))
+      (render-state [this {:keys [day date path onChange] :as state}]
+                    (dom/td #js {:className (build-day-class-name day (utils/om-get app [path]))
                                  :data-belongs-to-month (:belongs-to-month day)
                                  :onClick (fn [e]
                                             (let [el (.. e -target)
                                                   selected-day (js/parseInt (.. el -textContent))
                                                   date-updated (get-date-from-selected-day el date selected-day)]
-                                              (om/update! app path date-updated)))} (:day day)))))
+                                              (utils/om-update! app path date-updated)
+                                              (when onChange (onChange date-updated))))} (:day day)))))
+
 (defn- weeks-component [app owner]
   (reify
     om/IDisplayName
        (display-name[_] "DatepickerWeeks")
     om/IRenderState
-      (render-state [this {:keys [date path] :as state}]
+      (render-state [this {:keys [date path onChange] :as state}]
                     (apply dom/tbody nil
                            (map (fn [week]
                                   (apply dom/tr nil
                                          (map (fn [d]
-                                                (om/build day-component app {:state {:day d :path path :date date}})) week)))
+                                                (om/build day-component app {:state {:day d :path path :date date :onChange onChange}})) week)))
                                 (build-weeks date))))))
 
 (defn- year-component [app owner]
@@ -157,8 +159,8 @@
     om/IDisplayName
        (display-name[_] "DatepickerBody")
     om/IRenderState
-    (render-state [this {:keys [path date] :as state}]
-      (dom/div #js {:className "datepicker-days" :style #js {:display "block"}}
+    (render-state [this {:keys [path date onChange] :as state}]
+      (dom/div #js {:className "datepicker datepicker-days" :style #js {:display "block"}}
          (dom/table #js {:className "table-condensed"}
             (dom/thead nil
                (dom/tr nil
@@ -181,26 +183,7 @@
                        ;; datepicker body
                        (apply dom/tr nil
                               (om/build-all day-header days-short))
-                       (om/build weeks-component app {:state {:path path :date date}}))))))))
-
-(defn- datepicker-comp [app owner]
-  (reify
-    om/IDisplayName
-      (display-name[_] "Datepicker")
-    om/IDidMount
-      (did-mount [this]
-                 (let [datepicker (om/get-node owner)
-                       previous-el (.-previousSibling datepicker)
-                       new-offset-top (+ (.-offsetTop previous-el) (.-offsetHeight previous-el) 6)
-                       new-offset-left (+ (.-offsetLeft previous-el) 6)]
-                   (set! (-> datepicker (.-style) (.-top)) (str new-offset-top "px"))
-                   (set! (-> datepicker (.-style) (.-left)) (str new-offset-left "px"))))
-    om/IRenderState
-      (render-state [this {:keys [path date hidden] :as state}]
-                    (dom/div #js {:className "datepicker dropdown-menu"
-                                  :style #js {:display (if hidden "none"
-                                                         "block")}}
-                             (om/build body-component app {:state {:path path :date date}})))))
+                       (om/build weeks-component app {:state {:path path :date date :onChange onChange}}))))))))
 
 (defn datepicker
   "Datepicker public API
@@ -213,10 +196,11 @@
 
   note: we assume today date if the cursor does not have a date
   "
-  [app path {:keys [id hidden] :or {hidden true}}]
-  (om/build datepicker-comp app {:state {:id id
+  [app path {:keys [id hidden onChange] :or {hidden true}}]
+  (om/build body-component app {:state {:id id
                                          :hidden hidden
-                                         :date (if (instance? js/Date (get-in app [path]))
-                                                 (time/date-time (get-in app [path]))
+                                         :date (if (instance? js/Date (utils/om-get app [path]))
+                                                 (time/date-time (utils/om-get app [path]))
                                                  (time/now))
-                                         :path path}}))
+                                         :path path
+                                         :onChange onChange}}))
