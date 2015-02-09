@@ -1,4 +1,5 @@
 (ns om-widgets.stylesheet)
+
 (defn- add-style-string!
   [str]
   (let [node (.createElement js/document "style")]
