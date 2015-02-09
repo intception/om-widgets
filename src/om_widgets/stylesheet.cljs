@@ -7,7 +7,7 @@
     (set! (.-innerHTML node) str)
     (.appendChild js/document.body node)))
 
-(defn doc-ready-handler []
+(defn install-styles! []
   (let [ready-state (. js/document -readyState)]
     (if (= "complete" ready-state)
       (do
@@ -647,3 +647,8 @@
                              }
 
                              ")))))
+
+(defn on-doc-ready []
+  (aset js/document "onreadystatechange" install-styles!))
+
+(on-doc-ready)
