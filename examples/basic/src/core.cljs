@@ -3,7 +3,8 @@
             [om.dom :as dom :include-macros true]
             [om-widgets.layouts :as layout :include-macros true]
             [om-widgets.core :as w]
-            [om-widgets.grid :refer [row-builder]]))
+            [om-widgets.grid :refer [row-builder]]
+            [examples.basic.modal-example :refer [modal-sample]]))
 
 
 (enable-console-print!)
@@ -51,6 +52,9 @@
                    {:id :radiobutton
                     :text "Radiobutton"
                     :url "#/radiobutton"}
+                   {:id :modal
+                    :text "Modal"
+                    :url "#/modal"}
                    ]
                   [{:text "Grid"
                     :id :grid-sample
@@ -290,6 +294,7 @@
                            (condp = (:menu-selected app)
                              :dropdown (om/build dropdown-sample (get-in app [:dropdown]))
                              :datepicker (om/build datepicker-sample app)
+                             :modal (om/build modal-sample app)
                              :grid (om/build grid-sample (get-in app [:grid]))
                              :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
                              :radiobutton (om/build radiobutton-sample app)

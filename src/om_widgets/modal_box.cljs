@@ -6,7 +6,6 @@
             [dommy.core :as dommy :refer-macros [sel sel1]]
             [cljs.core.async :refer [put! chan <! alts! timeout]]))
 
-(enable-console-print!)
 
 (defn create-modal-box
   [target owner]
@@ -84,7 +83,7 @@
                                             (f/button :btn-mb-alert-ok
                                                       {:location :left
                                                        :style :mb-alert-ok
-                                                       :icon  :icon-ok
+                                                       :icon :icon-ok
                                                        :text " OK"
                                                        :on-click #(put! c :ok)}))})
       (when (<! c)
