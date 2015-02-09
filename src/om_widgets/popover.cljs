@@ -1,12 +1,10 @@
 (ns om-widgets.popover
-  (:require-macros [dommy.macros :refer [sel sel1]]
-                   [cljs.core.async.macros :refer [go go-loop]])
-
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [put! chan <! alts! timeout close!]]
             [sablono.core :as html :refer-macros [html]]
-            [dommy.core :as dommy ]))
+            [dommy.core :as dommy :refer-macros [sel sel1]]))
 
 
 (defn window-size []

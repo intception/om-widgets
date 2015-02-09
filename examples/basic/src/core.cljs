@@ -17,11 +17,7 @@
                             {:name "Fabian" :username "fapenia"}
                             {:name "Alexis" :username "_axs_"}
                             {:name "Martin" :username "nartub"}
-                            {:name "Jose" :username "jose"}
-                            {:name "Jorge" :username "jorge"}
-                            {:name "Marcela" :username "marcel"}
-                            {:name "Raquel" :username "raquel"}
-                            ]
+                            {:name "Intception" :username "intception"}]
             :source-custom {:rows [{:name "Seba" :username "kernelp4nic" :row-type :users}
                                    {:name "Guille" :username "guilespi" :row-type :users}
                                    {:name "Fabian" :username "fapenia" :row-type :users}
@@ -183,6 +179,7 @@
                                              (w/grid (get-in app [:source-simple])
                                                      (get-in app [:selected])
                                                      :container-class-name ""
+                                                     :page-size 2
                                                      :header {:type :default
                                                               :columns (get-in app [:columns])})))))))
 
@@ -302,4 +299,3 @@
   my-app
   app-state
   {:target (.getElementById js/document "app")})
-
