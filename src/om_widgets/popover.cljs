@@ -62,6 +62,8 @@
       (html
        [:div {:class "om-widgets-popover-overlay"
               :onMouseDown #(when mouse-down (mouse-down) false)}]))))
+(defn arrow-offset-align [vl0 vl1 align]
+  (+ vl0 (* align (- vl1 vl0))))
 
 (defn popover-container
   [_ owner opts]
@@ -73,6 +75,7 @@
     om/IDidMount
     (did-mount [this]
       (let [node (om.core/get-node owner)
+            align (or (:align opts) 0.5)
             parent (dommy/remove! node)
             target (if (:for opts)
                      (or (sel1 (keyword (str "#" (:for opts)))) parent)
@@ -91,7 +94,7 @@
                                 (min o m)))
                     wz (window-size)
                     trect (first (client-rects target));;(dommy/bounding-client-rect target)
-                    
+
                     target-pos (merge trect
                                       {:top (+ (:top trect) (:scroll-y wz))
                                        :bottom (+ (:bottom trect) (:scroll-y wz))
@@ -107,16 +110,16 @@
                     y (condp = side
                         :top    (- (:top target-pos) (:height bounding-rect))
                         :bottom (:bottom target-pos)
-                        :right  (- (+ (:top target-pos) (/ (:height target-pos) 2))
-                                   (/ (:height bounding-rect) 2))
-                        :left   (- (+ (:top target-pos) (/ (:height target-pos) 2))
-                                   (/ (:height bounding-rect) 2)))
+                        :right  (- (+ (:top target-pos) (* (:height target-pos) align))
+                                   (* (:height bounding-rect) align))
+                        :left   (- (+ (:top target-pos) (* (:height target-pos) align))
+                                   (* (:height bounding-rect) align)))
 
                     x (condp = side
-                        :top    (- (+ (:left target-pos) (/ (:width target-pos) 2))
-                                   (/ (:width bounding-rect) 2))
-                        :bottom (- (+ (:left target-pos) (/ (:width target-pos) 2))
-                                   (/ (:width bounding-rect) 2))
+                        :top    (- (+ (:left target-pos) (* (:width target-pos) align))
+                                   (* (:width bounding-rect) align))
+                        :bottom (- (+ (:left target-pos) (* (:width target-pos) align))
+                                   (* (:width bounding-rect) align))
                         :right  (:right target-pos)
                         :left   (- (:left target-pos) (:width bounding-rect)))
                     offset-left (ofs-max (if (contains? #{:top :bottom} side)
@@ -124,20 +127,21 @@
                                                  (> (+ x (:width bounding-rect)) (+ (:width wz) (:scroll-x wz))) (-  (+ (:width wz) (:scroll-x wz)) (+ x (:width bounding-rect)))
                                                  :else 0)
                                            0) (- (/ (:width bounding-rect) 2) 20))
-                    arrow-left (* 100 (- 0.5 (/ offset-left (:width bounding-rect))))
+                    arrow-left (* 100 (- align (/ (- offset-left (arrow-offset-align 14 -14 align)) (:width bounding-rect))))
 
                     offset-top (ofs-max (if (contains? #{:left :right} side)
                                           (cond (< y (:scroll-y wz)) (- (:scroll-y wz) y)
                                                 (> (+ y (:height bounding-rect)) (+ (:height wz) (:scroll-y wz))) (-  (+ (:height wz) (:scroll-y wz)) (+ y (:height bounding-rect)))
                                                 :else 0)
                                           0) (- (/ (:height bounding-rect) 2) 20))
-                    arrow-top (* 100 (- 0.5 (/ offset-top (:height bounding-rect))))]
+                    arrow-top (* 100 (- align (/ (- offset-top (arrow-offset-align 14 -14 align))(:height bounding-rect))))]
                 (if-not (= (om/get-state owner :side) side)
                   (om/set-state! owner :side side))
                 (dommy/set-px! node :top (+ y offset-top) :left (+ x offset-left))
-                (if (contains? #{:top :bottom} side)
-                  (dommy/set-style! arrow :left (str arrow-left "%"))
-                  (dommy/set-style! arrow :top (str arrow-top "%")))
+                (when arrow
+                  (if (contains? #{:top :bottom} side)
+                    (dommy/set-style! arrow :left (str arrow-left "%"))
+                    (dommy/set-style! arrow :top (str arrow-top "%"))))
                 (recur)))))))
     om/IWillUnmount
     (will-unmount [this]
@@ -145,10 +149,11 @@
       (dommy/append! (om/get-state owner :parent) (om/get-state owner :node))
       (put! (om/get-state owner :channel) :quit))
     om/IRenderState
-    (render-state [this {:keys [label side content-fn] :as state}]
+    (render-state [this {:keys [label side has-arrow content-fn] :as state}]
       (html
        [:div {:class (str "om-widgets-popover " (name side))}
-        [:span {:class "arrow"}]
+        (when (:has-arrow opts)
+          [:span {:class "arrow"}])
         (content-fn (:close-fn opts))]))))
 
 (defn popover-component
@@ -164,6 +169,8 @@
                    (om/build popover-container nil {:state {:content-fn popup-content-fn
                                                             :prefered-side prefered-side}
                                                     :opts {:for (:for opts)
+                                                           :align (:align opts)
+                                                           :has-arrow (:has-arrow opts)
                                                            :close-fn #(go
                                                                         (<! (timeout 10))
                                                                         (om/set-state! owner :visible false))}})))
@@ -173,7 +180,7 @@
 
 
 
-(defn- labeled-popover-component [_ owner]
+(defn- labeled-popover-component [_ owner opts]
   (reify
     om/IDisplayName
     (display-name [_] "PopOver")
@@ -195,7 +202,9 @@
                       label
                       (when visible (om/build popover-overlay nil {:state {:mouse-down #(om/set-state! owner :visible false)}}))
                       (when visible (om/build popover-container nil {:state {:content-fn body :prefered-side prefered-side}
-                                                                     :opts {:close-fn #(go
+                                                                     :opts {:align (:align opts)
+                                                                            :has-arrow (:has-arrow opts)
+                                                                            :close-fn #(go
                                                                                          (<! (timeout 10))
                                                                                          (om/set-state! owner :visible false))}})))))))
 
@@ -214,20 +223,29 @@
                                  id
                                  disabled
                                  for
-                                 prefered-side]
+                                 prefered-side
+                                 has-arrow
+                                 align]
                           :or {class-name "om-widgets-popover-button"
-                               prefered-side :bottom}}]
+                               prefered-side :bottom
+                               has-arrow true
+                               align 0.5}}]
   (cond
     (fn? front-face)
     (om/build popover-component nil {:state {:visible-content-fn front-face
                                              :popup-content-fn popup-body
                                              :prefered-side prefered-side}
-                                     :opts {:for for}})
+                                     :opts {:for for
+                                            :has-arrow has-arrow
+                                            :align align}})
     :else
     (om/build labeled-popover-component nil {:state {:label front-face
                                                      :id (or id front-face)
                                                      :disabled disabled
                                                      :class-name class-name
+
                                                      :prefered-side prefered-side
-                                                     :body popup-body}})))
+                                                     :body popup-body}
+                                             :opts {:align align
+                                                    :has-arrow has-arrow}})))
 
