@@ -11,6 +11,8 @@
   (let [ready-state (. js/document -readyState)]
     (if (= "complete" ready-state)
       (do
+        ;; TODO find a better way to handle this css, using datastructures and not a string
+        ;; see: https://github.com/noprompt/garden
         (add-style-string! "
                              .om-widgets-overlay {
                                  position:fixed;
