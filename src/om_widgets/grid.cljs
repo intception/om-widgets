@@ -11,10 +11,6 @@
 ;; ---------------------------------------------------------------------
 ;; TODOS
 ;;
-;; * row selection is broken when we use a vec from a cursor
-;;
-;; * rethink API and normalize input
-;;
 ;; * rethink markup, why we use two tables instead of one?
 ;;
 ;; * if you call the grid with an empty vec source, row-builder is called a lot
@@ -54,14 +50,14 @@
     om/IRenderState
     (render-state [this {:keys [current-page max-pages total-rows] :as state}]
       (dom/ul #js {:className "pager"}
-            ;; previous page
+              ;; previous page
               (dom/li #js {:className (when (= 0 current-page) "disabled")}
                       (dom/a #js {:onClick #(when (> current-page 0)
                                               (put! (:channel state) {:new-page (dec current-page)})
                                               false)}
-                             (translate language :grid.pager/previous-page))
+                             (translate language :grid.pager/previous-page)))
 
-            ;; next page
+                      ;; next page
                       (dom/li #js {:className (when (= current-page max-pages) "disabled")}
                               (dom/a #js {:onClick #(when (< current-page max-pages)
                                                       (put! (:channel state) {:new-page (inc current-page)})
@@ -69,7 +65,7 @@
                                      (translate language :grid.pager/next-page)))
             ;; total label
                       (dom/span #js {:className "totals"}
-                                (u/format (translate language :grid.pager/total-rows) total-rows)))))))
+                                (u/format (translate language :grid.pager/total-rows) total-rows))))))
 
 (defn- build-row-data [columns row selected-row]
   (let [fields (map #(:field %) columns)]
