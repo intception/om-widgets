@@ -10,7 +10,7 @@
          :grid {:pager
                 {:previous-page "« Previa"
                  :next-page "Siguiente »"
-                 :total "%d en total"}}
+                 :total "%d-%d de %d"}}
          :modal-box {}
          :radio-button {}
          :missing! "<Traducción no encontrada>"}
@@ -19,7 +19,7 @@
          :grid {:pager
                 {:previous-page "« Previous"
                  :next-page "Next »"
-                 :total-rows "Total rows: %d"}}
+                 :total-rows "%d-%d of %d"}}
          :modal-box {}
          :radio-button {}
          :missing! "<Translation not found>"}}})
