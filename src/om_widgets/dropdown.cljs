@@ -23,8 +23,8 @@
     (render-state [this {:keys [channel] :as state}]
       (html
        [:li
-                     ;; we use OnMouseDown because onBlour is triggered before
-                     ;; onClick event, we use onBlour to close the dropdown
+        ;; we use OnMouseDown because onBlour is triggered before
+        ;; onClick event, we use onBlour to close the dropdown
         [:a (->> {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
                                   (put! channel {:type :entry-click
                                                  :value (:id e)
@@ -68,7 +68,12 @@
 (defn- build-dropdown-js-options
   [state]
   {:class (build-dropdown-class (:opened state) (:size state))
-   :onClick #(put! (:channel state) {:type :open-dropdown})
+   :onClick (fn [e]
+              (put! (:channel state) {:type :open-dropdown})
+              (when (:prevent-default state)
+                (.preventDefault e))
+              (when (:stop-propagation state)
+                (.stopPropagation e)))
    :onBlur #(put! (:channel state) {:type :close-dropdown})
    :id (str "dropdown-" (name (:id state)))})
 
@@ -172,6 +177,8 @@
    (s/optional-key :id) s/Keyword
    (s/optional-key :set-path) s/Keyword ;; cursor path where we are going to update! selected item
    (s/optional-key :on-selection) (s/pred fn?)
+   (s/optional-key :prevent-default) s/Bool
+   (s/optional-key :stop-propagation) s/Bool
    (s/optional-key :type) (s/enum :default :menu)
    (s/optional-key :size) (s/enum :default :sm :xs :lg)})
 
