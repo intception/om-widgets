@@ -24,21 +24,22 @@
 
           (w/popover "Popover con varias palabras que pueden afectarse por word wrapping!"
             (fn [close-window]
-                  (dom/div #js {:className ""}
+                  (dom/div #js {:className "popup-window-sample"}
                     (w/grid (get-in app [:grid :source-simple])
                             (get-in app [:grid :selected])
                             :page-size 4
                             :container-class-name ""
                             :header {:type :default
                                     :columns (get-in app [:grid :columns])})))
-            {:prefered-side :bottom})
+            {:prefered-side :bottom
+             :align 0})
 
            (w/popover
             (fn [show-window]
               (dom/button #js {:id "pup" :onClick #(show-window)} "Popup"))
 
             (fn [close-window]
-                  (dom/div #js {:className ""}
+                  (dom/div #js {:className "popup-window-sample"}
                     (w/grid (get-in app [:grid :source-simple])
                             (get-in app [:grid :selected])
                             :page-size 4
@@ -54,7 +55,7 @@
               (dom/a #js {:id "pup2" :onMouseOver #(show-window)} "Mouse Over!"))
 
             (fn [close-window]
-                  (dom/div #js {:className ""}
+                  (dom/div #js {:className "popup-window-sample"}
                     (w/grid (get-in app [:grid :source-simple])
                             (get-in app [:grid :selected])
                             :page-size 4
