@@ -544,8 +544,8 @@
 
                              .om-widgets-popover {
                                position: absolute;
-                               top: 0;
-                               left: -10000px;
+                               top: -100000px;
+                               left: -100000px;
                                z-index: 25001;
                                padding: 1px;
                                text-align: left;
