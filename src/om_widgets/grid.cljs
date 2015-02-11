@@ -41,6 +41,20 @@
       (dom/table #js {:className "om-widgets-table om-widgets-header"}
                  (om/build header (:columns header-definition))))))
 
+(defn build-page-boundaries
+  "Given the pagination information will return where the
+  current page starts and ends, usefull to show this info in labels à la gmail (1-10 of 100)
+
+  Note: This function does not assume 0 indexes, so first page is 1 and so on."
+  [{:keys [current-page page-size total-items]}]
+    (let [end (* current-page page-size)]
+      {:start (if (pos? total-items)
+                (-> (- end page-size) (+ 1))
+                0)
+       :end (if (> end total-items)
+              total-items
+              end)}))
+
 (defn- default-pager
   [pager-definition owner {:keys [language] :as opts}]
   (reify
@@ -48,29 +62,31 @@
     (display-name [_] "GridPager")
 
     om/IRenderState
-    (render-state [this {:keys [current-page max-pages total-rows page-size] :as state}]
-                  (let [page-start-at (if (= 0 current-page) 1 (* current-page page-size))
-                        page-end-at (+ (* current-page page-size) page-size)]
-                    (dom/ul #js {:className "pager"}
-                          ;; previous page
-                          (dom/li #js {:className (when (= 0 current-page) "disabled")}
-                                  (dom/a #js {:onClick #(when (> current-page 0)
-                                                          (put! (:channel state) {:new-page (dec current-page)})
-                                                          false)}
-                                         (translate language :grid.pager/previous-page)))
+    (render-state [this {:keys [current-page max-pages total-rows page-size current-page-total] :as state}]
+      (let [page-info (build-page-boundaries {:current-page (inc current-page)
+                                              :page-size page-size
+                                              :total-items total-rows})]
+        (dom/ul #js {:className "pager"}
+                ;; previous page
+                (dom/li #js {:className (when (= 0 current-page) "disabled")}
+                        (dom/a #js {:onClick #(when (> current-page 0)
+                                                (put! (:channel state) {:new-page (dec current-page)})
+                                                false)}
+                               (translate language :grid.pager/previous-page)))
 
-                          ;; next page
-                          (dom/li #js {:className (when (= current-page max-pages) "disabled")}
-                                  (dom/a #js {:onClick #(when (< current-page max-pages)
-                                                          (put! (:channel state) {:new-page (inc current-page)})
-                                                          false)}
-                                         (translate language :grid.pager/next-page)))
-                          ;; total label
-                          (dom/span #js {:className "pull-right"}
-                                    (u/format (translate language :grid.pager/total-rows)
-                                              page-start-at
-                                              page-end-at
-                                              total-rows)))))))
+                ;; next page
+                (dom/li #js {:className (when (= current-page max-pages) "disabled")}
+                        (dom/a #js {:onClick #(when (< current-page max-pages)
+                                                (put! (:channel state) {:new-page (inc current-page)})
+                                                false)}
+                               (translate language :grid.pager/next-page)))
+
+                ;; total label
+                (dom/span #js {:className "pull-right"}
+                          (u/format (translate language :grid.pager/total-rows)
+                                    (:start page-info)
+                                    (:end page-info)
+                                    total-rows)))))))
 
 (defn- build-row-data [columns row selected-row]
   (let [fields (map #(:field %) columns)]
