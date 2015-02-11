@@ -4,276 +4,16 @@
             [om-widgets.layouts :as layout :include-macros true]
             [om-widgets.core :as w]
             [om-widgets.grid :refer [row-builder]]
-            [examples.basic.modal-example :refer [modal-sample]]))
+            [examples.basic.state-example :as state]
+            [examples.basic.modal-example :refer [modal-example]]
+            [examples.basic.datepicker-example :refer [datepicker-example]]
+            [examples.basic.popup-window-example :refer [popup-window-example]]
+            [examples.basic.radiobutton-example :refer [radiobutton-example]]
+            [examples.basic.grid-example :refer [grid-example grid-custom-row-sample]]
+            [examples.basic.dropdown-example :refer [dropdown-example]]))
 
 
 (enable-console-print!)
-
-(def app-state
-  (atom
-    {:birth-date #inst "1991-01-25"
-     :sex :male
-     :grid {:source-simple [{:name "Seba" :username "kernelp4nic"}
-                            {:name "Guille" :username "guilespi"}
-                            {:name "Fabian" :username "fapenia"}
-                            {:name "Alexis" :username "_axs_"}
-                            {:name "Martin" :username "nartub"}
-                            {:name "Intception" :username "intception"}]
-            :source-custom {:rows [{:name "Seba" :username "kernelp4nic" :row-type :users}
-                                   {:name "Guille" :username "guilespi" :row-type :users}
-                                   {:name "Fabian" :username "fapenia" :row-type :users}
-                                   {:name "Alexis" :username "_axs_" :row-type :users}
-                                   {:name "Martin" :username "nartub" :row-type :users}]}
-            :selected {}
-            :columns [{:caption "Name" :field :name}
-                      {:caption "Username" :field :username}]}
-     :dropdown {:items [{:id :duplicate
-                         :type :entry
-                         :text "Duplicate"
-                         :url "#/item/duplicate/1234"}
-                        {:type :divider}
-                        {:id :analysis
-                         :type :entry
-                         :text "Analysis"
-                         :url "#/item/analysis/1234"}
-                        {:type :divider}
-                        {:id :trash
-                         :type :entry
-                         :text "Trash"
-                         :url "#/item/trash/1234"}]
-                :selected-dropdown :edit}
-     :menu-selected :grid
-     :menu-items [[{:text "Dropdown"
-                    :id :dropdown
-                    :url "#/dropdown"}
-                   {:id :datepicker
-                    :text "Datepicker"
-                    :url "#/datepicker"}
-                   {:id :radiobutton
-                    :text "Radiobutton"
-                    :url "#/radiobutton"}
-                   {:id :modal
-                    :text "Modal"
-                    :url "#/modal"}
-                   ]
-                  [{:text "Grid"
-                    :id :grid-sample
-                    :items [{:id :grid
-                             :type :entry
-                             :text "Grid Simple"
-                             :url "#/grid-simple"}
-                            {:id :grid-custom-row
-                             :type :entry
-                             :text "Grid Row Custom"
-                             }]}]
-                  [{:text "Popup Window"
-                    :id :popup-window
-                    :url "#/popupwindow" }
-                  ]]}))
-
-(defn- datepicker-sample
-  [app owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-                {:hide-dropdown true})
-
-    om/IDisplayName
-    (display-name[_] "DatepickerSample")
-
-    om/IRenderState
-    (render-state [this state]
-                  (dom/div #js {:className "panel panel-default"}
-                           (dom/div #js {:className "panel-heading"} "Datepicker")
-                           (dom/div #js {:className "panel-body"}
-                                    (dom/div #js {:className "well"}
-                                             (w/popover
-                                               (fn [show]
-                                                  (dom/div #js {:className "input-group"}
-                                                            (dom/span #js {:className "input-group-btn"}
-                                                                      (dom/button #js {:className "btn btn-primary pull-right"
-                                                                                      :type "button"
-                                                                                      :id "btn-cal"
-                                                                                      :onClick (fn [e]
-                                                                                                  (show))}
-                                                                                  (dom/span #js {:className "glyphicon glyphicon-calendar"})))
-                                                            (w/textinput app :birth-date {:input-class "form-control"
-                                                                                          :input-format "date"
-
-                                                                                          :placeholder "MM/DD/YYYY"})))
-                                               (fn [close]
-                                                   (w/datepicker app :birth-date ))
-                                               {:for "btn-cal"})))))))
-
-(defn- radiobutton-sample
-  [app owner]
-  (reify
-    om/IInitState
-    (init-state [_]
-                {:hide-dropdown true})
-
-    om/IDisplayName
-    (display-name[_] "RadioButtonSample")
-
-    om/IRenderState
-    (render-state [this state]
-                  (dom/div #js {:className "panel panel-default"}
-                           (dom/div #js {:className "panel-heading"} (str "RadioButton"
-                                                                          " (cursor value "
-                                                                          (get-in app [:sex])
-                                                                          " )"))
-                           (dom/div #js {:className "panel-body"}
-                                    (dom/div #js {:className "well"}
-                                             (dom/div #js {:className "row"}
-                                                      (dom/div #js {:className "col-md-6 col-sm-6"}
-                                                               (w/radiobutton app :sex {:checked-value :male
-                                                                                        :name "options"
-                                                                                        :class-name "some-container-class"
-                                                                                        :label-class "some-label-class"
-                                                                                        :data-toggle "buttons"
-                                                                                        :label " Male"
-                                                                                        :id "male"}))
-                                                      (dom/div #js {:className "col-md-6 col-sm-6"}
-                                                               (w/radiobutton app
-                                                                              :sex
-                                                                              {:checked-value :female
-                                                                               :name "options"
-                                                                               :class-name "some-container-class"
-                                                                               :label-class "some-label-class"
-                                                                               :data-toggle "buttons"
-                                                                               :label " Female"
-                                                                               :id "female"})))))))))
-
-(defn- dropdown-sample
-  [cursor owner]
-  (reify
-    om/IDisplayName
-    (display-name [_] "DropdownSample")
-
-    om/IRenderState
-    (render-state [this state]
-                  (dom/div #js {:className "panel panel-default"}
-                           (dom/div #js {:className "panel-heading"}
-                                    (str "Dropdown (selected cursor value: "
-                                         (get-in cursor [:selected-dropdown])
-                                         " )"))
-                           (dom/div #js {:className "panel-body"}
-                                    (w/dropdown cursor
-                                                {:id :testing
-                                                 :title "Item Actions"
-                                                 :set-path :selected-dropdown
-                                                 :size :sm
-                                                 :items (get-in cursor [:items])}))))))
-
-(defn- grid-sample
-  [app owner]
-  (reify
-    om/IDisplayName
-    (display-name[_] "GridSample")
-
-    om/IRenderState
-    (render-state [this state]
-                  (dom/div #js {:className "panel panel-default"}
-                           (dom/div #js {:className "panel-heading"} (str "Grid"
-                                                                          " (selected cursor value: "
-                                                                          (:name (get-in app [:selected]))
-                                                                          " )"))
-                           (dom/div #js {:className "panel-body"}
-                                    (dom/div #js {:className ""}
-                                             (w/grid (get-in app [:source-simple])
-                                                     (get-in app [:selected])
-                                                     :container-class-name ""
-                                                     :page-size 2
-                                                     :header {:type :default
-                                                              :columns (get-in app [:columns])})))))))
-
-(defmethod row-builder :users
-  [row _ _]
-  (reify
-    om/IDisplayName
-    (display-name[_] "DefaultRow")
-    om/IRenderState
-    (render-state [this state]
-                  (dom/div nil
-                           (dom/label #js {:className ""} (str (:name row) " / " (:username row)))
-                           (dom/a #js {:href (str "http://twitter.com/" (:username row))
-                                       :className "pull-right"} "Twitter profile")))))
-
-(defn- grid-custom-row-sample
-  [app owner]
-  (reify
-    om/IDisplayName
-    (display-name[_] "GridCustomRowSample")
-
-    om/IRenderState
-    (render-state [this state]
-                  (dom/div #js {:className "panel panel-default"}
-                           (dom/div #js {:className "panel-heading"} "Grid Custom Row")
-                           (dom/div #js {:className "panel-body"}
-                                    (dom/div #js {:className ""}
-                                             (w/grid (get-in app [:source-custom :rows])
-                                                     (get-in app [:selected])
-                                                     :header {:type :none})))))))
-
-(defn- popup-window-sample
-  [app owner]
-  (reify
-    om/IDisplayName
-    (display-name [_] "Popup Window Sample")
-    om/IRenderState
-    (render-state [this state]
-      (dom/div #js {:className "panel panel-default"}
-        (dom/div #js {:className "panel-heading"} "Popup window sample")
-        (dom/div #js {:className "panel-body" :style #js {:overflow "scroll" :height "600"}}
-          (w/grid (get-in app [:grid :source-simple])
-                  (get-in app [:grid :selected])
-                  :container-class-name ""
-                  :header {:type :default
-                          :columns (get-in app [:grid :columns])})
-
-          (w/popover "Popover con varias palabras que pueden afectarse por word wrapping!"
-            (fn [close-window]
-                  (dom/div #js {:className ""}
-                    (w/grid (get-in app [:grid :source-simple])
-                            (get-in app [:grid :selected])
-                            :page-size 4
-                            :container-class-name ""
-                            :header {:type :default
-                                    :columns (get-in app [:grid :columns])})))
-            {:prefered-side :bottom})
-
-           (w/popover
-            (fn [show-window]
-              (dom/button #js {:id "pup" :onClick #(show-window)} "Popup"))
-
-            (fn [close-window]
-                  (dom/div #js {:className ""}
-                    (w/grid (get-in app [:grid :source-simple])
-                            (get-in app [:grid :selected])
-                            :page-size 4
-                            :container-class-name ""
-                            :header {:type :default
-                                    :columns (get-in app [:grid :columns])})
-                    (dom/button #js {:onClick #(close-window)} "Close")))
-            {:prefered-side :bottom
-              :for "pup"} )
-
-           (w/popover
-            (fn [show-window]
-              (dom/a #js {:id "pup2" :onMouseOver #(show-window)} "Mouse Over!"))
-
-            (fn [close-window]
-                  (dom/div #js {:className ""}
-                    (w/grid (get-in app [:grid :source-simple])
-                            (get-in app [:grid :selected])
-                            :page-size 4
-                            :container-class-name ""
-                            :header {:type :default
-                                    :columns (get-in app [:grid :columns])})
-                    (dom/button #js {:onClick #(close-window)} "Close")))
-            {:prefered-side :bottom
-              :for "pup2"}))))))
-
 
 (defn my-app [app owner]
   (reify
@@ -292,15 +32,15 @@
                                       :brand-title "Navbar Sample"})
 
                            (condp = (:menu-selected app)
-                             :dropdown (om/build dropdown-sample (get-in app [:dropdown]))
-                             :datepicker (om/build datepicker-sample app)
-                             :modal (om/build modal-sample app)
-                             :grid (om/build grid-sample (get-in app [:grid]))
+                             :dropdown (om/build dropdown-example (get-in app [:dropdown]))
+                             :datepicker (om/build datepicker-example app)
+                             :modal (om/build modal-example app)
+                             :grid (om/build grid-example (get-in app [:grid]))
                              :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
-                             :radiobutton (om/build radiobutton-sample app)
-                             :popup-window (om/build popup-window-sample app))))))
+                             :radiobutton (om/build radiobutton-example app)
+                             :popup-window (om/build popup-window-example app))))))
 
 (om/root
   my-app
-  app-state
+  state/app-state
   {:target (.getElementById js/document "app")})

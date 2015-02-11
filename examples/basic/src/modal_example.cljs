@@ -40,7 +40,7 @@
                                                 :class-name "btn btn-primary"})]))
                         :class-name "modal-lg"}))
 
-(defn modal-sample
+(defn modal-example
   [cursor owner opts]
   (reify
     om/IWillMount
