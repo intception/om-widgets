@@ -156,7 +156,7 @@
       om/IRenderState
       (render-state [this {:keys [label side has-arrow content-fn] :as state}]
         (html
-        [:div {:class (str "om-widgets-popover " (name side))}
+        [:div {:class (str (:class-name opts) " om-widgets-popover " (name side))}
           (when (:has-arrow opts)
             [:span {:class "arrow"}])
           (content-fn (:close-fn opts))])))))
