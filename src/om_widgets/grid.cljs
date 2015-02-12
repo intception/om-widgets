@@ -68,15 +68,16 @@
                                               :total-items total-rows})]
         (dom/ul #js {:className "pager"}
                 ;; previous page
-                (dom/li #js {:className (when (= 0 current-page) "disabled")}
-                        (dom/a #js {:onClick #(when (> current-page 0)
+                (dom/li nil
+                        (dom/a #js {:className (when (= 0 current-page) "disabled")
+                                    :onClick #(when (> current-page 0)
                                                 (put! (:channel state) {:new-page (dec current-page)})
                                                 false)}
                                (translate language :grid.pager/previous-page)))
-
                 ;; next page
-                (dom/li #js {:className (when (= current-page max-pages) "disabled")}
-                        (dom/a #js {:onClick #(when (< current-page max-pages)
+                (dom/li nil
+                        (dom/a #js {:className (when (= current-page max-pages) "disabled")
+                                    :onClick #(when (< current-page max-pages)
                                                 (put! (:channel state) {:new-page (inc current-page)})
                                                 false)}
                                (translate language :grid.pager/next-page)))

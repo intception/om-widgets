@@ -208,7 +208,7 @@
                                  display: inline-block;
                                  padding: 5px 14px;
                                }
-                               .om-widgets-grid .pager li.disabled {
+                               .om-widgets-grid .pager a.disabled {
                                    color: #777;
                                    cursor: not-allowed;
                                }
