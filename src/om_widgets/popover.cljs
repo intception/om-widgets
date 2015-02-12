@@ -67,94 +67,99 @@
 
 (defn popover-container
   [_ owner opts]
-  (reify
-    om/IInitState
-    (init-state [this]
-      {:channel (chan)
-       :side :bottom})
-    om/IDidMount
-    (did-mount [this]
-      (let [node (om.core/get-node owner)
-            align (or (:align opts) 0.5)
-            parent (dommy/remove! node)
-            target (if (:for opts)
-                     (or (sel1 (keyword (str "#" (:for opts)))) parent)
-                     parent)
-            arrow (sel1 node ".arrow")]
-        (dommy/append! (app-root) node)
-        (om/update-state! owner (fn [st]
-                                  (merge st {:node node
-                                             :parent parent})))
-        (go-loop []
-          (let [[message _] (alts! [(om/get-state owner :channel) (timeout 50)])]
-            (when-not (= message :quit)
-              (let [ofs-max (fn [o m]
-                              (if (<  o 0)
-                                (max o (- m))
-                                (min o m)))
-                    wz (window-size)
-                    trect (first (client-rects target));;(dommy/bounding-client-rect target)
+  (let [update-position #(put! (om/get-state owner :channel) :update)]
+    (reify
+      om/IInitState
+      (init-state [this]
+        {:channel (chan)
+        :side :bottom})
+      om/IDidMount
+      (did-mount [this]
+        (let [node (om.core/get-node owner)
+              align (or (:align opts) 0.5)
+              parent (dommy/remove! node)
+              target (if (:for opts)
+                      (or (sel1 (keyword (str "#" (:for opts)))) parent)
+                      parent)
+              arrow (sel1 node ".arrow")]
+          (dommy/append! (app-root) node)
+          (om/update-state! owner (fn [st]
+                                    (merge st {:node node
+                                              :parent parent})))
+          (go-loop []
+            (let [message (<! (om/get-state owner :channel))]
+              (when-not (= message :quit)
+                (let [ofs-max (fn [o m]
+                                (if (<  o 0)
+                                  (max o (- m))
+                                  (min o m)))
+                      wz (window-size)
+                      trect (first (client-rects target));;(dommy/bounding-client-rect target)
 
-                    target-pos (merge trect
-                                      {:top (+ (:top trect) (:scroll-y wz))
-                                       :bottom (+ (:bottom trect) (:scroll-y wz))
-                                       :left (+ (:left trect) (:scroll-x wz))
-                                       :right (+ (:right trect) (:scroll-x wz))})
-                    bounding-rect (dommy/bounding-client-rect node)
+                      target-pos (merge trect
+                                        {:top (+ (:top trect) (:scroll-y wz))
+                                        :bottom (+ (:bottom trect) (:scroll-y wz))
+                                        :left (+ (:left trect) (:scroll-x wz))
+                                        :right (+ (:right trect) (:scroll-x wz))})
+                      bounding-rect (dommy/bounding-client-rect node)
 
-                    side (condp =  (om/get-state owner :prefered-side)
-                           :top    (if (>= (- (:top target-pos) (+ (:height bounding-rect) 20)) (:scroll-y wz)) :top :bottom)
-                           :bottom (if (<= (+ (:bottom target-pos) (:height bounding-rect)) (+ (:scroll-y wz) (- (:height wz) 20))) :bottom :top)
-                           :right  (if (<= (+ (:right  target-pos) (:width  bounding-rect)) (+ (:scroll-x wz) (- (:width  wz) 20))) :right  :left)
-                           :left   (if (>= (- (:left target-pos) (+ (:width bounding-rect) 20)) (:scroll-x wz)) :left :right))
-                    y (condp = side
-                        :top    (- (:top target-pos) (:height bounding-rect))
-                        :bottom (:bottom target-pos)
-                        :right  (- (+ (:top target-pos) (* (:height target-pos) align))
-                                   (* (:height bounding-rect) align))
-                        :left   (- (+ (:top target-pos) (* (:height target-pos) align))
-                                   (* (:height bounding-rect) align)))
+                      side (condp =  (om/get-state owner :prefered-side)
+                            :top    (if (>= (- (:top target-pos) (+ (:height bounding-rect) 20)) (:scroll-y wz)) :top :bottom)
+                            :bottom (if (<= (+ (:bottom target-pos) (:height bounding-rect)) (+ (:scroll-y wz) (- (:height wz) 20))) :bottom :top)
+                            :right  (if (<= (+ (:right  target-pos) (:width  bounding-rect)) (+ (:scroll-x wz) (- (:width  wz) 20))) :right  :left)
+                            :left   (if (>= (- (:left target-pos) (+ (:width bounding-rect) 20)) (:scroll-x wz)) :left :right))
+                      y (condp = side
+                          :top    (- (:top target-pos) (:height bounding-rect))
+                          :bottom (:bottom target-pos)
+                          :right  (- (+ (:top target-pos) (* (:height target-pos) align))
+                                    (* (:height bounding-rect) align))
+                          :left   (- (+ (:top target-pos) (* (:height target-pos) align))
+                                    (* (:height bounding-rect) align)))
 
-                    x (condp = side
-                        :top    (- (+ (:left target-pos) (* (:width target-pos) align))
-                                   (* (:width bounding-rect) align))
-                        :bottom (- (+ (:left target-pos) (* (:width target-pos) align))
-                                   (* (:width bounding-rect) align))
-                        :right  (:right target-pos)
-                        :left   (- (:left target-pos) (:width bounding-rect)))
-                    offset-left (ofs-max (if (contains? #{:top :bottom} side)
-                                           (cond (< x (:scroll-x wz)) (- (:scroll-x wz) x)
-                                                 (> (+ x (:width bounding-rect)) (+ (:width wz) (:scroll-x wz))) (-  (+ (:width wz) (:scroll-x wz)) (+ x (:width bounding-rect)))
-                                                 :else 0)
-                                           0) (- (/ (:width bounding-rect) 2) 20))
-                    arrow-left (* 100 (- align (/ (- offset-left (arrow-offset-align 14 -14 align)) (:width bounding-rect))))
+                      x (condp = side
+                          :top    (- (+ (:left target-pos) (* (:width target-pos) align))
+                                    (* (:width bounding-rect) align))
+                          :bottom (- (+ (:left target-pos) (* (:width target-pos) align))
+                                    (* (:width bounding-rect) align))
+                          :right  (:right target-pos)
+                          :left   (- (:left target-pos) (:width bounding-rect)))
+                      offset-left (ofs-max (if (contains? #{:top :bottom} side)
+                                            (cond (< x (:scroll-x wz)) (- (:scroll-x wz) x)
+                                                  (> (+ x (:width bounding-rect)) (+ (:width wz) (:scroll-x wz))) (-  (+ (:width wz) (:scroll-x wz)) (+ x (:width bounding-rect)))
+                                                  :else 0)
+                                            0) (- (/ (:width bounding-rect) 2) 20))
+                      arrow-left (* 100 (- align (/ (- offset-left (arrow-offset-align 14 -14 align)) (:width bounding-rect))))
 
-                    offset-top (ofs-max (if (contains? #{:left :right} side)
-                                          (cond (< y (:scroll-y wz)) (- (:scroll-y wz) y)
-                                                (> (+ y (:height bounding-rect)) (+ (:height wz) (:scroll-y wz))) (-  (+ (:height wz) (:scroll-y wz)) (+ y (:height bounding-rect)))
-                                                :else 0)
-                                          0) (- (/ (:height bounding-rect) 2) 20))
-                    arrow-top (* 100 (- align (/ (- offset-top (arrow-offset-align 14 -14 align))(:height bounding-rect))))]
-                (if-not (= (om/get-state owner :side) side)
-                  (om/set-state! owner :side side))
-                (dommy/set-px! node :top (+ y offset-top) :left (+ x offset-left))
-                (when arrow
-                  (if (contains? #{:top :bottom} side)
-                    (dommy/set-style! arrow :left (str arrow-left "%"))
-                    (dommy/set-style! arrow :top (str arrow-top "%"))))
-                (recur)))))))
-    om/IWillUnmount
-    (will-unmount [this]
-      (dommy/remove! (om/get-state owner :node))
-      (dommy/append! (om/get-state owner :parent) (om/get-state owner :node))
-      (put! (om/get-state owner :channel) :quit))
-    om/IRenderState
-    (render-state [this {:keys [label side has-arrow content-fn] :as state}]
-      (html
-       [:div {:class (str "om-widgets-popover " (name side))}
-        (when (:has-arrow opts)
-          [:span {:class "arrow"}])
-        (content-fn (:close-fn opts))]))))
+                      offset-top (ofs-max (if (contains? #{:left :right} side)
+                                            (cond (< y (:scroll-y wz)) (- (:scroll-y wz) y)
+                                                  (> (+ y (:height bounding-rect)) (+ (:height wz) (:scroll-y wz))) (-  (+ (:height wz) (:scroll-y wz)) (+ y (:height bounding-rect)))
+                                                  :else 0)
+                                            0) (- (/ (:height bounding-rect) 2) 20))
+                      arrow-top (* 100 (- align (/ (- offset-top (arrow-offset-align 14 -14 align))(:height bounding-rect))))]
+                  (if-not (= (om/get-state owner :side) side)
+                    (om/set-state! owner :side side))
+                  (dommy/set-px! node :top (+ y offset-top) :left (+ x offset-left))
+                  (when arrow
+                    (if (contains? #{:top :bottom} side)
+                      (dommy/set-style! arrow :left (str arrow-left "%"))
+                      (dommy/set-style! arrow :top (str arrow-top "%"))))
+                  (recur)))))
+                (dommy/listen! js/window :resize update-position)
+                (put! (om/get-state owner :channel) :update)
+          ))
+      om/IWillUnmount
+      (will-unmount [this]
+        (dommy/remove! (om/get-state owner :node))
+        (dommy/append! (om/get-state owner :parent) (om/get-state owner :node))
+        (dommy/unlisten! js/window :resize update-position)
+        (put! (om/get-state owner :channel) :quit))
+      om/IRenderState
+      (render-state [this {:keys [label side has-arrow content-fn] :as state}]
+        (html
+        [:div {:class (str "om-widgets-popover " (name side))}
+          (when (:has-arrow opts)
+            [:span {:class "arrow"}])
+          (content-fn (:close-fn opts))])))))
 
 (defn popover-component
   [_ owner opts]
