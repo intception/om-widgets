@@ -1,4 +1,4 @@
-(defproject org.clojars.intception/om-widgets "0.1.19"
+(defproject org.clojars.intception/om-widgets "0.1.20"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
 

@@ -154,9 +154,12 @@
         (dommy/unlisten! js/window :resize update-position)
         (put! (om/get-state owner :channel) :quit))
       om/IRenderState
-      (render-state [this {:keys [label side has-arrow content-fn] :as state}]
+      (render-state [this {:keys [label side has-arrow content-fn mouse-down] :as state}]
         (html
         [:div {:class (str (:class-name opts) " om-widgets-popover " (name side))}
+          (when (:mouse-down opts)
+            (om/build popover-overlay nil {:state {:mouse-down (:mouse-down opts)}}))
+
           (when (:has-arrow opts)
             [:span {:class "arrow"}])
           (content-fn (:close-fn opts))])))))
@@ -170,12 +173,12 @@
        [:div
         (when visible
           (dom/div nil
-                   (om/build popover-overlay nil {:state {:mouse-down #(om/set-state! owner :visible false)}})
                    (om/build popover-container nil {:state {:content-fn popup-content-fn
                                                             :prefered-side prefered-side}
                                                     :opts {:for (:for opts)
                                                            :align (:align opts)
                                                            :has-arrow (:has-arrow opts)
+                                                           :mouse-down #(om/set-state! owner :visible false)
                                                            :close-fn #(go
                                                                         (<! (timeout 10))
                                                                         (om/set-state! owner :visible false))}})))
@@ -205,10 +208,10 @@
                                        (om/set-state! owner :visible true)
                                        false)}
                       label
-                      (when visible (om/build popover-overlay nil {:state {:mouse-down #(om/set-state! owner :visible false)}}))
                       (when visible (om/build popover-container nil {:state {:content-fn body :prefered-side prefered-side}
                                                                      :opts {:align (:align opts)
                                                                             :has-arrow (:has-arrow opts)
+                                                                            :mouse-down #(om/set-state! owner :visible false)
                                                                             :close-fn #(go
                                                                                          (<! (timeout 10))
                                                                                          (om/set-state! owner :visible false))}})))))))
