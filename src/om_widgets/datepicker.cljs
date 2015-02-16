@@ -109,7 +109,7 @@
     (display-name [_] "DatepickerDay")
     om/IRenderState
     (render-state [this {:keys [day date path onChange] :as state}]
-      (dom/td #js {:className (build-day-class-name day (utils/om-get app [path]))
+      (dom/td #js {:className (build-day-class-name day date)
                    :data-belongs-to-month (:belongs-to-month day)
                    :onClick (fn [e]
                               (let [el (.. e -target)
@@ -184,7 +184,7 @@
                                              (apply dom/tr nil
                                                     (om/build-all day-header days-short))
                                              (om/build weeks-component app {:state {:path path :date date :onChange onChange}}))))))))
-
+(enable-console-print!)
 (defn datepicker
   "Datepicker public API
   the cursor at the current path is updated when
