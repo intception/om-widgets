@@ -1,6 +1,7 @@
 (ns examples.basic.core
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            [figwheel.client :as fw]
             [om-widgets.layouts :as layout :include-macros true]
             [om-widgets.core :as w]
             [om-widgets.grid :refer [row-builder]]
@@ -9,7 +10,7 @@
             [examples.basic.datepicker-example :refer [datepicker-example]]
             [examples.basic.popup-window-example :refer [popup-window-example]]
             [examples.basic.radiobutton-example :refer [radiobutton-example]]
-            [examples.basic.grid-example :refer [grid-example grid-custom-row-sample]]
+            [examples.basic.grid-example :refer [grid-example grid-link-example grid-custom-row-sample]]
             [examples.basic.dropdown-example :refer [dropdown-example]]))
 
 
@@ -36,11 +37,20 @@
                              :datepicker (om/build datepicker-example app)
                              :modal (om/build modal-example app)
                              :grid (om/build grid-example (get-in app [:grid]))
+                             :grid-link (om/build grid-link-example (get-in app [:grid]))
                              :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
                              :radiobutton (om/build radiobutton-example app)
                              :popup-window (om/build popup-window-example app))))))
 
-(om/root
-  my-app
-  state/app-state
-  {:target (.getElementById js/document "app")})
+(defn ^:export examples
+  []
+  (om/root
+    my-app
+    state/app-state
+    {:target (.getElementById js/document "app")}))
+
+(fw/watch-and-reload
+ :websocket-url "ws://localhost:3449/figwheel-ws"
+ :jsload-callback
+ (fn []
+   (examples)))
