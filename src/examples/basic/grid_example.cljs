@@ -1,7 +1,7 @@
 (ns examples.basic.grid-example
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [om-widgets.grid :refer [row-builder cell-builder]]
+            [om-widgets.grid :refer [row-builder]]
             [sablono.core :as html :refer-macros [html]]
             [om-widgets.core :as w]))
 
@@ -38,22 +38,34 @@
     (render-state [this state]
       (dom/div #js {:className "panel panel-default"}
                (dom/div #js {:className "panel-heading"}
-                        (str "Grid with link (selected cursor value: " (:name (get-in app [:selected])) " )"))
+                        (str "Grid with custom cells (selected cursor value: " (:name (get-in app [:selected])) " )"))
                (dom/div #js {:className "panel-body"}
                         (dom/div #js {:className ""}
-                                 (w/grid (get-in app [:source-simple])
+                                 (w/grid (get-in app [:source-custom-cell])
                                          (get-in app [:selected])
                                          :container-class-name ""
                                          :page-size 2
                                          :header {:type :default
                                                   :columns [{:caption "Name" :field :name}
+
                                                             {:caption "Username"
                                                              :field :username
                                                              :data-format :dom
                                                              :fn (fn [[id content]]
                                                                    (html
                                                                      [:a {:href (str "http://github.com/" content)}
-                                                                      content]))}]})))))))
+                                                                      content]))}
+
+                                                            {:caption "Registered Date"
+                                                             :field :registered-date
+                                                             :data-format :date
+                                                             :date-formatter "yyyy/MM/dd"}
+
+                                                            {:caption "Status"
+                                                             :field :status
+                                                             :data-format :keyword
+                                                             :options {:active "Active"
+                                                                       :disabled "Disabled"}}]})))))))
 
 
 (defmethod row-builder :users

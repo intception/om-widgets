@@ -12,3 +12,5 @@ examples/navbar/main.js
 examples/basic/main.js
 .lein-repl-history
 .lein-failures
+resources/public/examples/basic/main.js
+figwheel_server.log

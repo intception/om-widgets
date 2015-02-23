@@ -2,6 +2,9 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            [om-widgets.utils :as utils]
+            [cljs-time.core :as time]
+            [cljs-time.format :as timef]
             [schema.core :as s :include-macros true]
             [cljs.core.async :refer [put! chan <! alts! timeout close!]]
             [om-widgets.translations :refer [translate]]
@@ -29,10 +32,6 @@
    (dom/thead #js {:className "om-widgets-title-header-row"}
               (apply dom/tr nil
                      (om/build-all title-header-cell columns)))))
-
-(defn- data-cell [text]
-  (om/component
-   (dom/td #js {:className "om-widgets-data-cell"} text)))
 
 (defn- default-header [header-definition owner opts]
   (reify
@@ -65,11 +64,13 @@
     (render-state [this {:keys [current-page max-pages total-rows page-size current-page-total] :as state}]
       (let [page-info (build-page-boundaries {:current-page (inc current-page)
                                               :page-size page-size
-                                              :total-items total-rows})]
+                                              :total-items total-rows})
+            previous-disabled? (or (= 0 current-page)
+                                   (= 0 current-page-total))]
         (dom/ul #js {:className "pager"}
                 ;; previous page
                 (dom/li nil
-                        (dom/a #js {:className (when (= 0 current-page) "disabled")
+                        (dom/a #js {:className (when previous-disabled? "disabled")
                                     :onClick #(when (> current-page 0)
                                                 (put! (:channel state) {:new-page (dec current-page)})
                                                 false)}
@@ -89,13 +90,6 @@
                                     (:end page-info)
                                     total-rows)))))))
 
-(defn- build-row-data [columns row selected-row]
-  (let [fields (map #(:field %) columns)]
-    (merge {} {:projection (select-keys row fields)
-               :class (str "om-widgets-default-row"
-                           (when (= selected-row row)
-                             " success"))})))
-
 
 ;; ---------------------------------------------------------------------
 ;; Grid Header Multimethod
@@ -112,6 +106,33 @@
 
 (defmethod grid-header :none [_ _ _])
 
+;; ---------------------------------------------------------------------
+;; cell-builder multimethod, if :data-format key is present inside
+;; column definition, we can format the data to display correctly.
+
+(defmulti cell-builder (fn [[id content] owner opts]
+                         (:data-format (:column-def opts))))
+
+(defmethod cell-builder :date [[id content] owner opts]
+  (om/component
+   (dom/td #js {:className "om-widgets-data-cell"}
+           (timef/unparse (timef/formatter (:date-formatter (:column-def opts)))
+                          (time/date-time content)))))
+
+(defmethod cell-builder :keyword [[id content] owner opts]
+  (om/component
+   (dom/td #js {:className "om-widgets-data-cell"}
+           (or (get (:options (:column-def opts)) content)
+               content))))
+
+(defmethod cell-builder :dom [row owner opts]
+  (om/component
+   (dom/td #js {:className "om-widgets-data-cell"}
+           ((:fn (:column-def opts)) row))))
+
+(defmethod cell-builder :default [[id content] owner opts]
+  (om/component
+   (dom/td #js {:className "om-widgets-data-cell"} content)))
 
 ;; ---------------------------------------------------------------------
 ;; Row Builder Multimethod
@@ -130,12 +151,15 @@
 
     om/IRenderState
     (render-state [this state]
-      (let [row-data (build-row-data (:columns opts) row (:target opts))]
-        (apply dom/tr #js {:className (:class row-data)
+        (apply dom/tr #js {:className (str "om-widgets-default-row"
+                                           (when (= row (:target opts)) " success"))
                            :onMouseDown #(put! (:channel state) {:row (if (satisfies? IDeref row)
                                                                         @row
                                                                         row)})}
-               (om/build-all data-cell (vals (:projection row-data))))))))
+               (map (fn [cell]
+                      (let [column-def (first (filter #(= (:field %) (first cell)) (:columns opts)))]
+                        (om/build cell-builder cell {:opts {:column-def column-def}})))
+                    row)))))
 
 ;; ---------------------------------------------------------------------
 ;; Grid Pager Multimethod
@@ -257,7 +281,12 @@
 (def HeaderSchema
   {:type (s/enum :default :none)
    (s/optional-key :columns) [{:caption s/Str
-                               :field s/Keyword}]})
+                               :field s/Keyword
+                               :data-format (s/enum :default :date :dom :keyword)
+                               ;; for dom format
+                               (s/optional-key :fn) (s/pred fn?)
+                               ;; for keywords
+                               (s/optional-key :options) (s/pred coll?)}]})
 
 (def GridSourceSchema
   {:rows [{s/Keyword s/Any}]

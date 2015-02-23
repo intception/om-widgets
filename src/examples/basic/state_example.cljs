@@ -12,6 +12,15 @@
                             {:name "Martin" :username "nartub"}
                             {:name "Intception" :username "intception"}]
 
+            :source-custom-cell [{:name "Seba"
+                                  :username "kernelp4nic"
+                                  :registered-date #inst "2015-01-25"
+                                  :status :active}
+                                 {:name "Guille"
+                                  :username "guilespi"
+                                  :registered-date #inst "2014-01-25"
+                                  :status :disabled}]
+
             :source-custom {:rows [{:name "Seba" :username "kernelp4nic" :row-type :users}
                                    {:name "Guille" :username "guilespi" :row-type :users}
                                    {:name "Fabian" :username "fapenia" :row-type :users}
@@ -19,8 +28,7 @@
                                    {:name "Martin" :username "nartub" :row-type :users}]}
             :selected {}
             :columns [{:caption "Name" :field :name}
-                      {:caption "Username" :field :username}]
-            }
+                      {:caption "Username" :field :username}]}
      :dropdown {:items [{:id :duplicate
                          :type :entry
                          :text "Duplicate"
@@ -48,8 +56,7 @@
                     :url "#/radiobutton"}
                    {:id :modal
                     :text "Modal"
-                    :url "#/modal"}
-                   ]
+                    :url "#/modal"}]
                   [{:text "Grid"
                     :id :grid-sample
                     :items [{:id :grid
@@ -58,13 +65,10 @@
                              :url "#/grid-simple"}
                             {:id :grid-link
                              :type :entry
-                             :text "Grid With link"
-                             }
+                             :text "Grid With Custom Cells"}
                             {:id :grid-custom-row
                              :type :entry
-                             :text "Grid Row Custom"
-                             }]}]
+                             :text "Grid Row Custom"}]}]
                   [{:text "Popup Window"
                     :id :popup-window
-                    :url "#/popupwindow" }
-                   ]]}))
+                    :url "#/popupwindow"}]]}))
