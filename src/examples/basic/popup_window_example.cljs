@@ -32,6 +32,7 @@
                             :header {:type :default
                                     :columns (get-in app [:grid :columns])})))
             {:prefered-side :bottom
+             :popover-class "coso0"
              :align 0})
 
            (w/popover
@@ -48,6 +49,7 @@
                                     :columns (get-in app [:grid :columns])})
                     (dom/button #js {:onClick #(close-window)} "Close")))
             {:prefered-side :bottom
+              :popover-class "coso1"
               :for "pup"} )
 
            (w/popover
@@ -64,4 +66,5 @@
                                     :columns (get-in app [:grid :columns])})
                     (dom/button #js {:onClick #(close-window)} "Close")))
             {:prefered-side :bottom
+              :popover-class "coso2"
               :for "pup2"}))))))

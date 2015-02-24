@@ -156,7 +156,7 @@
       om/IRenderState
       (render-state [this {:keys [label side has-arrow content-fn mouse-down] :as state}]
         (html
-        [:div {:class (str (:class-name opts) " om-widgets-popover " (name side))}
+        [:div {:class (str  "om-widgets-popover " (name side) " " (:popover-class opts))}
           (when (:mouse-down opts)
             (om/build popover-overlay nil {:state {:mouse-down (:mouse-down opts)}}))
 
@@ -179,6 +179,7 @@
                                                            :align (:align opts)
                                                            :has-arrow (:has-arrow opts)
                                                            :mouse-down #(om/set-state! owner :visible false)
+                                                           :popover-class (:popover-class opts)
                                                            :close-fn #(go
                                                                         (<! (timeout 10))
                                                                         (om/set-state! owner :visible false))}})))
@@ -212,6 +213,7 @@
                                                                      :opts {:align (:align opts)
                                                                             :has-arrow (:has-arrow opts)
                                                                             :mouse-down #(om/set-state! owner :visible false)
+                                                                            :popover-class (:popover-class opts)
                                                                             :close-fn #(go
                                                                                          (<! (timeout 10))
                                                                                          (om/set-state! owner :visible false))}})))))))
@@ -233,9 +235,11 @@
                                  for
                                  prefered-side
                                  has-arrow
+                                 popover-class
                                  align]
                           :or {class-name "om-widgets-popover-button"
                                prefered-side :bottom
+                               popover-class ""
                                has-arrow true
                                align 0.5}}]
   (cond
@@ -245,6 +249,7 @@
                                              :prefered-side prefered-side}
                                      :opts {:for for
                                             :has-arrow has-arrow
+                                            :popover-class popover-class
                                             :align align}})
     :else
     (om/build labeled-popover-component nil {:state {:label front-face
@@ -255,5 +260,6 @@
                                                      :prefered-side prefered-side
                                                      :body popup-body}
                                              :opts {:align align
+                                                    :popover-class popover-class
                                                     :has-arrow has-arrow}})))
 
