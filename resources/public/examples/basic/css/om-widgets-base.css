@@ -3,20 +3,20 @@
     left:0px;
     top:0px;
     z-index:1000;
-    background:gray;
+    background:black;
     height:100%;
     width:100%;
     opacity:0.2;
     /* IE 8 */
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
     /* IE 5-7 */
-    filter: alpha(opacity=20);
+    filter: alpha(opacity=50);
     /* Netscape */
-    -moz-opacity: 0.2;
+    -moz-opacity: 0.5;
     /* Safari 1.x */
-    -khtml-opacity: 0.2;
+    -khtml-opacity: 0.5;
     /* Good browsers */
-    opacity: 0.2;
+    opacity: 0.5;
   }
 .om-widgets-click-handler {
     position:fixed;
@@ -42,7 +42,6 @@
   overflow-y: auto;
   opacity: 1;
   display: block;
-  z-index: 10000 !important;
   position: fixed;
   top: 0;
   right: 0;
@@ -66,6 +65,11 @@
     position: relative;
     margin: 30px auto;
     width:600px;
+  }
+}
+@media (min-width: 992px){
+  .om-widgets-modal-dialog {
+    width:900px;
   }
 }
 
@@ -510,7 +514,7 @@ label.om-widgets-control-label {
   left:0px;
   top:0px;
   z-index:25000;
-  background:gray;
+  background:black;
   height:100%;
   width:100%;
   opacity:0;
