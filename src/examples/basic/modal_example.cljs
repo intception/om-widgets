@@ -8,23 +8,13 @@
             [om-widgets.core :as w]))
 
 
-(def ESC 27)
-
-(defn key-event->keycode [e] (.-keyCode e))
-(def legal-key #{ESC})
-
-(defn handle-keydown [e owner]
-  (let [k (key-event->keycode e)]
-    (when (legal-key k)
-      (condp = k
-        ESC (om/set-state! owner :show-modal false)))))
-
 ;; TODO parent is a workarround, normally you should pass a core.async channel
 (defn- modal-component [cursor parent]
   (mb/modal-box cursor {:title (fn [_ target]
                                  (html
                                    [:h4 "Title"]))
                         :close-fn #(om/set-state! parent :show-modal false)
+                        :close-on-esc true
                         :body (fn [_ target]
                                 (html
                                   [:label "This is the modal's body..."]))
@@ -43,13 +33,6 @@
 (defn modal-example
   [cursor owner opts]
   (reify
-    om/IWillMount
-    (will-mount [_] (dommy/listen! (sel1 :body) :keydown #(handle-keydown % owner)))
-
-    om/IWillUnmount
-    (will-unmount [_]
-      (dommy/unlisten! (sel1 :body) :keydown #(handle-keydown % owner)))
-
     om/IDisplayName
     (display-name[_] "ModalSample")
 

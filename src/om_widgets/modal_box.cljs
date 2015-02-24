@@ -9,17 +9,29 @@
 
 (defn create-modal-box
   [target owner]
-  (reify
+  (let [ESC 27
+        handle-keydown #(let [k (.-keyCode %)]
+                           (when (#{ESC} k)
+                             (condp = k
+                               ESC ((om/get-state owner :close-fn)))))
+        handle-click #(println %)]
+    (reify
 
     om/IDidMount
     (did-mount [this]
       (-> (sel1 "body")
-          (dommy/add-class! "om-widgets-modal-is-open")))
+          (dommy/add-class! "om-widgets-modal-is-open"))
+
+      (when (om/get-state owner :close-on-esc)
+        (dommy/listen! (sel1 :body) :keydown handle-keydown)))
 
     om/IWillUnmount
     (will-unmount [this]
       (-> (sel1 "body")
-          (dommy/remove-class! "om-widgets-modal-is-open")))
+          (dommy/remove-class! "om-widgets-modal-is-open"))
+
+      (when (om/get-state owner :close-on-esc)
+        (dommy/unlisten! (sel1 :body) :keydown handle-keydown)))
 
     om/IRenderState
     (render-state [this {:keys [title body footer close-fn class-name] :as state}]
@@ -53,17 +65,18 @@
                                                                   (seq? footer) footer
                                                                   (not= nil footer) [footer]
                                                                   :else nil)]
-                                            (apply dom/div #js {:className "om-widgets-modal-footer"} footer-seq)))))))))
+                                            (apply dom/div #js {:className "om-widgets-modal-footer"} footer-seq))))))))))
 
 
 (defn modal-box
-  "Arguments title,body and footer  [string or vector of components]"
-  [target {:keys [title body footer close-fn class-name]
+  "Arguments title, body and footer  [string or vector of components]"
+  [target {:keys [title body footer close-fn class-name close-on-esc]
            :or {body "Missing body parameter!"}}]
   (om/build create-modal-box target {:state {:body body
                                              :close-fn close-fn
                                              :footer footer
                                              :title title
+                                             :close-on-esc close-on-esc
                                              :class-name class-name}}))
 
 (defn install-modal-box!
@@ -147,7 +160,7 @@
   (let [c (chan)]
     (go
       (let [close-fn (fn [result]
-                       (put! c result))]
+                       (put! c (or result false)))]
         (om/set-state! owner
                        :mb_config
                        {:close-fn close-fn
