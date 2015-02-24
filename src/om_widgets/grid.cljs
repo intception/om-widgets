@@ -109,29 +109,30 @@
 ;; cell-builder multimethod, if :data-format key is present inside
 ;; column definition, we can format the data to display correctly.
 
-(defmulti cell-builder (fn [[id content] owner opts]
+(defmulti cell-builder (fn [cell owner opts]
                          (:data-format (:column-def opts))))
 
-(defmethod cell-builder :date [[id content] owner opts]
+(defmethod cell-builder :date [date owner opts]
   (om/component
    (dom/td #js {:className "om-widgets-data-cell"}
-           (timef/unparse (timef/formatter (:date-formatter (:column-def opts)))
-                          (time/date-time content)))))
+           (timef/unparse (timef/formatter (or (:date-formatter (:column-def opts))
+                                               "yyyy/MM/dd"))
+                          (time/date-time date)))))
 
-(defmethod cell-builder :keyword [[id content] owner opts]
+(defmethod cell-builder :keyword [cell owner opts]
   (om/component
    (dom/td #js {:className "om-widgets-data-cell"}
-           (or (get (:options (:column-def opts)) content)
-               content))))
+           (or (get (:options (:column-def opts)) cell)
+               cell))))
 
-(defmethod cell-builder :dom [row owner opts]
+(defmethod cell-builder :dom [cell owner opts]
   (om/component
    (dom/td #js {:className "om-widgets-data-cell"}
-           ((:fn (:column-def opts)) row))))
+           ((:fn (:column-def opts)) cell (:row opts)))))
 
-(defmethod cell-builder :default [[id content] owner opts]
+(defmethod cell-builder :default [cell owner opts]
   (om/component
-   (dom/td #js {:className "om-widgets-data-cell"} content)))
+   (dom/td #js {:className "om-widgets-data-cell"} cell)))
 
 ;; ---------------------------------------------------------------------
 ;; Row Builder Multimethod
@@ -150,15 +151,14 @@
 
     om/IRenderState
     (render-state [this state]
-        (apply dom/tr #js {:className (str "om-widgets-default-row"
-                                           (when (= row (:target opts)) " success"))
-                           :onMouseDown #(put! (:channel state) {:row (if (satisfies? IDeref row)
-                                                                        @row
-                                                                        row)})}
-               (map (fn [cell]
-                      (let [column-def (first (filter #(= (:field %) (first cell)) (:columns opts)))]
-                        (om/build cell-builder cell {:opts {:column-def column-def}})))
-                    row)))))
+      (apply dom/tr #js {:className (str "om-widgets-default-row"
+                                         (when (= row (:target opts)) " success"))
+                         :onMouseDown #(put! (:channel state) {:row (if (satisfies? IDeref row)
+                                                                      @row
+                                                                      row)})}
+             (map (fn [{:keys [field] :as column}]
+                    (om/build cell-builder (field row) {:opts {:column-def column :row row}}))
+                  (:columns opts))))))
 
 ;; ---------------------------------------------------------------------
 ;; Grid Pager Multimethod
@@ -282,6 +282,8 @@
    (s/optional-key :columns) [{:caption s/Str
                                :field s/Keyword
                                :data-format (s/enum :default :date :dom :keyword)
+                               ;; for date format
+                               :date-formatter s/Str
                                ;; for dom format
                                (s/optional-key :fn) (s/pred fn?)
                                ;; for keywords
