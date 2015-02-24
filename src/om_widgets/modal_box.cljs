@@ -14,12 +14,12 @@
     om/IDidMount
     (did-mount [this]
       (-> (sel1 "body")
-          (dommy/add-class! "modal-is-open")))
+          (dommy/add-class! "om-widgets-modal-is-open")))
 
     om/IWillUnmount
     (will-unmount [this]
       (-> (sel1 "body")
-          (dommy/remove-class! "modal-is-open")))
+          (dommy/remove-class! "om-widgets-modal-is-open")))
 
     om/IRenderState
     (render-state [this {:keys [title body footer close-fn class-name] :as state}]
