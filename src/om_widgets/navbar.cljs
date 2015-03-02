@@ -11,13 +11,13 @@
 ;;                         (dom/span #js {:className "sr-only"} "Toggle navigation")
 ;;                         (dom/span #js {:className "icon-bar"}))
 
-(defn- entry [cursor owner]
+(defn- entry-component [{:keys [cursor entry]} owner]
   (reify
     om/IDisplayName
     (display-name [_] "NavBarEntry")
 
     om/IRenderState
-    (render-state [_ {:keys [entry set-path on-selection]}]
+    (render-state [_ {:keys [set-path on-selection]}]
       (dom/li #js {:className (when (= (get-in cursor [set-path])
                                        (:id entry)) "active")}
               (if (:items entry)
@@ -44,20 +44,20 @@
                        (dom/span #js {:className (:iconClassName entry)})
                        (:text entry)))))))
 
-(defn- navbar-nav [app owner]
+(defn- navbar-nav [{:keys [cursor entries]} owner]
   (reify
     om/IDisplayName
     (display-name [_] "NavBarNav")
 
     om/IRenderState
-    (render-state [this {:keys [navbar set-path on-selection]}]
+    (render-state [this {:keys [set-path on-selection]}]
       (apply dom/ul #js {:className (str "nav navbar-nav"
-                                         (when (:right-position (first navbar))
+                                         (when (:right-position (first entries))
                                            " navbar-right"))}
-             (map #(om/build entry app {:state {:set-path set-path
-                                                :entry %
-                                                :on-selection on-selection}})
-                  navbar)))))
+             (map #(om/build entry-component {:cursor cursor
+                                              :entry %} {:state {:set-path set-path
+                                                                 :on-selection on-selection}})
+                  entries)))))
 
 (defn- nav-header [app owner]
   (reify
@@ -73,25 +73,26 @@
                                     :height (if brand-image-expanded "100%" "")})
                       (str " " brand-title))))))
 
-(defn- navbar-container [app owner]
+(defn navbar-container [cursor owner]
   (reify
     om/IDisplayName
     (display-name [_] "NavBarContainer")
 
     om/IRenderState
-    (render-state [this {:keys [container items brand-image-url brand-title brand-image-expanded set-path on-selection] :as state}]
+    (render-state [this {:keys [container brand-image-url brand-title brand-image-expanded set-path on-selection] :as state}]
       (dom/nav #js {:className (str "navbar navbar-default"
                                     (when (:fixed-top state) " navbar-fixed-top"))}
                (dom/div #js {:className (str "container"
                                              (when (= container :fluid) "-fluid"))}
-                        (om/build nav-header app {:state {:brand-image-url brand-image-url
+                        (om/build nav-header cursor {:state {:brand-image-url brand-image-url
                                                           :brand-image-expanded brand-image-expanded
                                                           :brand-title brand-title}})
                         (apply dom/div #js {:className "navbar-collapse"}
-                               (map #(om/build navbar-nav app {:state {:set-path set-path
-                                                                       :on-selection on-selection
-                                                                       :navbar %}})
-                                    items)))))))
+                               (map #(om/build navbar-nav {:cursor cursor
+                                                           :entries %}
+                                                          {:state {:set-path set-path
+                                                                   :on-selection on-selection}})
+                                    (:menu-items cursor))))))))
 
 
 ;; ---------------------------------------------------------------------
@@ -124,6 +125,6 @@
 ;; Public
 
 (defn navbar
-  [app set-path {:keys [items brand-image-url brand-title on-selection] :as options}]
+  [app set-path {:keys [brand-image-url brand-title on-selection] :as options}]
   (s/validate NavbarSchema options)
   (om/build navbar-container app {:state (merge {:set-path set-path} options)}))
