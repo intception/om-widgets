@@ -28,15 +28,23 @@
                                                                        :scroll-y (.-scrollTop js/document.documentElement)})))
 (defn client-rects
   [el]
-  (let [rs (js->clj (.getClientRects el))]
-    (map (fn [i]
-           (let [r (.item rs i)]
-             {:top (.-top r)
-              :bottom (.-bottom r)
-              :left (.-left r)
-              :right (.-right r)
-              :width (.-width r)
-              :height (.-height r)})) (range (.-length rs)))))
+  (let [rs (.getClientRects el)]
+    (if (not (nil? (.-length rs)))
+      (map (fn [i]
+            (let [r (.item rs i)]
+              {:top (.-top r)
+                :bottom (.-bottom r)
+                :left (.-left r)
+                :right (.-right r)
+                :width (.-width r)
+                :height (.-height r)})) (range (.-length rs)))
+      [{:top (.-top rs)
+        :bottom (.-bottom rs)
+        :left (.-left rs)
+        :right (.-right rs)
+        :width (.-width rs)
+        :height (.-height rs)}])))
+
 
 (defn app-root []
   (sel1 "div [data-reactid=\".0\"]"))
@@ -95,14 +103,12 @@
                                   (min o m)))
                       wz (window-size)
                       trect (first (client-rects target));;(dommy/bounding-client-rect target)
-
                       target-pos (merge trect
                                         {:top (+ (:top trect) (:scroll-y wz))
                                         :bottom (+ (:bottom trect) (:scroll-y wz))
                                         :left (+ (:left trect) (:scroll-x wz))
                                         :right (+ (:right trect) (:scroll-x wz))})
                       bounding-rect (dommy/bounding-client-rect node)
-
                       side (condp =  (om/get-state owner :prefered-side)
                             :top    (if (>= (- (:top target-pos) (+ (:height bounding-rect) 20)) (:scroll-y wz)) :top :bottom)
                             :bottom (if (<= (+ (:bottom target-pos) (:height bounding-rect)) (+ (:scroll-y wz) (- (:height wz) 20))) :bottom :top)
@@ -136,6 +142,7 @@
                                                   :else 0)
                                             0) (- (/ (:height bounding-rect) 2) 20))
                       arrow-top (* 100 (- align (/ (- offset-top (arrow-offset-align 14 -14 align))(:height bounding-rect))))]
+                  (println (+ y offset-top) "  " (+ x offset-left))
                   (if-not (= (om/get-state owner :side) side)
                     (om/set-state! owner :side side))
                   (dommy/set-px! node :top (+ y offset-top) :left (+ x offset-left))
@@ -162,7 +169,8 @@
 
           (when (:has-arrow opts)
             [:span {:class "arrow"}])
-          (content-fn (:close-fn opts))])))))
+          [:div {:class "popover-container"}
+            (content-fn (:close-fn opts))]])))))
 
 (defn popover-component
   [_ owner opts]
