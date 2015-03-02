@@ -142,7 +142,6 @@
                                                   :else 0)
                                             0) (- (/ (:height bounding-rect) 2) 20))
                       arrow-top (* 100 (- align (/ (- offset-top (arrow-offset-align 14 -14 align))(:height bounding-rect))))]
-                  (println (+ y offset-top) "  " (+ x offset-left))
                   (if-not (= (om/get-state owner :side) side)
                     (om/set-state! owner :side side))
                   (dommy/set-px! node :top (+ y offset-top) :left (+ x offset-left))
