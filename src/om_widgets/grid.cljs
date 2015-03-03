@@ -5,6 +5,7 @@
             [om-widgets.utils :as utils]
             [cljs-time.core :as time]
             [cljs-time.format :as timef]
+            [sablono.core :as html :refer-macros [html]]
             [schema.core :as s :include-macros true]
             [cljs.core.async :refer [put! chan <! alts! timeout close!]]
             [om-widgets.translations :refer [translate]]
@@ -23,9 +24,10 @@
 ;; a valid om component and the other one is just a function that makes the build.
 
 
-(defn- title-header-cell [{:keys [caption]}]
+(defn- title-header-cell [{:keys [caption col-span]}]
   (om/component
-   (dom/th #js {} caption)))
+    (html [:th (when col-span {:colSpan col-span})
+           caption])))
 
 (defn- header [columns]
   (om/component
@@ -113,26 +115,42 @@
                          (:data-format (:column-def opts))))
 
 (defmethod cell-builder :date [date owner opts]
-  (om/component
-   (dom/td #js {:className "om-widgets-data-cell"}
-           (timef/unparse (timef/formatter (or (:date-formatter (:column-def opts))
-                                               "yyyy/MM/dd"))
-                          (time/date-time date)))))
+  (let [col-span (:col-span (:column-def opts))
+        date-formatter (:date-formatter (:column-def opts))]
+    (om/component
+      (html
+        [:td (-> {:class "om-widgets-data-cell"}
+                 (merge (when col-span) {:colSpan col-span}))
+         (timef/unparse (timef/formatter (or date-formatter
+                                             "yyyy/MM/dd"))
+                        (time/date-time date))]))))
 
 (defmethod cell-builder :keyword [cell owner opts]
-  (om/component
-   (dom/td #js {:className "om-widgets-data-cell"}
-           (or (get (:options (:column-def opts)) cell)
-               cell))))
+  (let [col-span (:col-span (:column-def opts))
+        options (:options (:column-def opts))]
+    (om/component
+      (html
+        [:td (-> {:class "om-widgets-data-cell"}
+                 (merge (when col-span) {:colSpan col-span}))
+         (or (get options cell)
+             cell)]))))
 
 (defmethod cell-builder :dom [cell owner opts]
-  (om/component
-   (dom/td #js {:className "om-widgets-data-cell"}
-           ((:fn (:column-def opts)) cell (:row opts)))))
+  (let [col-span (:col-span (:column-def opts))
+        content (:fn (:column-def opts))]
+    (om/component
+    (html
+      [:td (-> {:class "om-widgets-data-cell"}
+               (merge (when col-span) {:colSpan col-span}))
+       (content cell (:row opts))]))))
 
 (defmethod cell-builder :default [cell owner opts]
-  (om/component
-   (dom/td #js {:className "om-widgets-data-cell"} cell)))
+  (let [col-span (:col-span (:column-def opts))]
+    (om/component
+      (html
+        [:td (-> {:class "om-widgets-data-cell"}
+                 (merge (when col-span) {:colSpan col-span}))
+         cell]))))
 
 ;; ---------------------------------------------------------------------
 ;; Row Builder Multimethod
@@ -153,9 +171,11 @@
     (render-state [this state]
       (apply dom/tr #js {:className (str "om-widgets-default-row"
                                          (when (= row (:target opts)) " success"))
-                         :onMouseDown #(put! (:channel state) {:row (if (satisfies? IDeref row)
-                                                                      @row
-                                                                      row)})}
+                         :onMouseDown #(let [props (om/get-props owner)]
+                                         (put! (:channel state)
+                                               {:row (if (satisfies? IDeref props)
+                                                       @props
+                                                       props)}))}
              (map (fn [{:keys [field] :as column}]
                     (om/build cell-builder (field row) {:opts {:column-def column :row row}}))
                   (:columns opts))))))
@@ -189,6 +209,7 @@
           (when-not (= msg :quit)
             (om/update! target (:row msg))
             (recur)))))
+
     om/IInitState
     (init-state [_]
       {:channel (chan)})
@@ -199,7 +220,11 @@
 
     om/IRenderState
     (render-state [this {:keys [rows] :as state}]
-      (dom/table #js {:className "table data"}
+      (dom/table #js {:className (str "table data"
+                                      (when (:hover? opts) " table-hover")
+                                      (when (:condensed? opts) " table-condensed")
+                                      (when (:bordered? opts) " table-bordered")
+                                      (when (:striped? opts) " table-striped"))}
                  (om/build header (:columns opts))
                  (apply dom/tbody #js {}
                         (om/build-all row-builder rows {:state {:channel (:channel state)}
@@ -260,7 +285,11 @@
                                                    (:current-page state)
                                                    (:page-size state)
                                                    (:events-channel state))}
-                          :opts {:columns (:columns header)}})
+                          :opts {:columns (:columns header)
+                                 :hover? (:hover? opts)
+                                 :condensed? (:condensed? opts)
+                                 :bordered? (:bordered? opts)
+                                 :striped? (:striped? opts)}})
                (grid-pager (:pager state) {:total-rows (:total-rows src)
                                            :channel (:channel state)
                                            :page-size (:page-size state)
@@ -281,6 +310,7 @@
   {:type (s/enum :default :none)
    (s/optional-key :columns) [{:caption s/Str
                                :field s/Keyword
+                               (s/optional-key :col-span) s/Int
                                :data-format (s/enum :default :date :dom :keyword)
                                ;; for date format
                                :date-formatter s/Str
@@ -296,6 +326,10 @@
 
 (def GridSchema
   {(s/optional-key :id) s/Str
+   (s/optional-key :hover?) s/Bool
+   (s/optional-key :condensed?) s/Bool
+   (s/optional-key :bordered?) s/Bool
+   (s/optional-key :striped?) s/Bool
    (s/optional-key :onChange) (s/pred fn?)
    (s/optional-key :events-channel) s/Any
    (s/optional-key :header) HeaderSchema
@@ -323,5 +357,8 @@
                        :page-size page-size
                        :onChange onChange}
                :opts {:language (or (:language definition) :en)
+                      :hover? (:hover? definition)
+                      :condensed? (:condensed? definition)
+                      :bordered? (:bordered? definition)
+                      :striped? (:striped? definition)
                       :id id}})))
-

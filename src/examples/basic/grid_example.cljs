@@ -24,6 +24,10 @@
                                              (w/grid (get-in app [:source-simple])
                                                      (get-in app [:selected])
                                                      :container-class-name ""
+                                                     :hover? true
+                                                     :condensed? true
+                                                     :bordered? false
+                                                     :striped? true
                                                      :page-size 2
                                                      :header {:type :default
                                                               :columns (get-in app [:columns])})))))))
@@ -63,9 +67,10 @@
 
                                                             {:caption "Status"
                                                              :field :status
+                                                             :col-span 2
                                                              :data-format :keyword
-                                                             :options {:active "Active"
-                                                                       :disabled "Disabled"}}]})))))))
+                                                             :options {:active "This user is active"
+                                                                       :disabled "This user is disabled"}}]})))))))
 
 
 (defmethod row-builder :users
