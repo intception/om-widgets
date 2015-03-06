@@ -4,6 +4,7 @@
             [om-widgets.utils :as utils]
             [cljs.reader :as reader]))
 
+
 (defn- option
   [[value name]]
   (om/component
@@ -33,17 +34,23 @@
                        :onBlur (:onBlur state)
                        :value (pr-str {:value value})
                        :id (:id state)}
+                      (merge (when (:tabIndex state)) {:tabIndex (:tabIndex state)})
                       (merge (when (:read-only state) {:readOnly true})))]
         (apply dom/select (clj->js opts)
                (apply conj [(dom/option #js {:value (pr-str {:value nil}) :disabled true})]
                       (om/build-all option options)))))))
+
+
+;; ---------------------------------------------------------------------
+;; Public
 (defn combobox
-  [app path {:keys [options class-name id read-only disabled onBlur onChange] :or {class-name ""}}]
- ;; entry point
+  [app path {:keys [options class-name id read-only disabled onBlur onChange tabIndex]
+             :or {class-name ""}}]
   (om/build combo app {:state {:options options
                                :class-name class-name
                                :read-only read-only
                                :disabled disabled
+                               :tabIndex tabIndex
                                :id id
                                :onBlur onBlur
                                :onChange onChange

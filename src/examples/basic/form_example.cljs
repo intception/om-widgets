@@ -22,40 +22,54 @@
              [:label "Name"]
              (w/textinput app :name {:input-class "form-control"
                                      :autofocus true
-                                     :tabindex 1
+                                     :tabIndex 1
                                      :placeholder "Your name"})]
 
             [:div.form-group
              [:label "Email"]
              (w/textinput app :email {:input-class "form-control"
-                                      :tabindex 2
+                                      :tabIndex 2
                                       :placeholder "hello@domain.com"})]
 
             [:div.form-group
              [:label "Birth Date"]
              (w/textinput app :birth-date {:input-class "form-control"
                                            :input-format "date"
-                                           :tabindex 3
+                                           :tabIndex 3
                                            :placeholder "MM/DD/YYYY"})]
 
             [:div.form-group
              [:label "Sex"]
              (w/radiobutton app :sex {:checked-value :female
-                                      :tabindex 4
+                                      :tabIndex 4
                                       :class-name "some-container-class"
                                       :label-class "some-label-class"
                                       :label " Female"})
              (w/radiobutton app :sex {:checked-value :male
-                                      :tabindex 5
                                       :class-name "some-container-class"
                                       :label-class "some-label-class"
                                       :label " Male"})]
 
             [:div.form-group
+             [:label "Marital Status"]
+             [:br]
+             (w/combobox app :marital-status
+                             {:tabIndex 5
+                              :options (sorted-map :single "Single"
+                                                   :married "Married"
+                                                   :divorced "Divorced"
+                                                   :widowed "Widowed")})]
+
+            [:div.form-group
              [:label "Password"]
              (w/textinput app :password {:input-class "form-control"
-                                         :tabindex 6
+                                         :tabIndex 6
                                          :input-format "password"})]
 
             [:button.btn.btn-default {:type "submit"
-                                      :tabindex 7} "Submit"]]]]))))
+                                      :tabIndex 7} "Submit"]
+
+            [:hr]
+            [:div.form-group
+             [:label "Cursor:"]
+             [:p.form-control-static (pr-str app)]]]]]))))

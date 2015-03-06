@@ -2,6 +2,8 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]))
 
+
+;; TODO this component doesn't do anything, no sense.
 (defn- button-component [entity]
   (reify
     om/IRenderState

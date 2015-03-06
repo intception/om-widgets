@@ -337,7 +337,7 @@
                  :onKeyUp #(handlekeyup target owner state %)
                  :onKeyPress #(handlekeypress target owner state %)
                  :autoFocus (:autofocus state)
-                 :tabIndex (:tabindex state)
+                 :tabIndex (:tabIndex state)
                  :onBlur (fn [e]
                            (update-target target owner state true)
                            (when (:onBlur state)
@@ -351,7 +351,7 @@
                          "text")
                  :style {:text-align (:align state)}})))))
 
-(defn textinput [target path {:keys [dont-update-cursor input-class input-format multiline onBlur tabindex autofocus
+(defn textinput [target path {:keys [dont-update-cursor input-class input-format multiline onBlur tabIndex autofocus
                                      placeholder id decimals align onChange auto-complete read-only disabled onKeyPress]
                               :or {input-class ""}}]
   (om/build create-textinput target
@@ -360,7 +360,7 @@
                      :input-class input-class
                      :input-format input-format
                      :multiline multiline
-                     :tabindex tabindex
+                     :tabIndex tabIndex
                      :autofocus autofocus
                      :placeholder placeholder
                      :id id
