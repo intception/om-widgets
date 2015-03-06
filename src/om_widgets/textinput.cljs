@@ -166,7 +166,7 @@
   [target owner state value]
   (when-let  [dom-node (:dom-node @(:private-state state))]
     (when-not  (= value (:prev-value @(:private-state state)))
-      (set! (.-value dom-node)  value))))
+      (set! (.-value dom-node) value))))
 
 (defmethod handlekeydown :unmasked
   [target owner state e]
@@ -335,7 +335,10 @@
                  :readOnly (:read-only state)
                  :onKeyDown #(handlekeydown target owner state %)
                  :onKeyUp #(handlekeyup target owner state %)
-                 :onKeyPress #(handlekeypress target owner state %)
+                 :onKeyPress #(do
+                                (when (:onKeyPress state)
+                                  ((:onKeyPress state) %))
+                                (handlekeypress target owner state %))
                  :autoFocus (:autofocus state)
                  :tabIndex (:tabIndex state)
                  :onBlur (fn [e]
