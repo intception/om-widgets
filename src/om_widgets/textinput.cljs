@@ -7,6 +7,7 @@
             [cljs-time.local :as time-local]
             [cljs-time.coerce :as timec]))
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def date-local-format "dd/MM/yyyy")
 (def date-local-mask "00/00/0000")
@@ -238,7 +239,8 @@
       (do
         (if (= sel-start sel-end)
           (condp = k
-            8 (let [pos (dec sel-start)] ;; Backspace
+            ;; backspace
+            8 (let [pos (dec sel-start)]
                    (when (>= pos 0)
                      (do
                        (when-not (string? (nth mask-vector pos))
@@ -246,6 +248,7 @@
                            (swap! private-state assoc :entered-values new-entered-values)
                            (set! (.-value dom-node)  (apply str new-entered-values))))
                        (set-caret-pos dom-node pos))))
+            ;; delete
             46 (when (< sel-start (count mask-vector))
                  (do
                    (when-not (string? (nth mask-vector sel-start))
@@ -324,30 +327,31 @@
       (applymask! target owner state (utils/om-get target (:path state)))
       ((if (not (:multiline state))
          dom/input
-         dom/textarea) (clj->js {:id (:id state)
-                                 :name (:id state)
-                                 :className (clojure.string/join " " ["om-widgets-input-text"  (:input-class state)])
-                                 :autoComplete (:auto-complete state)
-                                 :readOnly (:read-only state)
-                                 :onKeyDown #(handlekeydown target owner state %)
-                                 :onKeyUp #(handlekeyup target owner state %)
-                                 :onKeyPress #(handlekeypress target owner state %)
-                                 :onBlur (fn [e]
-                                           (update-target target owner state true)
-                                           (when (:onBlur state)
-                                             ((:onBlur state)))
-                                           false)
+         dom/textarea)
+       (clj->js {:id (:id state)
+                 :name (:id state)
+                 :className (clojure.string/join " " ["om-widgets-input-text" (:input-class state)])
+                 :autoComplete (:auto-complete state)
+                 :readOnly (:read-only state)
+                 :onKeyDown #(handlekeydown target owner state %)
+                 :onKeyUp #(handlekeyup target owner state %)
+                 :onKeyPress #(handlekeypress target owner state %)
+                 :autoFocus (:autofocus state)
+                 :tabIndex (:tabindex state)
+                 :onBlur (fn [e]
+                           (update-target target owner state true)
+                           (when (:onBlur state)
+                             ((:onBlur state)))
+                           false)
+                 :onPaste #(handlepaste target owner state %)
+                 :placeholder (:placeholder state)
+                 :disabled (:disabled state)
+                 :type (if (= (:input-format state) "password")
+                         "password"
+                         "text")
+                 :style {:text-align (:align state)}})))))
 
-                                 :onPaste #(handlepaste target owner state %)
-                                 :placeholder (:placeholder state)
-                                 :disabled (:disabled state)
-
-                                 :type (if (= (:input-format state) "password")
-                                         "password"
-                                         "text")
-                                 :style {:text-align (:align state)}})))))
-
-(defn textinput [target path {:keys [dont-update-cursor input-class input-format multiline onBlur
+(defn textinput [target path {:keys [dont-update-cursor input-class input-format multiline onBlur tabindex autofocus
                                      placeholder id decimals align onChange auto-complete read-only disabled onKeyPress]
                               :or {input-class ""}}]
   (om/build create-textinput target
@@ -356,6 +360,8 @@
                      :input-class input-class
                      :input-format input-format
                      :multiline multiline
+                     :tabindex tabindex
+                     :autofocus autofocus
                      :placeholder placeholder
                      :id id
                      :disabled disabled

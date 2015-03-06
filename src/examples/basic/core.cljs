@@ -6,10 +6,10 @@
             [om-widgets.core :as w]
             [om-widgets.grid :refer [row-builder]]
             [examples.basic.state-example :as state]
+            [examples.basic.form-example :refer [form-example]]
             [examples.basic.modal-example :refer [modal-example]]
             [examples.basic.datepicker-example :refer [datepicker-example]]
             [examples.basic.popup-window-example :refer [popup-window-example]]
-            [examples.basic.radiobutton-example :refer [radiobutton-example]]
             [examples.basic.grid-example :refer [grid-example grid-link-example grid-custom-row-sample]]
             [examples.basic.dropdown-example :refer [dropdown-example]]))
 
@@ -33,13 +33,13 @@
                                       :brand-title "Navbar Sample"})
 
                            (condp = (:menu-selected app)
+                             :form (om/build form-example (get-in app [:form]))
                              :dropdown (om/build dropdown-example (get-in app [:dropdown]))
                              :datepicker (om/build datepicker-example app)
                              :modal (om/build modal-example app)
                              :grid (om/build grid-example (get-in app [:grid]))
                              :grid-link (om/build grid-link-example (get-in app [:grid]))
                              :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
-                             :radiobutton (om/build radiobutton-example app)
                              :popup-window (om/build popup-window-example app))))))
 
 (defn ^:export examples
