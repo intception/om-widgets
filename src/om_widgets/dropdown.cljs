@@ -162,7 +162,7 @@
 
 (def EntrySchema
   "Schema for a dropdown entry"
-  {:id s/Keyword
+  {:id s/Any
    :text s/Str
    :type (s/enum :entry)
    (s/optional-key :url) s/Str})
