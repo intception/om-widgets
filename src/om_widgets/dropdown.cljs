@@ -74,8 +74,7 @@
                 (.preventDefault e))
               (when (:stop-propagation state)
                 (.stopPropagation e)))
-   :onBlur #(put! (:channel state) {:type :close-dropdown})
-   :id (str "dropdown-" (name (:id state)))})
+   :onBlur #(put! (:channel state) {:type :close-dropdown})})
 
 (defn- channel-processing
   [cursor owner]
