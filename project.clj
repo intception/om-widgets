@@ -12,13 +12,13 @@
                  [net.unit8/tower-cljs "0.1.0"] ;; translations
                  [sablono "0.2.22"]
                  [shodan "0.4.1"]
-                 [figwheel "0.2.3-SNAPSHOT"]
                  [com.cemerick/clojurescript.test "0.3.3"]
                  [prismatic/schema "0.3.3"]]
 
   :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]
             [lein-figwheel "0.2.3-SNAPSHOT"]
             [com.cemerick/clojurescript.test "0.3.3"]]
+
   :source-paths ["src"]
   :test-paths ["test"]
 
