@@ -501,6 +501,9 @@ label.om-widgets-control-label {
   left: auto;
 }
 
+.om-widgets-dropdown {
+  outline: none;
+}
 .om-widgets-dropdown .dropdown-toggle {
   cursor:pointer;
 }

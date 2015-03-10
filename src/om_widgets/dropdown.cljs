@@ -23,8 +23,8 @@
     (render-state [this {:keys [channel] :as state}]
       (html
        [:li
-        ;; we use OnMouseDown because onBlour is triggered before
-        ;; onClick event, we use onBlour to close the dropdown
+        ;; we use OnMouseDown because onBlur is triggered before
+        ;; onClick event, we use onBlur to close the dropdown
         [:a (->> {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
                                   (put! channel {:type :entry-click
                                                  :value (:id e)
@@ -68,6 +68,10 @@
 (defn- build-dropdown-js-options
   [state]
   {:class (build-dropdown-class (:opened state) (:size state))
+   ;; tab index is set to 0 to force focus on the container,
+   ;; this way, the onBlur event will be called when the user
+   ;; clicks outside and we can close the dropdown.
+   :tabIndex 0
    :onClick (fn [e]
               (put! (:channel state) {:type :open-dropdown})
               (when (:prevent-default state)
