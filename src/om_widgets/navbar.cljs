@@ -115,6 +115,7 @@
 (def NavbarEntry
   {:text s/Str
    :id s/Keyword
+   (s/optional-key :right-position) s/Bool
    (s/optional-key :url) s/Str
    (s/optional-key :className) s/Str
    (s/optional-key :iconClassName) s/Str})
