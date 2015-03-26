@@ -13,8 +13,7 @@
         handle-keydown #(let [k (.-keyCode %)]
                            (when (#{ESC} k)
                              (condp = k
-                               ESC ((om/get-state owner :close-fn)))))
-        handle-click #(println %)]
+                               ESC ((om/get-state owner :close-fn)))))]
     (reify
 
     om/IDidMount
