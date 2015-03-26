@@ -8,6 +8,13 @@
             [cljs-time.format :as timef]))
 
 
+(defn make-childs
+  "Build all alternative for sablono"
+  [tag & childs]
+  (vec (apply concat
+              (if (vector? tag) tag [tag])
+              childs)))
+
 (defn format
   [fmt & args]
   (apply gstring/format fmt args))

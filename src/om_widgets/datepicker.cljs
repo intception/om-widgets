@@ -184,7 +184,7 @@
                                              (apply dom/tr nil
                                                     (om/build-all day-header days-short))
                                              (om/build weeks-component app {:state {:path path :date date :onChange onChange}}))))))))
-(enable-console-print!)
+
 (defn datepicker
   "Datepicker public API
   the cursor at the current path is updated when

@@ -4,6 +4,8 @@
             [figwheel.client :as fw]
             [om-widgets.layouts :as layout :include-macros true]
             [om-widgets.core :as w]
+            [om-widgets.navbar :as navbar]
+            [sablono.core :as html :refer-macros [html]]
             [om-widgets.grid :refer [row-builder]]
             [examples.basic.state-example :as state]
             [examples.basic.form-example :refer [form-example]]
@@ -23,24 +25,24 @@
 
     om/IRenderState
     (render-state [this state]
-                  (dom/div nil
-                           (w/navbar app
-                                     :menu-selected
-                                     {:items (get-in app [:menu-items])
-                                      :on-selection #(println "selected item: " %)
-                                      :brand-image-url "images/logo.png"
-                                      :brand-image-expanded true
-                                      :brand-title "Navbar Sample"})
-
-                           (condp = (:menu-selected app)
-                             :form (om/build form-example (get-in app [:form]))
-                             :dropdown (om/build dropdown-example (get-in app [:dropdown]))
-                             :datepicker (om/build datepicker-example app)
-                             :modal (om/build modal-example app)
-                             :grid (om/build grid-example (get-in app [:grid]))
-                             :grid-link (om/build grid-link-example (get-in app [:grid]))
-                             :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
-                             :popup-window (om/build popup-window-example app))))))
+      (html
+        [:div
+         (w/navbar app
+                   :menu-selected
+                   {:items (get-in app [:menu-items])
+                    :on-selection #(om/update! app :menu-selected %)
+                    :brand-image-url "images/logo.png"
+                    :brand-image-expanded true
+                    :brand-title "Navbar Sample"})
+         (condp = (:menu-selected app)
+           :form (om/build form-example (get-in app [:form]))
+           :dropdown (om/build dropdown-example (get-in app [:dropdown]))
+           :datepicker (om/build datepicker-example app)
+           :modal (om/build modal-example app)
+           :grid (om/build grid-example (get-in app [:grid]))
+           :grid-link (om/build grid-link-example (get-in app [:grid]))
+           :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
+           :popup-window (om/build popup-window-example app))]))))
 
 (defn ^:export examples
   []

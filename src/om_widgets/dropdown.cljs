@@ -83,8 +83,7 @@
 (defn- channel-processing
   [cursor owner]
   (let [channel (om/get-state owner :channel)
-        on-selection (om/get-state owner :on-selection)
-        set-path (om/get-state owner :set-path)]
+        on-selection (om/get-state owner :on-selection)]
     (go-loop []
       (let [msg (<! channel)]
         (condp = (:type msg)
@@ -93,8 +92,6 @@
           :entry-click (do
                          (when (:link msg)
                            (set! (.-location js/window) (:link msg)))
-                         (when set-path
-                           (om/update! cursor set-path (:value msg)))
                          (when on-selection
                            (on-selection (:value msg)))
                          (put! channel {:type :close-dropdown})))
@@ -178,7 +175,6 @@
   {:items [(s/either EntrySchema DividerSchema)]
    :title s/Str
    (s/optional-key :id) s/Keyword
-   (s/optional-key :set-path) s/Keyword ;; cursor path where we are going to update! selected item
    (s/optional-key :on-selection) (s/pred fn?)
    (s/optional-key :prevent-default) s/Bool
    (s/optional-key :stop-propagation) s/Bool
