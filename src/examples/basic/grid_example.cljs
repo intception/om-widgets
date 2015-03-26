@@ -14,23 +14,32 @@
 
     om/IRenderState
     (render-state [this state]
-                  (dom/div #js {:className "panel panel-default"}
-                           (dom/div #js {:className "panel-heading"} (str "Grid"
-                                                                          " (selected cursor value: "
-                                                                          (:name (get-in app [:selected]))
-                                                                          " )"))
-                           (dom/div #js {:className "panel-body"}
-                                    (dom/div #js {:className ""}
-                                             (w/grid (get-in app [:source-simple])
-                                                     (get-in app [:selected])
-                                                     :container-class-name ""
-                                                     :hover? true
-                                                     :condensed? true
-                                                     :bordered? false
-                                                     :striped? true
-                                                     :page-size 2
-                                                     :header {:type :default
-                                                              :columns (get-in app [:columns])})))))))
+      (html
+        [:div
+         [:div.panel.panel-default
+          [:div.panel-heading (str "Grid (selected cursor value: "
+                                   (:name (get-in app [:selected])) " )")]
+          [:div.panel-body
+           (w/grid (get-in app [:source-simple])
+                   (get-in app [:selected])
+                   :container-class-name ""
+                   :hover? true
+                   :condensed? true
+                   :bordered? false
+                   :striped? true
+                   :page-size 2
+                   :header {:type :default
+                            :columns (get-in app [:columns])})]]
+
+         [:div.panel.panel-default
+          [:div.panel-heading "Empty Grid"]
+          [:div.panel-body
+           (w/grid []
+                   (get-in app [:selected])
+                   :container-class-name ""
+                   :page-size 2
+                   :header {:type :default
+                            :columns []})]]]))))
 
 (defn grid-link-example
   [app owner]

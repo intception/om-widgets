@@ -69,7 +69,8 @@
                                               :total-items total-rows})
             previous-disabled? (or (= 0 current-page)
                                    (= 0 current-page-total))
-            next-disabled? (= current-page max-pages)]
+            next-disabled? (or (= 0 total-rows)
+                               (= current-page max-pages))]
         (dom/ul #js {:className "pager"}
                 ;; previous page
                 (dom/li #js {:className (when previous-disabled? "disabled")}
