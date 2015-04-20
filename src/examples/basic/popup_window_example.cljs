@@ -2,6 +2,7 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [sablono.core :as html :refer-macros [html]]
+            [cljs.core.async :refer [put! chan <! alts! timeout close!]]
             [om-widgets.core :as w]))
 
 
@@ -11,60 +12,32 @@
     om/IDisplayName
     (display-name [_] "Popup Window Sample")
 
+    om/IDidMount
+    (did-mount [this]
+      (om/set-state! owner :popover-target (om.core/get-node owner)))
+
     om/IRenderState
-    (render-state [this state]
+    (render-state [this {:keys [chan popover-target]}]
       (dom/div #js {:className "panel panel-default"}
         (dom/div #js {:className "panel-heading"} "Popup window sample")
         (dom/div #js {:className "panel-body" :style #js {:overflow "scroll" :height "600"}}
-          (w/grid (get-in app [:grid :source-simple])
-                  (get-in app [:grid :selected])
-                  :container-class-name ""
-                  :header {:type :default
-                          :columns (get-in app [:grid :columns])})
 
-          (w/popover "Popover con varias palabras que pueden afectarse por word wrapping!"
-            (fn [close-window]
-                  (dom/div #js {:className "popup-window-sample"}
-                    (w/grid (get-in app [:grid :source-simple])
-                            (get-in app [:grid :selected])
-                            :page-size 4
-                            :container-class-name ""
-                            :header {:type :default
-                                    :columns (get-in app [:grid :columns])})))
-            {:prefered-side :bottom
-             :popover-class "coso0"
-             :align 0})
+                 (w/popover (fn [show]
+                              (dom/button #js {:onClick #(show)
+                                               :id "open"} "ABRIR"))
+                            (fn [hide]
 
-           (w/popover
-            (fn [show-window]
-              (dom/button #js {:id "pup" :onClick #(show-window)} "Popup"))
+                              (dom/button #js {:onClick #(hide)
+                                               :id "close"} "CERRRAR"))
+                            {:for "open"})
 
-            (fn [close-window]
-                  (dom/div #js {:className "popup-window-sample"}
-                    (w/grid (get-in app [:grid :source-simple])
-                            (get-in app [:grid :selected])
-                            :page-size 4
-                            :container-class-name ""
-                            :header {:type :default
-                                    :columns (get-in app [:grid :columns])})
-                    (dom/button #js {:onClick #(close-window)} "Close")))
-            {:prefered-side :bottom
-              :popover-class "coso1"
-              :for "pup"} )
+                 (w/popover "swaewqae"
+                            (fn [hide]
+                              (dom/button #js {:onClick #(hide)
+                                               :id "close"} "CERRRAR"))
+                            )
 
-           (w/popover
-            (fn [show-window]
-              (dom/a #js {:id "pup2" :onMouseOver #(show-window)} "Mouse Over!"))
 
-            (fn [close-window]
-                  (dom/div #js {:className "popup-window-sample"}
-                    (w/grid (get-in app [:grid :source-simple])
-                            (get-in app [:grid :selected])
-                            :page-size 4
-                            :container-class-name ""
-                            :header {:type :default
-                                    :columns (get-in app [:grid :columns])})
-                    (dom/button #js {:onClick #(close-window)} "Close")))
-            {:prefered-side :bottom
-              :popover-class "coso2"
-              :for "pup2"}))))))
+               )))))
+
+
