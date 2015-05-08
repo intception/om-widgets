@@ -1,7 +1,7 @@
 (ns examples.basic.core
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [figwheel.client :as fw]
+;            [figwheel.client :as fw]
             [om-widgets.layouts :as layout :include-macros true]
             [om-widgets.core :as w]
             [om-widgets.navbar :as navbar]
@@ -13,7 +13,9 @@
             [examples.basic.datepicker-example :refer [datepicker-example]]
             [examples.basic.popup-window-example :refer [popup-window-example]]
             [examples.basic.grid-example :refer [grid-example grid-link-example grid-custom-row-sample]]
-            [examples.basic.dropdown-example :refer [dropdown-example]]))
+            [examples.basic.dropdown-example :refer [dropdown-example]]
+            [examples.basic.placeholder-editor-example :refer [placeholder-editor-example]]
+            ))
 
 
 (enable-console-print!)
@@ -42,7 +44,8 @@
            :grid (om/build grid-example (get-in app [:grid]))
            :grid-link (om/build grid-link-example (get-in app [:grid]))
            :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
-           :popup-window (om/build popup-window-example app))]))))
+           :popup-window (om/build popup-window-example app)
+           :placeholder-editor (om/build placeholder-editor-example (get-in app [:placeholder-editor-example])))]))))
 
 (defn ^:export examples
   []
@@ -51,8 +54,8 @@
     state/app-state
     {:target (.getElementById js/document "app")}))
 
-(fw/watch-and-reload
+;(fw/watch-and-reload
  :websocket-url "ws://localhost:3449/figwheel-ws"
  :jsload-callback
- (fn []
-   (examples)))
+; (fn []
+;   (examples)))
