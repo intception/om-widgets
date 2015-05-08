@@ -9,7 +9,7 @@
     om/IRenderState
     (render-state [this {:keys [label id path checked-value disabled class-name label-class tabIndex]}]
       (dom/div #js {:className class-name}
-               (dom/label #js {:className (or label-class "label")}
+               (dom/label #js {:className (or label-class "radiobutton-label")}
                           (dom/input #js {:type "radio"
                                           :id id
                                           :disabled disabled
