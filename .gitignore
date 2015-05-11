@@ -14,3 +14,4 @@ examples/basic/main.js
 .lein-failures
 resources/public/examples/basic/main.js
 figwheel_server.log
+pom.xml.asc
