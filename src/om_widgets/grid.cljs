@@ -171,7 +171,10 @@
     om/IRenderState
     (render-state [this state]
       (apply dom/tr #js {:className (str "om-widgets-default-row"
-                                         (when (= row (:target opts)) " success"))
+                                         (when (= row (:target opts))
+                                           (str " " (or (and (:selected-row-style opts)
+                                                             (name (:selected-row-style opts)))
+                                                        "active"))))
                          :onMouseDown #(let [props (om/get-props owner)]
                                          (put! (:channel state)
                                                {:row (if (satisfies? IDeref props)
@@ -230,6 +233,7 @@
                  (apply dom/tbody #js {}
                         (om/build-all row-builder rows {:state {:channel (:channel state)}
                                                         :opts {:columns (:columns opts)
+                                                               :selected-row-style (:selected-row-style opts)
                                                                :target target}}))))))
 
 ;; This function where private but we cannot test it from outside given the lack of #' reader
@@ -290,7 +294,8 @@
                                  :hover? (:hover? opts)
                                  :condensed? (:condensed? opts)
                                  :bordered? (:bordered? opts)
-                                 :striped? (:striped? opts)}})
+                                 :striped? (:striped? opts)
+                                 :selected-row-style (:selected-row-style opts)}})
                (grid-pager (:pager state) {:total-rows (:total-rows src)
                                            :channel (:channel state)
                                            :page-size (:page-size state)
@@ -331,6 +336,7 @@
    (s/optional-key :condensed?) s/Bool
    (s/optional-key :bordered?) s/Bool
    (s/optional-key :striped?) s/Bool
+   (s/optional-key :selected-row-style) (s/enum :active :success :info :warning :danger)
    (s/optional-key :onChange) (s/pred fn?)
    (s/optional-key :events-channel) s/Any
    (s/optional-key :header) HeaderSchema
@@ -362,4 +368,5 @@
                       :condensed? (:condensed? definition)
                       :bordered? (:bordered? definition)
                       :striped? (:striped? definition)
+                      :selected-row-style (:selected-row-style definition)
                       :id id}})))
