@@ -1,7 +1,6 @@
 (ns examples.basic.core
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
-            [figwheel.client :as fw]
             [om-widgets.layouts :as layout :include-macros true]
             [om-widgets.core :as w]
             [om-widgets.navbar :as navbar]
@@ -50,9 +49,3 @@
     my-app
     state/app-state
     {:target (.getElementById js/document "app")}))
-
-(fw/watch-and-reload
- :websocket-url "ws://localhost:3449/figwheel-ws"
- :jsload-callback
- (fn []
-   (examples)))
