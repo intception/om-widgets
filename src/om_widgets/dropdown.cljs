@@ -22,17 +22,17 @@
     om/IRenderState
     (render-state [this {:keys [channel] :as state}]
       (html
-       [:li
         ;; we use OnMouseDown because onBlur is triggered before
         ;; onClick event, we use onBlur to close the dropdown
-        [:a (->> {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
-                                  (put! channel {:type :entry-click
-                                                 :value (:id e)
-                                                 :link (:url e)}))}
-                 (#(if (:url entry)
-                     (merge {:href (:url entry)} %)
-                     %)))
-         (:text entry)]]))))
+        [:li (->> {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
+                                   (put! channel {:type :entry-click
+                                                  :value (:id e)
+                                                  :link (:url e)}))}
+                  (#(if (:url entry)
+                      (merge {:href (:url entry)} %)
+                      %)))
+
+         [:a (:text entry)]]))))
 
 (defmethod build-entry :divider [entry app]
   (reify
@@ -74,6 +74,7 @@
    :tabIndex 0
    :onClick (fn [e]
               (put! (:channel state) {:type :open-dropdown})
+
               (when (:prevent-default state)
                 (.preventDefault e))
               (when (:stop-propagation state)
@@ -93,8 +94,7 @@
                          (when (:link msg)
                            (set! (.-location js/window) (:link msg)))
                          (when on-selection
-                           (on-selection (:value msg)))
-                         (put! channel {:type :close-dropdown})))
+                           (on-selection (:value msg)))))
         (recur)))))
 
 (defn- dropdown-menu
