@@ -28,8 +28,12 @@
   (reify
     om/IRenderState
     (render-state [this state]
-      (dom/div #js {:className (if (= (:current-page page) (:index page)) "om-widgets-active-tab" "om-widgets-inactive-tab")}
-               (:content page)))))
+      (dom/div #js {:className (if (= (:current-page page) (:index page))
+                                 "om-widgets-active-tab"
+                                 "om-widgets-inactive-tab")}
+               (if (fn? (:content page))
+                 ((:content page))
+                 (:content page))))))
 
 (defn- tab-component
   [cursor owner]
@@ -49,7 +53,6 @@
                                                  right-panel)))))
                  (dom/div nil
                           (om/build  tab-page (nth opts current-page))))))))
-
 
 (defn tab
   [cursor path {:keys [id current-page on-change right-panel]} & pages]
