@@ -7,12 +7,14 @@
             [sablono.core :as html :refer-macros [html]]
             [om-widgets.grid :refer [row-builder]]
             [examples.basic.state-example :as state]
+            [examples.basic.tab-example :refer [tab-example]]
             [examples.basic.form-example :refer [form-example]]
             [examples.basic.modal-example :refer [modal-example]]
             [examples.basic.datepicker-example :refer [datepicker-example]]
             [examples.basic.popup-window-example :refer [popup-window-example]]
             [examples.basic.grid-example :refer [grid-example grid-link-example grid-custom-row-sample]]
             [examples.basic.dropdown-example :refer [dropdown-example]]))
+
 
 
 (enable-console-print!)
@@ -34,6 +36,7 @@
                     :brand-image-expanded true
                     :brand-title "Navbar Sample"})
          (condp = (:menu-selected app)
+           :tab (om/build tab-example (get-in app [:tab]))
            :form (om/build form-example (get-in app [:form]))
            :dropdown (om/build dropdown-example (get-in app [:dropdown]))
            :datepicker (om/build datepicker-example app)

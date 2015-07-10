@@ -10,6 +10,9 @@
                    {:text "Dropdown"
                     :id :dropdown
                     :url "#/dropdown"}
+                   {:text "Tabs"
+                    :id :tab
+                    :url "#/tab"}
                    {:id :datepicker
                     :text "Datepicker"
                     :url "#/datepicker"}
@@ -33,6 +36,7 @@
                     :url "#/popupwindow"}]]
      :birth-date #inst "1991-01-25"
      :sex :male
+     :tab {}
      :form {:name ""
             :birth-date ""
             :sex :male
