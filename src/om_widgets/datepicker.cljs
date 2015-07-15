@@ -66,30 +66,32 @@
   (om/component
    (dom/th #js {:className "dow"} day)))
 
-(defmulti get-date-from-selected-day
-  (fn [el previous-date selected-day]
-    (utils/el-data el :belongs-to-month)))
+(defmulti get-date-from-selected-day (fn [previous-date selected-day]
+                                       (:belongs-to-month selected-day)))
 
-(defmethod get-date-from-selected-day :current [_ previous-date selected-day]
+(defmethod get-date-from-selected-day :current [previous-date selected-day]
   (timec/to-date (time/date-time (time/year previous-date)
                                  (time/month previous-date)
-                                 selected-day)))
+                                 (:day selected-day))))
 
-(defmethod get-date-from-selected-day :previous [_ previous-date selected-day]
+(defmethod get-date-from-selected-day :previous [previous-date selected-day]
   (timec/to-date (time/date-time (time/year previous-date)
                                  (- (time/month previous-date) 1)
-                                 selected-day)))
+                                 (:day selected-day))))
 
-(defmethod get-date-from-selected-day :next [_ previous-date selected-day]
+(defmethod get-date-from-selected-day :next [previous-date selected-day]
   (timec/to-date (time/date-time (time/year previous-date)
                                  (+ (time/month previous-date) 1)
-                                 selected-day)))
+                                 (:day selected-day))))
 
-(defn- current-day? [date-node date]
-  (and (= (:belongs-to-month date-node) :current)
-       (= (:day date-node) (time/day (time/date-time date)))
-       (= (:month date-node) (time/month (time/date-time date)))
-       (= (:year date-node) (time/year (time/date-time date)))))
+(defn current-day?
+  ([date-node]
+   (current-day? date-node (time/now)))
+  ([date-node date]
+   (and (= (:belongs-to-month date-node) :current)
+        (= (:day date-node) (time/day (time/date-time date)))
+        (= (:month date-node) (time/month (time/date-time date)))
+        (= (:year date-node) (time/year (time/date-time date))))))
 
 (defmulti build-day-class-name
   (fn [day-node date]
@@ -103,6 +105,13 @@
 (defmethod build-day-class-name :previous [day-node date] "day old")
 (defmethod build-day-class-name :next [day-node date] "day new")
 
+(defmulti day-renderer (fn [app owner state]
+                         :day))
+
+(defmethod day-renderer :default
+  [app owner {:keys [day]}]
+  (:day day))
+
 (defn- day-component [app owner]
   (reify
     om/IDisplayName
@@ -111,12 +120,10 @@
     (render-state [this {:keys [day date path onChange] :as state}]
       (dom/td #js {:className (build-day-class-name day date)
                    :data-belongs-to-month (:belongs-to-month day)
-                   :onClick (fn [e]
-                              (let [el (.. e -target)
-                                    selected-day (js/parseInt (.. el -textContent))
-                                    date-updated (get-date-from-selected-day el date selected-day)]
-                                (utils/om-update! app path date-updated)
-                                (when onChange (onChange date-updated))))} (:day day)))))
+                   :onClick #(let [date-updated (get-date-from-selected-day date day)]
+                               (utils/om-update! app path date-updated)
+                               (when onChange (onChange date-updated)))}
+              (day-renderer app owner {:day day})))))
 
 (defn- weeks-component [app owner]
   (reify
