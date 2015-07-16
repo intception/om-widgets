@@ -17,9 +17,9 @@
                  :min (:min state)
                  :max (:max state)
                  :step (:step state)
-                 :defaultValue ((:path state) cursor)
+                 :value (or ((:path state) cursor) 0)
                  :onChange (fn [e]
-                             (let [value (.. e -target -value)]
+                             (let [value (js/parseInt (.. e -target -value))]
                                (om/update! cursor (:path state) value)
                                (when (:onChange state) ((:onChange state) value))))}]))))
 
