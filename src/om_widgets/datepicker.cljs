@@ -106,7 +106,9 @@
 (defmethod build-day-class-name :next [day-node date] "day new")
 
 (defmulti day-renderer (fn [app owner state]
-                         :day))
+                         (:type (if (utils/atom? app)
+                                  @app
+                                  app))))
 
 (defmethod day-renderer :default
   [app owner {:keys [day]}]
