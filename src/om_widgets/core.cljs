@@ -14,6 +14,7 @@
             [om-widgets.tab]
             [om-widgets.page-switcher]
             [om-widgets.popover]
+            [om-widgets.slider]
             [om-widgets.utils]))
 
 (def textinput om-widgets.textinput/textinput)
@@ -22,12 +23,12 @@
 (def navbar om-widgets.navbar/navbar)
 (def datepicker om-widgets.datepicker/datepicker)
 (def radiobutton om-widgets.radiobutton/radiobutton)
-(def radiobutton-group om-widgets.radiobutton/radiobutton-group)
 (def combobox om-widgets.combobox/combobox)
 (def button om-widgets.button/button)
 (def grid om-widgets.grid/grid)
 (def tab om-widgets.tab/tab)
 (def popover om-widgets.popover/popover)
+(def slider om-widgets.slider/slider)
 
 (def install-modal-box! om-widgets.modal-box/install-modal-box!)
 (def alert om-widgets.modal-box/alert)

@@ -15,3 +15,5 @@ examples/basic/main.js
 resources/public/examples/basic/main.js
 figwheel_server.log
 pom.xml.asc
+.tags
+.tags_sorted_by_file

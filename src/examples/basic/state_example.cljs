@@ -39,6 +39,7 @@
      :tab {}
      :form {:name ""
             :birth-date ""
+            :hours 8
             :sex :male
             :password ""}
      :grid {:source-simple [{:name "Sebas" :username "kernelp4nic"}

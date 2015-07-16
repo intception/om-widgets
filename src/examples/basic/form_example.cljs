@@ -31,6 +31,14 @@
                                       :tabIndex 2
                                       :placeholder "hello@domain.com"})]
 
+
+            [:div.form-group
+             [:label "How much hours do you work? (4-12)"]
+             (w/slider app :hours {:step "1"
+                                   :min "4"
+                                   :max "12"})
+             [:label (:hours app)]]
+
             [:div.form-group
              [:label "Birth Date"]
              (w/textinput app :birth-date {:input-class "form-control"
