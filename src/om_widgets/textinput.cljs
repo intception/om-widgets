@@ -39,6 +39,9 @@
              (date-from-localstring value date-local-format)
              (catch js/Error e
                value))
+    "numeric" (let [f (js/parseFloat value)]
+                (if (js/isNaN f) value f))
+
     value))
 
 (defn replace-item-at-pos
@@ -105,9 +108,9 @@
 (defn- mask-handler-selector
   [target owner state]
   (condp = (:input-format state)
-    "numeric" :numeric
+    "numeric" :unmasked
     "password" :unmasked
-    nil       :unmasked
+    nil :unmasked
     :mask))
 
 (defmulti handlekeydown mask-handler-selector)
@@ -140,41 +143,41 @@
     (swap! private-state assoc :cbtimeout (.setTimeout js/window #(update-target target owner state false)
                                                        (or typing-timeout 500)))))
 
-(defmethod handlekeydown :unmasked
+(defmethod handlekeydown :default
   [target owner state e]
   true)
 
-(defmethod handlekeyup :unmasked
+(defmethod handlekeyup :default
   [target owner state e]
   true)
 
-(defmethod handlekeypress :unmasked
+(defmethod handlekeypress :default
   [target owner state e]
   true)
 
-(defmethod handlepaste :unmasked
+(defmethod handlepaste :default
   [target owner state e]
   true)
 
-(defmethod handle-custom-keys! :unmasked
+(defmethod handle-custom-keys! :default
   [target owner state k]
   true)
 
-(defmethod initmask! :unmasked
+(defmethod initmask! :default
   [target owner state])
 
-(defmethod applymask! :unmasked
+(defmethod applymask! :default
   [target owner state value]
   (when-let  [dom-node (:dom-node @(:private-state state))]
     (when-not  (= value (:prev-value @(:private-state state)))
       (set! (.-value dom-node) value))))
 
-(defmethod handlekeydown :unmasked
+(defmethod handlekeydown :default
   [target owner state e]
   (fire-on-change target owner state)
   true)
 
-(defmethod handle-custom-keys! :unmasked
+(defmethod handle-custom-keys! :default
   [target owner state k]
   true)
 
