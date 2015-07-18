@@ -94,20 +94,20 @@
                        (when (:fixed-top state) "navbar-fixed-top")]}
 
          [:div {:class ["container"
-                        (when (= (:container state) :fluid) "-fluid")]}]
+                        (when (= (:container state) :fluid) "-fluid")]}
 
-         (om/build nav-header
-                   cursor
-                   {:state {:brand-image-url (:brand-image-url state)
-                            :brand-image-expanded (:brand-image-expanded state)
-                            :brand-title (:brand-title state)}})
+          (om/build nav-header
+                    cursor
+                    {:state {:brand-image-url (:brand-image-url state)
+                             :brand-image-expanded (:brand-image-expanded state)
+                             :brand-title (:brand-title state)}})
 
-         (u/make-childs [:div.navbar-collapse]
-                        (map #(om/build navbar-nav {:cursor cursor
-                                                    :entries %}
-                                        {:state {:active-path (:active-path state)
-                                                 :on-selection (:on-selection state)}})
-                             (:menu-items cursor)))]))))
+          (u/make-childs [:div.navbar-collapse]
+                         (map #(om/build navbar-nav {:cursor cursor
+                                                     :entries %}
+                                         {:state {:active-path (:active-path state)
+                                                  :on-selection (:on-selection state)}})
+                              (:menu-items cursor)))]]))))
 
 ;; ---------------------------------------------------------------------
 ;; Schema
