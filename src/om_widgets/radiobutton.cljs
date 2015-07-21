@@ -8,7 +8,7 @@
   (reify
     om/IRenderState
     (render-state [this {:keys [label id path checked-value disabled class-name label-class tabIndex]}]
-      (dom/div #js {:className class-name}
+      (dom/div #js {:className (str class-name (if (= (utils/om-get entity [path]) checked-value) " active" ""))}
                (dom/label #js {:className (or label-class "label")}
                           (dom/input #js {:type "radio"
                                           :id id

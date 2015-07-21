@@ -7,7 +7,7 @@
   (reify
     om/IRenderState
     (render-state [this {:keys [label id path disabled on-change class-name checked-value unchecked-value]}]
-      (dom/div #js {:className class-name}
+      (dom/div #js {:className (str class-name (if (= checked-value (utils/om-get app path)) " active" ""))}
                (dom/label #js {:className "om-widgets-label"}
                           (dom/input #js {:type "checkbox"
                                           :id id
