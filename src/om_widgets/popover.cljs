@@ -177,9 +177,9 @@
     om/IRenderState
     (render-state [this {:keys [visible-content-fn popup-content-fn visible prefered-side channel] :as state}]
       (html
-       [:div
+       [:div {:class "om-widgets-popover-launcher"}
         (when visible
-          (dom/div nil
+          (dom/div #js {:style #js {:position "absolute" :display "inline"}}
                    (om/build popover-container nil {:state {:content-fn popup-content-fn
                                                             :prefered-side prefered-side}
                                                     :opts {:for (:for opts)
