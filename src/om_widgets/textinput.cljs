@@ -123,7 +123,7 @@
 (defmulti applymask! mask-handler-selector)
 
 (defn- update-target
-  [target owner {:keys [cbtimeout typing-timeout input-format prev-value path onChange private-state] :as state} bInternal]
+  [target owner {:keys [cbtimeout input-format prev-value path onChange private-state] :as state} bInternal]
   (when target
     (let [prev-value (:prev-value @private-state)
           dom-node (:dom-node @private-state)
@@ -136,7 +136,7 @@
             (onChange value)))))))
 
 (defn- fire-on-change
-  [target owner {:keys [cbtimeout typing-timeout prev-value path  private-state onChange] :as state}]
+  [target owner {:keys [cbtimeout typing-timeout prev-value path private-state onChange] :as state}]
   (let [cbtimeout (:cbtimeout @private-state)]
     (when cbtimeout
       (.clearTimeout js/window cbtimeout))
@@ -340,6 +340,11 @@
                  :onKeyDown #(handlekeydown target owner state %)
                  :onKeyUp #(handlekeyup target owner state %)
                  :onKeyPress #(do
+                                (when (and (:flush-on-enter state)
+                                           (not (:multiline state))
+                                           (= "Enter" (.-key %)))
+                                  (update-target target owner state true))
+
                                 (when (:onKeyPress state)
                                   ((:onKeyPress state) %))
                                 (handlekeypress target owner state %))
@@ -353,13 +358,15 @@
                  :onPaste #(handlepaste target owner state %)
                  :placeholder (:placeholder state)
                  :disabled (:disabled state)
+                 :typing-timeout (:typing-timeout state)
                  :type (if (= (:input-format state) "password")
                          "password"
                          "text")
                  :style {:text-align (:align state)}})))))
 
 (defn textinput [target path {:keys [dont-update-cursor input-class input-format multiline onBlur tabIndex autofocus
-                                     placeholder id decimals align onChange auto-complete read-only disabled onKeyPress]
+                                     placeholder id decimals align onChange auto-complete read-only disabled onKeyPress
+                                     typing-timeout flush-on-enter]
                               :or {input-class ""}}]
   (om/build create-textinput target
             {:state {:path path
@@ -372,6 +379,8 @@
                      :placeholder placeholder
                      :id id
                      :disabled disabled
+                     :typing-timeout typing-timeout
+                     :flush-on-enter flush-on-enter
                      :read-only read-only
                      :input-mask (cond
                                    (= input-format "numeric") "numeric"

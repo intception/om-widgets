@@ -72,6 +72,7 @@
              [:label "Password"]
              (w/textinput app :password {:input-class "form-control"
                                          :tabIndex 6
+                                         :flush-on-enter true
                                          :input-format "password"})]
 
             [:button.btn.btn-default {:type "submit"
