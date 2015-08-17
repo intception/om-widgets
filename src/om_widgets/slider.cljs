@@ -4,6 +4,18 @@
             [sablono.core :as html :refer-macros [html]]
             [om-widgets.utils :as utils]))
 
+;; ---------------------------------------------------------------------
+;; TODO
+;; Support datalist
+;;  <datalist id=volsettings>
+;;    <option>0</option>
+;;    <option>20</option>
+;;    <option>40</option>
+;;    <option>60</option>
+;;    <option>80</option>
+;;    <option>100</option>
+;;  </datalist>
+
 (defn- input
   [cursor owner]
   (reify
