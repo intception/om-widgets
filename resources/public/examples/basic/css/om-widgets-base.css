@@ -223,6 +223,7 @@ select.om-widgets-combobox[disabled] {
   display:table;
   border-bottom: 1px solid #ddd;
   width:100%;
+  list-style-type: none;
 }
 .om-widgets-tab .om-widgets-right-panel {
   float:right;

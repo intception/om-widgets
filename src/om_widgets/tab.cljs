@@ -4,16 +4,16 @@
             [om-widgets.utils :as utils]
             [cljs.reader :as reader]))
 
+
 (defn- tab-header
   [page]
   (reify
     om/IRenderState
     (render-state [this state]
       (dom/li #js {:className (cond
-                                (:disabled page)  "disabled"
-                                (= (:current-page page)
-                                   (:index page)) "active"
-                                :else             "inactive")}
+                                (:disabled page) "disabled"
+                                (= (:current-page page) (:index page)) "active"
+                                :else "inactive")}
               (dom/a #js {:className "om-widgets-tab-item"
                           :onClick (fn [e]
                                      (when (not (:disabled page))
@@ -25,7 +25,9 @@
                                          (when (utils/atom? (om/get-props parent-owner))
                                            (om/refresh! parent-owner))))
                                      false)}
-                     (:label page))))))
+                     (when (:icon page)
+                       (dom/i #js {:className (str "glyphicon glyphicon-" (name (:icon page)))}))
+                     (str (when (:icon page) "  ") (:label page)))))))
 
 (defn- tab-page
   [page owner]
@@ -52,7 +54,7 @@
         (dom/div #js {:className (str "om-widgets-tab " class-name)
                       :id id}
                  (dom/div #js {:className "om-widgets-top-row"}
-                          (apply dom/ul #js {:className "om-widgets-nav om-widgets-nav-tabs" :role "tablist"}
+                          (apply dom/ul #js {:className "nav nav-tabs om-widgets-nav om-widgets-nav-tabs"}
                                  (conj (om/build-all tab-header opts)
                                        (when right-panel
                                          (dom/li #js {:className "om-widgets-right-panel"}
@@ -61,9 +63,9 @@
                           (om/build tab-page (nth opts current-page))))))))
 
 (defn tab
-  [cursor path {:keys [id current-page on-change right-panel class-name]} & pages]
+  [cursor path {:keys [id on-change right-panel class-name]} & pages]
   (om/build tab-component cursor {:state {:id id
-                                          :path  path
+                                          :path path
                                           :pages pages
                                           :class-name class-name
                                           :on-change on-change
