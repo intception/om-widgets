@@ -44,18 +44,14 @@
       (html
        [:li {:class "divider"}]))))
 
-(defn- build-dropdown-class
-  [opened size]
-  (str "om-widgets-dropdown dropdown btn-group "
-       (str "btn-group-" (name (or size :md)))
-       (when opened " open")))
-
 ;; ---------------------------------------------------------------------
 ;; Dropdown containers
 
 (defn- build-dropdown-js-options
-  [state]
-  {:class (build-dropdown-class (:opened state) (:size state))
+  [{:keys [size opened channel] :as state}]
+  {:class ["om-widgets-dropdown dropdown btn-group"
+           (str "btn-group-" (name (or size :md)))
+           (when opened " open")]
    ;; tab index is set to 0 to force focus on the container,
    ;; this way, the onBlur event will be called when the user
    ;; clicks outside and we can close the dropdown.
@@ -127,22 +123,22 @@
     (will-mount [_] (channel-processing cursor owner))
 
     om/IRenderState
-    (render-state [_ {:keys [title as-link? className icon items channel] :as state}]
-      (html
-       [:div (build-dropdown-js-options state)
+    (render-state [_ {:keys [title as-link? icon items channel] :as state}]
+      (let [title (str (when icon "  ") title " ")]
+        (html
+          [:div (build-dropdown-js-options state)
+           (if as-link?
+             [:a.btn-link
+              (when icon [:span {:class icon}])
+              title]
 
-        [:button {:class ["btn" (if as-link? "btn-link" "btn-default dropdown-toggle")]
-                  :type "button"}
-         (when icon
-           [:span {:class icon}])
-
-         (str (when icon "  ") title " ")
-
-         (when-not as-link?
-           [:span {:class "caret"}])]
-
-        (om/build dropdown-menu cursor {:state {:channel channel
-                                                :items items}})]))))
+             [:button {:class "btn btn-default dropdown-toggle"
+                       :type "button"}
+              (when icon [:span {:class icon}])
+              title
+              [:span {:class "caret"}]])
+           (om/build dropdown-menu cursor {:state {:channel channel
+                                                   :items items}})])))))
 
 ;; ---------------------------------------------------------------------
 ;; Schema

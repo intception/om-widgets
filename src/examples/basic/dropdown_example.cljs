@@ -51,34 +51,20 @@
           ;; Dividers
           (w/dropdown cursor
                       {:id :testing
-                       :title "with Dividers"
+                       :title "With Dividers"
                        :korks [:selected-dropdown]
                        :items (get-in cursor [:dividers])}) [:hr]
 
           ;; ---------------------------------------------------------------------
           ;; Links
+
           (w/dropdown cursor
                       {:id :testing
-                       :title "Small Dropdown Link"
+                       :title "Dropdown Link"
                        :as-link? true
                        :korks [:selected-dropdown]
                        :size :sm
-                       :items (get-in cursor [:default])})
-
-          (w/dropdown cursor
-                      {:id :testing
-                       :title "Normal Dropdown Link"
-                       :as-link? true
-                       :korks [:selected-dropdown]
-                       :items (get-in cursor [:default])})
-
-          (w/dropdown cursor
-                      {:id :testing
-                       :title "Big Dropdown Link"
-                       :as-link? true
-                       :korks [:selected-dropdown]
-                       :size :lg
-                       :items (get-in cursor [:default])})[:hr]
+                       :items (get-in cursor [:default])}) [:hr]
 
           ;; ---------------------------------------------------------------------
           ;; Icons
