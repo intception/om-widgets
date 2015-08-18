@@ -8,22 +8,83 @@
 (defn dropdown-example
   [cursor owner]
   (reify
-    om/IDisplayName
-    (display-name [_] "DropdownSample")
-
     om/IRenderState
     (render-state [this state]
-      (dom/div #js {:className "panel panel-default"
-                    :onClick #(println "preventing dropdown click propagation...")}
-               (dom/div #js {:className "panel-heading"}
-                        (str "Dropdown (selected cursor value: "
-                             (get-in cursor [:selected-dropdown])
-                             " )"))
-               (dom/div #js {:className "panel-body"}
-                        (w/dropdown cursor
-                                    {:id :testing
-                                     :title "Item Actions"
-                                     :on-selection #(om/update! cursor [:selected-dropdown] %)
-                                     :size :sm
-                                     :stop-propagation true
-                                     :items (get-in cursor [:items])}))))))
+      (html
+        [:div.panel.panel-default
+         [:div.panel-heading (str "Selected cursor value: " (get-in cursor [:selected-dropdown]))]
+
+         [:div.panel-body
+
+          ;; ---------------------------------------------------------------------
+          ;; Sizes
+          (w/dropdown cursor
+                      {:id :testing
+                       :title "Small Dropdown Button"
+                       :korks [:selected-dropdown]
+                       :size :sm
+                       :items (get-in cursor [:default])}) [:hr]
+
+          (w/dropdown cursor
+                      {:id :testing
+                       :title "Normal with URLS"
+                       :korks [:selected-dropdown]
+                       :items (get-in cursor [:urls])}) [:hr]
+
+          ;; ---------------------------------------------------------------------
+          ;; Callback
+          (w/dropdown cursor
+                      {:id :testing
+                       :title "on-selection Callback"
+                       :on-selection #(.alert js/window (str "Selected value: " %))
+                       :items (get-in cursor [:urls])}) [:hr]
+
+          ;; ---------------------------------------------------------------------
+          ;; Disabled
+          (w/dropdown cursor
+                      {:id :testing
+                       :title "Disabled entries"
+                       :korks [:selected-dropdown]
+                       :items (get-in cursor [:disabled])}) [:hr]
+
+          ;; ---------------------------------------------------------------------
+          ;; Dividers
+          (w/dropdown cursor
+                      {:id :testing
+                       :title "with Dividers"
+                       :korks [:selected-dropdown]
+                       :items (get-in cursor [:dividers])}) [:hr]
+
+          ;; ---------------------------------------------------------------------
+          ;; Links
+          (w/dropdown cursor
+                      {:id :testing
+                       :title "Small Dropdown Link"
+                       :as-link? true
+                       :korks [:selected-dropdown]
+                       :size :sm
+                       :items (get-in cursor [:default])})
+
+          (w/dropdown cursor
+                      {:id :testing
+                       :title "Normal Dropdown Link"
+                       :as-link? true
+                       :korks [:selected-dropdown]
+                       :items (get-in cursor [:default])})
+
+          (w/dropdown cursor
+                      {:id :testing
+                       :title "Big Dropdown Link"
+                       :as-link? true
+                       :korks [:selected-dropdown]
+                       :size :lg
+                       :items (get-in cursor [:default])})[:hr]
+
+          ;; ---------------------------------------------------------------------
+          ;; Icons
+          (w/dropdown cursor
+                      {:id :testing
+                       :title "with icon"
+                       :icon "glyphicon glyphicon-calendar"
+                       :korks [:selected-dropdown]
+                       :items (get-in cursor [:default])})]]))))

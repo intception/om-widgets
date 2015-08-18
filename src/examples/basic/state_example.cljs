@@ -66,18 +66,27 @@
             :selected {}
             :columns [{:caption "Name" :field :name}
                       {:caption "Username" :field :username}]}
-     :dropdown {:items [{:id :duplicate
-                         :type :entry
-                         :text "Duplicate"
-                         :url "#/item/duplicate/1234"}
-                        {:type :divider}
-                        {:id :analysis
-                         :type :entry
-                         :text "Analysis"
-                         :url "#/item/analysis/1234"}
-                        {:type :divider}
-                        {:id :trash
-                         :type :entry
-                         :text "Trash"
-                         :url "#/item/trash/1234"}]
+
+     :dropdown {:urls [{:id :first-link :type :entry :text "First Link" :url "#/link/1"}
+                       {:id :second-link :type :entry :text "Second Link" :url "#/link/2"}
+                       {:id :third-link :type :entry :text "Third Link" :url "#/link/3"}
+                       {:id :fourth-link :type :entry :text "Fourth Link" :url "#/link/4"}]
+
+                :dividers [{:id :entry1 :type :entry :text "Entry 1"}
+                           {:type :divider}
+                           {:id :entry2 :type :entry :text "Entry 2"}
+                           {:id :entry3 :type :entry :text "Entry 3"}
+                           {:type :divider}
+                           {:id :entry4 :type :entry :text "Entry 3"}]
+
+                :default [{:id 1 :type :entry :text "Entry 1"}
+                          {:id 2 :type :entry :text "Entry 2"}
+                          {:id 3 :type :entry :text "Entry 3"}
+                          {:id 4 :type :entry :text "Entry 4"}]
+
+                :disabled [{:id 1 :type :entry :text "Entry 1"}
+                           {:id 2 :type :entry :text "Entry 2" :disabled true}
+                           {:id 3 :type :entry :text "Entry 3"}
+                           {:id 4 :type :entry :text "Entry 4" :disabled true}]
+
                 :selected-dropdown :edit}}))

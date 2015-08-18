@@ -14,53 +14,41 @@
 
 (defmulti build-entry (fn [entry app] (:type entry)))
 
-(defmethod build-entry :entry [entry app]
+(defmethod build-entry :entry
+  [entry app]
   (reify
-    om/IDisplayName
-    (display-name [_] "DropdownEntry")
-
     om/IRenderState
     (render-state [this {:keys [channel] :as state}]
       (html
         ;; we use OnMouseDown because onBlur is triggered before
         ;; onClick event, we use onBlur to close the dropdown
-        [:li (->> {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
-                                   (put! channel {:type :entry-click
-                                                  :value (:id e)
-                                                  :link (:url e)}))}
+        [:li (->> {:class (when (:disabled entry) "disabled")}
+                  (merge (when-not (:disabled entry)
+                           {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
+                                            (put! channel {:type :entry-click
+                                                           :value (:id e)
+                                                           :link (:url e)})
+                                            (.preventDefault %)
+                                            (.stopPropagation %))})))
+         [:a (->> {}
                   (#(if (:url entry)
                       (merge {:href (:url entry)} %)
                       %)))
+          (:text entry)]]))))
 
-         [:a (:text entry)]]))))
-
-(defmethod build-entry :divider [entry app]
+(defmethod build-entry :divider
+  [entry app]
   (reify
-    om/IDisplayName
-    (display-name [_] "DropdownDivider")
-
     om/IRenderState
     (render-state [this state]
       (html
        [:li {:class "divider"}]))))
 
-;; ---------------------------------------------------------------------
-;; Build class multimethod
-
-(defmulti build-dropdown-class (fn [opened size] size))
-
-(defmethod build-dropdown-class :default [opened size]
-  (str "om-widgets-dropdown dropdown" (when opened " open")))
-
-(defmethod build-dropdown-class :xs [opened size]
-  (str "om-widgets-dropdown dropdown btn-group btn-group-xs" (when opened " open")))
-
-(defmethod build-dropdown-class :sm [opened size]
-  (str "om-widgets-dropdown dropdown btn-group btn-group-sm" (when opened " open")))
-
-(defmethod build-dropdown-class :lg [opened size]
-  (str "om-widgets-dropdown dropdown btn-group btn-group-lg" (when opened " open")))
-
+(defn- build-dropdown-class
+  [opened size]
+  (str "om-widgets-dropdown dropdown btn-group "
+       (str "btn-group-" (name (or size :md)))
+       (when opened " open")))
 
 ;; ---------------------------------------------------------------------
 ;; Dropdown containers
@@ -74,17 +62,15 @@
    :tabIndex 0
    :onClick (fn [e]
               (put! (:channel state) {:type :open-dropdown})
-
-              (when (:prevent-default state)
-                (.preventDefault e))
-              (when (:stop-propagation state)
-                (.stopPropagation e)))
+              (.preventDefault e)
+              (.stopPropagation e))
    :onBlur #(put! (:channel state) {:type :close-dropdown})})
 
 (defn- channel-processing
   [cursor owner]
   (let [channel (om/get-state owner :channel)
-        on-selection (om/get-state owner :on-selection)]
+        on-selection (om/get-state owner :on-selection)
+        korks (om/get-state owner :korks)]
     (go-loop []
       (let [msg (<! channel)]
         (condp = (:type msg)
@@ -93,6 +79,10 @@
           :entry-click (do
                          (when (:link msg)
                            (set! (.-location js/window) (:link msg)))
+
+                         (when korks
+                           (om/update! cursor korks (:value msg)))
+
                          (when on-selection
                            (on-selection (:value msg)))))
         (recur)))))
@@ -100,21 +90,14 @@
 (defn- dropdown-menu
   [cursor owner]
   (reify
-    om/IDisplayName
-    (display-name [_] "dropdown-menu")
-
     om/IRenderState
     (render-state [this {:keys [channel items] :as state}]
       (html
        (vec (concat [:ul {:class "dropdown-menu"}]
                     (map #(om/build build-entry % {:state {:channel channel}}) items)))))))
 
-;; TODO merge with basic dropdown?
 (defn- dropdown-menu-container [cursor owner]
   (reify
-    om/IDisplayName
-    (display-name [_] "dropdown-menu-container")
-
     om/IInitState
     (init-state [_]
       {:opened false
@@ -133,12 +116,8 @@
         (om/build dropdown-menu cursor {:state {:channel channel
                                                 :items items}})]))))
 
-;; TODO merge with menu dropdown?
 (defn- dropdown-container [cursor owner]
   (reify
-    om/IDisplayName
-    (display-name [_] "dropdown-container")
-
     om/IInitState
     (init-state [_]
       {:opened false
@@ -148,12 +127,20 @@
     (will-mount [_] (channel-processing cursor owner))
 
     om/IRenderState
-    (render-state [_ {:keys [title items channel] :as state}]
+    (render-state [_ {:keys [title as-link? className icon items channel] :as state}]
       (html
        [:div (build-dropdown-js-options state)
-        [:button {:class "btn btn-default dropdown-toggle" :type "button"}
-         (str title " ")
-         [:span {:class "caret"}]]
+
+        [:button {:class ["btn" (if as-link? "btn-link" "btn-default dropdown-toggle")]
+                  :type "button"}
+         (when icon
+           [:span {:class icon}])
+
+         (str (when icon "  ") title " ")
+
+         (when-not as-link?
+           [:span {:class "caret"}])]
+
         (om/build dropdown-menu cursor {:state {:channel channel
                                                 :items items}})]))))
 
@@ -165,6 +152,7 @@
   {:id s/Any
    :text s/Str
    :type (s/enum :entry)
+   (s/optional-key :disabled) s/Bool
    (s/optional-key :url) s/Str})
 
 (def DividerSchema
@@ -174,10 +162,12 @@
 (def DropdownSchema
   {:items [(s/either EntrySchema DividerSchema)]
    :title s/Str
-   (s/optional-key :id) s/Keyword
+   (s/optional-key :id) (s/either s/Keyword s/Str s/Int)
+   (s/optional-key :korks) (s/either s/Keyword [s/Keyword])
+   (s/optional-key :icon) s/Str
+   (s/optional-key :className) s/Str
    (s/optional-key :on-selection) (s/pred fn?)
-   (s/optional-key :prevent-default) s/Bool
-   (s/optional-key :stop-propagation) s/Bool
+   (s/optional-key :as-link?) s/Bool
    (s/optional-key :type) (s/enum :default :menu)
    (s/optional-key :size) (s/enum :default :sm :xs :lg)})
 
