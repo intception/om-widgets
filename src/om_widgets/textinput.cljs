@@ -340,10 +340,13 @@
                  :onKeyDown #(handlekeydown target owner state %)
                  :onKeyUp #(handlekeyup target owner state %)
                  :onKeyPress #(do
-                                (when (and (:flush-on-enter state)
-                                           (not (:multiline state))
-                                           (= "Enter" (.-key %)))
-                                  (update-target target owner state true))
+                                (when (= "Enter" (.-key %))
+                                  (do
+                                    (when (and (:flush-on-enter state)
+                                               (not (:multiline state)))
+                                      (update-target target owner state true))
+                                    (when (:onEnter state)
+                                      ((:onEnter state) %))))
 
                                 (when (:onKeyPress state)
                                   ((:onKeyPress state) %))
@@ -366,7 +369,7 @@
 
 (defn textinput [target path {:keys [dont-update-cursor input-class input-format multiline onBlur tabIndex autofocus
                                      placeholder id decimals align onChange auto-complete read-only disabled onKeyPress
-                                     typing-timeout flush-on-enter]
+                                     typing-timeout flush-on-enter onEnter]
                               :or {input-class ""}}]
   (om/build create-textinput target
             {:state {:path path
@@ -400,4 +403,5 @@
                      :onChange onChange
                      :onBlur onBlur
                      :onKeyPress onKeyPress
+                     :onEnter onEnter
                      :auto-complete auto-complete}}))
