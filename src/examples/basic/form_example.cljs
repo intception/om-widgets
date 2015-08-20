@@ -26,9 +26,17 @@
                                      :placeholder "Your name"})]
 
             [:div.form-group
+             [:label "How old are you?"]
+             (w/textinput app :age {:input-class "form-control"
+                                    :autofocus true
+                                    :tabIndex 2
+                                    :input-format "numeric"
+                                    :placeholder "Your age (numbers only)"})]
+
+            [:div.form-group
              [:label "Email"]
              (w/textinput app :email {:input-class "form-control"
-                                      :tabIndex 2
+                                      :tabIndex 3
                                       :placeholder "hello@domain.com"})]
 
 
@@ -43,13 +51,13 @@
              [:label "Birth Date"]
              (w/textinput app :birth-date {:input-class "form-control"
                                            :input-format "date"
-                                           :tabIndex 3
+                                           :tabIndex 4
                                            :placeholder "MM/DD/YYYY"})]
 
             [:div.form-group
              [:label "Sex"]
              (w/radiobutton app :sex {:checked-value :female
-                                      :tabIndex 4
+                                      :tabIndex 5
                                       :class-name "some-container-class"
                                       :label-class "some-label-class"
                                       :label " Female"})
@@ -62,22 +70,22 @@
              [:label "Marital Status"]
              [:br]
              (w/combobox app :marital-status
-                             {:tabIndex 5
-                              :options (sorted-map :single "Single"
-                                                   :married "Married"
-                                                   :divorced "Divorced"
-                                                   :widowed "Widowed")})]
+                         {:tabIndex 6
+                          :options (sorted-map :single "Single"
+                                               :married "Married"
+                                               :divorced "Divorced"
+                                               :widowed "Widowed")})]
 
             [:div.form-group
              [:label "Password"]
              (w/textinput app :password {:input-class "form-control"
-                                         :tabIndex 6
+                                         :tabIndex 7
                                          :flush-on-enter true
                                          :onEnter #(println "enter pressed!")
                                          :input-format "password"})]
 
             [:button.btn.btn-default {:type "submit"
-                                      :tabIndex 7} "Submit"]
+                                      :tabIndex 8 } "Submit"]
 
             [:hr]
             [:div.form-group

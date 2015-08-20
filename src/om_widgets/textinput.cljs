@@ -108,19 +108,10 @@
 (defn- mask-handler-selector
   [target owner state]
   (condp = (:input-format state)
-    "numeric" :unmasked
+    "numeric" :numeric
     "password" :unmasked
     nil :unmasked
     :mask))
-
-(defmulti handlekeydown mask-handler-selector)
-(defmulti handlekeyup mask-handler-selector)
-(defmulti handlekeypress mask-handler-selector)
-(defmulti handlepaste mask-handler-selector)
-
-(defmulti handle-custom-keys! mask-handler-selector)
-(defmulti initmask! mask-handler-selector)
-(defmulti applymask! mask-handler-selector)
 
 (defn- update-target
   [target owner {:keys [cbtimeout input-format prev-value path onChange private-state] :as state} bInternal]
@@ -143,93 +134,10 @@
     (swap! private-state assoc :cbtimeout (.setTimeout js/window #(update-target target owner state false)
                                                        (or typing-timeout 500)))))
 
-(defmethod handlekeydown :default
-  [target owner state e]
-  true)
 
-(defmethod handlekeyup :default
-  [target owner state e]
-  true)
-
-(defmethod handlekeypress :default
-  [target owner state e]
-  true)
-
-(defmethod handlepaste :default
-  [target owner state e]
-  true)
-
-(defmethod handle-custom-keys! :default
-  [target owner state k]
-  true)
-
-(defmethod initmask! :default
-  [target owner state])
-
-(defmethod applymask! :default
-  [target owner state value]
-  (when-let  [dom-node (:dom-node @(:private-state state))]
-    (when-not  (= value (:prev-value @(:private-state state)))
-      (set! (.-value dom-node) value))))
-
-(defmethod handlekeydown :default
-  [target owner state e]
-  (fire-on-change target owner state)
-  true)
-
-(defmethod handle-custom-keys! :default
-  [target owner state k]
-  true)
-
-(defmethod handlekeydown :mask
-  [target owner state e]
-  (let [k (.-which e)]
-    (if (special-key? k)
-      true
-      (do
-        (fire-on-change target owner state)
-        (handle-custom-keys! target owner state k)))))
-
-(defmethod handlekeyup :mask
-  [target owner state e]
-  (let [k (.-which e)]
-    (if (special-key? k)
-      true)
-    false))
-
-(defmethod handlekeypress :mask
-  [target owner state e]
-  (let [private-state (:private-state state)
-        dom-node (:dom-node @private-state)
-        mask-vector (:mask-vector @private-state)
-        entered-values (:entered-values @private-state)
-        mi (nth mask-vector (min (get-selection-start dom-node) (dec (count mask-vector))))
-        pos (next-available-position mask-vector (get-selection-start dom-node))
-        char-code (.-which e)
-        new-char (.fromCharCode js/String char-code)
-        entered-values (:entered-values @private-state)]
-
-    (when (and pos (> (count mask-vector) pos))
-      (let [m (nth mask-vector pos)]
-        (if (re-matches m new-char)
-          (let [new-entered-values (replace-item-at-pos entered-values pos new-char)]
-            (swap! private-state assoc :entered-values new-entered-values)
-            (set! (.-value dom-node)  (apply str new-entered-values))
-            (set-caret-pos dom-node (inc pos)))
-          (if (string? mi)
-            (set-caret-pos dom-node pos))
-          (set-caret-pos dom-node (inc pos)))))
-
-    false))
-
-(defmethod handlepaste :mask
-  [target owner state k]
-  (.setTimeout js/window (fn []
-                           (let [private-state (:private-state state)
-                                 dom-node (:dom-node @private-state)]
-                             (applymask! target owner state (.-value dom-node))))
-               1)
-  true)
+;; ---------------------------------------------------------------------
+;; handle-custom-keys
+(defmulti handle-custom-keys! mask-handler-selector)
 
 (defmethod handle-custom-keys! :mask
   [target owner state k]
@@ -268,20 +176,94 @@
         false)
       true)))
 
-(defmethod initmask! :mask
-  [target owner state]
+(defmethod handle-custom-keys! :default
+  [target owner state k]
+  true)
+
+;; ---------------------------------------------------------------------
+;; handlekeydown
+(defmulti handlekeydown mask-handler-selector)
+
+(defmethod handlekeydown :mask
+  [target owner state e]
+  (let [k (.-which e)]
+    (if (special-key? k)
+      true
+      (do
+        (fire-on-change target owner state)
+        (handle-custom-keys! target owner state k)))))
+
+(defmethod handlekeydown :numeric
+  [target owner state e]
+  (let [k (.-which e)]
+    (if (special-key? k)
+      true
+      (do
+        (fire-on-change target owner state)
+        (handle-custom-keys! target owner state k)))))
+
+(defmethod handlekeydown :default
+  [target owner state e]
+  (fire-on-change target owner state)
+  true)
+
+;; ---------------------------------------------------------------------
+;; handlekeyup
+(defmulti handlekeyup mask-handler-selector)
+
+(defmethod handlekeyup :mask
+  [target owner state e]
+  (let [k (.-which e)]
+    (if (special-key? k)
+      true)
+    false))
+
+(defmethod handlekeyup :default
+  [target owner state e]
+  true)
+
+
+;; ---------------------------------------------------------------------
+;; handlekeypress
+(defmulti handlekeypress mask-handler-selector)
+
+(defmethod handlekeypress :mask
+  [target owner state e]
   (let [private-state (:private-state state)
-        input-mask (:input-mask state)
-        mask (vec (map #(condp = %
-                          \0 #"^[0-9]$"
-                          \# #"^[0-9s%.]$"
-                          \L #"^[a-zA-Z]$"
-                          \A #"^[0-9a-zA-Z]$"
-                          \& #"."
-                          \\ nil
-                          %) input-mask))]
-    (swap! private-state assoc :entered-values (map #(when (string? %) %) mask)
-           :mask-vector (remove nil? mask))))
+        dom-node (:dom-node @private-state)
+        mask-vector (:mask-vector @private-state)
+        entered-values (:entered-values @private-state)
+        mi (nth mask-vector (min (get-selection-start dom-node) (dec (count mask-vector))))
+        pos (next-available-position mask-vector (get-selection-start dom-node))
+        char-code (.-which e)
+        new-char (.fromCharCode js/String char-code)
+        entered-values (:entered-values @private-state)]
+    (when (and pos (> (count mask-vector) pos))
+      (let [m (nth mask-vector pos)]
+        (if (re-matches m new-char)
+          (let [new-entered-values (replace-item-at-pos entered-values pos new-char)]
+            (swap! private-state assoc :entered-values new-entered-values)
+            (set! (.-value dom-node)  (apply str new-entered-values))
+            (set-caret-pos dom-node (inc pos)))
+          (if (string? mi)
+            (set-caret-pos dom-node pos))
+          (set-caret-pos dom-node (inc pos)))))
+
+    false))
+
+(defmethod handlekeypress :numeric
+  [target owner state e]
+  (let [char-code (.-which e)
+        new-char (.fromCharCode js/String char-code)]
+    (pos? (count (re-seq #"\d" new-char)))))
+
+(defmethod handlekeypress :default
+  [target owner state e]
+  true)
+
+;; ---------------------------------------------------------------------
+;; Apply Mask
+(defmulti applymask! mask-handler-selector)
 
 (defmethod applymask! :mask
   [target owner state value]
@@ -308,7 +290,58 @@
                :prev-value new-value)
         (set! (.-value dom-node)  new-value)))))
 
-(defn- create-textinput [target owner]
+(defmethod applymask! :default
+  [target owner state value]
+  (when-let  [dom-node (:dom-node @(:private-state state))]
+    (when-not  (= value (:prev-value @(:private-state state)))
+      (set! (.-value dom-node) value))))
+
+
+;; ---------------------------------------------------------------------
+;; handlepaste
+(defmulti handlepaste mask-handler-selector)
+
+(defmethod handlepaste :mask
+  [target owner state k]
+  (.setTimeout js/window (fn []
+                           (let [private-state (:private-state state)
+                                 dom-node (:dom-node @private-state)]
+                             (applymask! target owner state (.-value dom-node))))
+               1)
+  true)
+
+(defmethod handlepaste :default
+  [target owner state e]
+  true)
+
+
+;; ---------------------------------------------------------------------
+;; Init Mask
+(defmulti initmask! mask-handler-selector)
+
+(defmethod initmask! :mask
+  [target owner state]
+  (let [private-state (:private-state state)
+        input-mask (:input-mask state)
+        mask (vec (map #(condp = %
+                          \0 #"^[0-9]$"
+                          \# #"^[0-9s%.]$"
+                          \L #"^[a-zA-Z]$"
+                          \A #"^[0-9a-zA-Z]$"
+                          \& #"."
+                          \\ nil
+                          %) input-mask))]
+    (swap! private-state assoc :entered-values (map #(when (string? %) %) mask)
+           :mask-vector (remove nil? mask))))
+
+(defmethod initmask! :default
+  [target owner state])
+
+
+;; ---------------------------------------------------------------------
+;; Components
+(defn- create-textinput
+  [target owner]
   (reify
     om/IInitState
     (init-state [this]
@@ -367,13 +400,14 @@
                          "text")
                  :style {:text-align (:align state)}})))))
 
-(defn textinput [target path {:keys [dont-update-cursor input-class input-format multiline onBlur tabIndex autofocus
-                                     placeholder id decimals align onChange auto-complete read-only disabled onKeyPress
-                                     typing-timeout flush-on-enter onEnter]
-                              :or {input-class ""}}]
+
+(defn textinput
+  [target path {:keys [input-class input-format multiline onBlur tabIndex autofocus
+                       placeholder id decimals align onChange auto-complete read-only disabled onKeyPress
+                       typing-timeout flush-on-enter onEnter] :as opts
+                :or {input-class ""}}]
   (om/build create-textinput target
             {:state {:path path
-                     :dont-update-cursor dont-update-cursor
                      :input-class input-class
                      :input-format input-format
                      :multiline multiline

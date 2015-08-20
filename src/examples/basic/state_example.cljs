@@ -38,6 +38,7 @@
      :sex :male
      :tab {}
      :form {:name ""
+            :age 25
             :birth-date ""
             :hours 8
             :sex :male
