@@ -159,7 +159,7 @@
   {:items [(s/either EntrySchema DividerSchema)]
    :title s/Str
    (s/optional-key :id) (s/either s/Keyword s/Str s/Int)
-   (s/optional-key :korks) (s/either s/Keyword [s/Keyword])
+   (s/optional-key :korks) (s/either s/Any [s/Any])
    (s/optional-key :icon) s/Str
    (s/optional-key :className) s/Str
    (s/optional-key :on-selection) (s/pred fn?)
