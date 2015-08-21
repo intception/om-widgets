@@ -4,12 +4,13 @@
             [om-widgets.utils :as utils]))
 
 
-(defn- radio [entity owner]
+(defn- radio
+  [entity owner]
   (reify
     om/IRenderState
     (render-state [this {:keys [label id path checked-value disabled class-name label-class tabIndex]}]
       (dom/div #js {:className (str class-name (if (= (utils/om-get entity [path]) checked-value) " active" ""))}
-               (dom/label #js {:className (or label-class "label")}
+               (dom/label #js {:className (or label-class "")}
                           (dom/input #js {:type "radio"
                                           :id id
                                           :disabled disabled
