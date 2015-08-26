@@ -23,13 +23,15 @@
   (let [dt (timec/from-date dt)]
     (time-format/unparse (time-format/formatter fmt) dt)))
 
+
 (defn- convert-input
   [input-type value]
   (condp = input-type
     "date" (try
              (string-from-date value date-local-format)
              (catch js/Error e
-               value))
+               ;; assume empty string for unhandled values
+               ""))
     value))
 
 (defn- convert-output
