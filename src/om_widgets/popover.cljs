@@ -112,70 +112,91 @@
                                         :right (+ (:right trect) (:scroll-x wz))})
                       bounding-rect (dommy/bounding-client-rect node)
                       side (condp =  (om/get-state owner :prefered-side)
-                            :top    (if (>= (- (:top target-pos) (+ (:height bounding-rect) 20))
-                                            (:scroll-y wz))
-                                      :top
-                                      :bottom)
-                            :bottom (if (<= (+ (:bottom target-pos) (:height bounding-rect))
-                                            (+ (:scroll-y wz) (- (:height wz) 20)))
-                                      :bottom
-                                      :top)
-                            :right  (if (<= (+ (:right  target-pos) (:width  bounding-rect))
-                                            (+ (:scroll-x wz) (- (:width  wz) 20)))
-                                      :right
-                                      :left)
-                            :left   (if (>= (- (:left target-pos) (+ (:width bounding-rect) 20))
-                                            (:scroll-x wz))
-                                      :left
-                                      :right))
+                            :top  (cond
+                                    (>= (- (:top target-pos)
+                                           (+ (:height bounding-rect) 20))
+                                        (:scroll-y wz)) :top
+
+                                    (<= (+ (:bottom target-pos) (:height bounding-rect))
+                                        (+ (:scroll-y wz) (- (:height wz) 20))) :bottom
+                                    (<= (+ (:right  target-pos) (:width  bounding-rect))
+                                        (+ (:scroll-x wz) (- (:width  wz) 20))) :right
+                                    (>= (- (:left target-pos) (+ (:width bounding-rect) 20))
+                                        (:scroll-x wz)) :left
+                                    :else :center)
+
+                            :bottom (cond
+                                      (<= (+ (:bottom target-pos) (:height bounding-rect))
+                                            (+ (:scroll-y wz) (- (:height wz) 20))) :bottom
+                                      (>= (- (:top target-pos)
+                                             (+ (:height bounding-rect) 20))
+                                          (:scroll-y wz)) :top
+                                      (<= (+ (:right  target-pos) (:width  bounding-rect))
+                                          (+ (:scroll-x wz) (- (:width  wz) 20))) :right
+                                      (>= (- (:left target-pos) (+ (:width bounding-rect) 20))
+                                          (:scroll-x wz)) :left
+                                      :else :center)
+
+                            :right  (cond
+                                      (<= (+ (:right  target-pos) (:width  bounding-rect))
+                                            (+ (:scroll-x wz) (- (:width  wz) 20))) :right
+                                      (>= (- (:left target-pos) (+ (:width bounding-rect) 20))
+                                          (:scroll-x wz)) :left
+                                      (>= (- (:top target-pos)
+                                             (+ (:height bounding-rect) 20))
+                                          (:scroll-y wz)) :top
+                                      (<= (+ (:bottom target-pos) (:height bounding-rect))
+                                          (+ (:scroll-y wz) (- (:height wz) 20))) :bottom
+                                      :else :center)
+                            :left   (cond (>= (- (:left target-pos) (+ (:width bounding-rect) 20))
+                                            (:scroll-x wz)) :left
+                                          (<= (+ (:right  target-pos) (:width  bounding-rect))
+                                              (+ (:scroll-x wz) (- (:width  wz) 20))) :right
+                                          (>= (- (:top target-pos)
+                                                 (+ (:height bounding-rect) 20))
+                                              (:scroll-y wz)) :top
+                                          (<= (+ (:bottom target-pos) (:height bounding-rect))
+                                              (+ (:scroll-y wz) (- (:height wz) 20))) :bottom
+                                          :else :center))
                       y (condp = side
-                          :top    (- (:top target-pos) (:height bounding-rect))
+                          :top    (- (:top target-pos)
+                                     (:height bounding-rect))
                           :bottom (:bottom target-pos)
                           :right  (- (+ (:top target-pos) (* (:height target-pos) align))
                                     (* (:height bounding-rect) align))
                           :left   (- (+ (:top target-pos) (* (:height target-pos) align))
-                                    (* (:height bounding-rect) align)))
+                                    (* (:height bounding-rect) align))
+                          :center (- (+ (/ (:height wz) 2)
+                                           (:scroll-y wz))
+                                        (/ (:height bounding-rect) 2)))
 
                       x (condp = side
                           :top    (- (+ (:left target-pos) (* (:width target-pos) align))
-                                    (* (:width bounding-rect) align))
+                                     (* (:width bounding-rect) align))
                           :bottom (- (+ (:left target-pos) (* (:width target-pos) align))
                                     (* (:width bounding-rect) align))
                           :right  (:right target-pos)
-                          :left   (- (:left target-pos) (:width bounding-rect)))
-                      offset-left (if (or (< y 0)
-                                          (> (+ y (:height bounding-rect)) (- (:height wz) 14))
-                                          (x < 0)
-                                          (> (+ x (:width bounding-rect)) (- (:width wz) 14)))
-                                    (- (- (+ (/ (:width wz) 2)  (:scroll-x wz))
-                                          (/ (:width bounding-rect) 2)) x -14)
-                                    (ofs-max (if (contains? #{:top :bottom} side)
+                          :left   (- (:left target-pos) (:width bounding-rect))
+                          :center (- (+ (/ (:width wz) 2)
+                                        (:scroll-x wz))
+                                     (/ (:width bounding-rect) 2)))
+
+                      offset-left   (ofs-max (if (contains? #{:top :bottom} side)
                                             (cond (< x (:scroll-x wz)) (- (:scroll-x wz) x)
                                                   (> (+ x (:width bounding-rect)) (+ (:width wz) (:scroll-x wz))) (-  (+ (:width wz) (:scroll-x wz)) (+ x (:width bounding-rect)))
                                                   :else 0)
                                             0)
-                                           (- (/ (:width bounding-rect) 2) 20)))
+                                           (- (/ (:width bounding-rect) 2) 20))
                       arrow-left (* 100 (- align (/ (- offset-left (arrow-offset-align 14 -14 align)) (:width bounding-rect))))
-                      offset-top (if (or (< y 0)
-                                         (> (+ y (:height bounding-rect)) (- (:height wz) 14))
-                                         (x < 0)
-                                         (> (+ x (:width bounding-rect)) (- (:width wz) 14)))
-                                   (- (- (+ (/ (:height wz) 2)  (:scroll-y wz))
-                                         (/ (:height bounding-rect) 2)) y -14)
-
-                                   (ofs-max (if (contains? #{:left :right} side)
+                      offset-top    (ofs-max (if (contains? #{:left :right} side)
                                             (cond (< y (:scroll-y wz)) (- (:scroll-y wz) y)
                                                   (> (+ y (:height bounding-rect)) (+ (:height wz) (:scroll-y wz))) (-  (+ (:height wz) (:scroll-y wz)) (+ y (:height bounding-rect)))
                                                   :else 0)
                                             0)
-                                          (- (/ (:height bounding-rect) 2) 20)))
-
-                      has-arrow (if (or (< y 0)
-                                        (> (+ y (:height bounding-rect)) (- (:height wz) 14))
-                                        (x < 0)
-                                        (> (+ x (:width bounding-rect)) (- (:width wz) 14)))
-                                  false
-                                  (:has-arrow opts))
+                                          (- (/ (:height bounding-rect) 2) 20))
+                      has-arrow (if-not (= side :center)
+                                  (:has-arrow opts)
+                                  false)
                       arrow-top (* 100 (- align (/ (- offset-top (arrow-offset-align 14 -14 align))(:height bounding-rect))))]
                   (om/set-state! owner :has-arrow has-arrow)
                   (when-not (= (om/get-state owner :side) side)
