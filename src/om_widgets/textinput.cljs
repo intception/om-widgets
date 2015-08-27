@@ -31,7 +31,7 @@
              (string-from-date value date-local-format)
              (catch js/Error e
                ;; assume empty string for unhandled values
-               ""))
+               (str value)))
     value))
 
 (defn- convert-output
