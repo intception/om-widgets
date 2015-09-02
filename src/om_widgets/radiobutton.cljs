@@ -8,7 +8,7 @@
   [entity owner]
   (reify
     om/IRenderState
-    (render-state [this {:keys [label id path checked-value disabled class-name label-class tabIndex]}]
+    (render-state [this {:keys [label id path checked-value disabled class-name label-class tabIndex onChange]}]
       (dom/div #js {:className (str class-name (if (= (utils/om-get entity [path]) checked-value) " active" ""))}
                (dom/label #js {:className (or label-class "")}
                           (dom/input #js {:type "radio"
@@ -17,6 +17,8 @@
                                           :tabIndex tabIndex
                                           :checked (= (utils/om-get entity [path]) checked-value)
                                           :onChange (fn [e]
+                                                      (when onChange
+                                                        (onChange checked-value))
                                                       (utils/om-update! entity path checked-value)
                                                       (when (utils/atom? entity)
                                                         (om/refresh! owner)))}
@@ -26,7 +28,7 @@
 ;; Public
 
 (defn radiobutton
-  [entity path {:keys [label class-name id checked-value disabled label-class tabIndex]
+  [entity path {:keys [label class-name id checked-value disabled label-class tabIndex onChange]
                 :or {checked-value true class-name "om-widgets-radio"}}]
   (om/build radio entity {:state {:label label
                                   :id id
@@ -34,5 +36,6 @@
                                   :disabled disabled
                                   :class-name class-name
                                   :label-class label-class
+                                  :onChange onChange
                                   :checked-value checked-value
                                   :path path}}))
