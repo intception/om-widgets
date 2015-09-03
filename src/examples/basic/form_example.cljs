@@ -56,15 +56,12 @@
 
             [:div.form-group
              [:label "Sex"]
-             (w/radiobutton app :sex {:checked-value :female
-                                      :tabIndex 5
-                                      :class-name "some-container-class"
-                                      :label-class "some-label-class"
-                                      :label " Female"})
-             (w/radiobutton app :sex {:checked-value :male
-                                      :class-name "some-container-class"
-                                      :label-class "some-label-class"
-                                      :label " Male"})]
+             (w/radiobutton-group app :sex {:class-name "some-container-class"
+                                            :label-class "some-label-class"
+                                            :options [{:label " Male"
+                                                       :checked-value :male}
+                                                      {:label " Female"
+                                                       :checked-value :female}]})]
 
             [:div.form-group
              [:label "Marital Status"]

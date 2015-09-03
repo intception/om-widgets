@@ -23,6 +23,7 @@
 (def navbar om-widgets.navbar/navbar)
 (def datepicker om-widgets.datepicker/datepicker)
 (def radiobutton om-widgets.radiobutton/radiobutton)
+(def radiobutton-group om-widgets.radiobutton/radiobutton-group)
 (def combobox om-widgets.combobox/combobox)
 (def button om-widgets.button/button)
 (def grid om-widgets.grid/grid)

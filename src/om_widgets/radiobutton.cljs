@@ -24,6 +24,24 @@
                                                         (om/refresh! owner)))}
                                      label))))))
 
+(defn- group
+  [entity]
+  (reify
+    om/IRenderState
+    (render-state [this {:keys [path options disabled class-name label-class]}]
+      (apply dom/div nil
+             (map (fn [option]
+                    (om/build radio entity {:state {:label (:label option)
+                                                    :tabIndex (:tabIndex option)
+                                                    :disabled disabled
+                                                    :class-name class-name
+                                                    :label-class label-class
+                                                    :onChange (:onChange option)
+                                                    :checked-value (:checked-value option)
+                                                    :path path}}))
+                  options)))))
+
+
 ;; ---------------------------------------------------------------------
 ;; Public
 
@@ -38,4 +56,12 @@
                                   :label-class label-class
                                   :onChange onChange
                                   :checked-value checked-value
+                                  :path path}}))
+
+(defn radiobutton-group
+  [entity path {:keys [options disabled class-name label-class]}]
+  (om/build group entity {:state {:options options
+                                  :disabled disabled
+                                  :class-name class-name
+                                  :label-class label-class
                                   :path path}}))
