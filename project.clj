@@ -1,21 +1,21 @@
-(defproject org.clojars.intception/om-widgets "0.1.50"
+(defproject org.clojars.intception/om-widgets "0.2.0"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
 
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2665" :scope "provided"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [org.clojure/clojurescript "1.7.122" :scope "provided"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                 [om "0.7.1"]
+                 [org.omcljs/om "0.8.8" :scope "provided"]
                  [com.palletops/thread-expr "1.3.0"]
-                 [com.andrewmcveigh/cljs-time "0.2.1"]
+                 [com.andrewmcveigh/cljs-time "0.3.13"]
                  [prismatic/dommy "1.0.0"]
                  [net.unit8/tower-cljs "0.1.0"] ;; translations
                  [sablono "0.2.22"]
                  [shodan "0.4.1"]
                  [com.cemerick/clojurescript.test "0.3.3"]
-                 [prismatic/schema "0.3.3"]]
+                 [prismatic/schema "0.4.0" :exclusions [org.clojure/clojurescript]]]
 
-  :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]
+  :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.2.3-SNAPSHOT"]
             [com.cemerick/clojurescript.test "0.3.3"]]
 

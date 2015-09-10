@@ -248,8 +248,8 @@
             (set! (.-value dom-node)  (apply str new-entered-values))
             (set-caret-pos dom-node (inc pos)))
           (if (string? mi)
-            (set-caret-pos dom-node pos))
-          (set-caret-pos dom-node (inc pos)))))
+            (set-caret-pos dom-node pos)
+            (set-caret-pos dom-node (inc pos))))))
 
     false))
 
@@ -400,7 +400,7 @@
                  :type (if (= (:input-format state) "password")
                          "password"
                          "text")
-                 :style {:text-align (:align state)}})))))
+                 :style {:textAlign (:align state)}})))))
 
 
 (defn textinput
