@@ -41,9 +41,7 @@
                                  (if (and sort-info
                                           (= (:column sort-info)
                                              column))
-                                   (if (= :up (:direction sort-info))
-                                     "up"
-                                     "down")
+                                   (name (:direction sort-info))
                                    "both"))}]]))))
 
 (defn standard-sort [column]
@@ -55,18 +53,26 @@
                                                  :channel channel}}))
     ISortableColumnSortData
     (sort-data [this sort-info rows]
-      (-> (sort-by (get-in sort-info [:column :field])
-                   rows)
-          (#(if (= :down (:direction sort-info))
-             (reverse %)
-             %))))))
+      (let [direction (:direction sort-info)
+            field (get-in sort-info [:column :field])
+            sort-fn (get-in sort-info [:column :sort-fn])]
+        (-> (if-not sort-fn
+              (sort-by #(let [v (get % field)]
+                         (if (string? v)
+                           (clojure.string/lower-case v)
+                           v))
+                       rows)
+              (sort sort-fn rows))
+            (#(if (= :down direction)
+               (reverse %)
+               %)))))))
 
 (defmulti grid-sorter :sort)
 
 (defmethod grid-sorter :default
   [column])
 
-(defmethod grid-sorter :standard
+(defmethod grid-sorter true
   [column]
   (standard-sort column))
 
@@ -320,9 +326,7 @@
 
     om/IRenderState
     (render-state [this {:keys [header src] :as state}]
-      (dom/div #js {:className (str "om-widgets-grid "
-                                    (when (:read-only state)
-                                      "read-only"))
+      (dom/div #js {:className "om-widgets-grid"
                     :id (:id opts)}
                (om/build grid-body
                          target
@@ -359,7 +363,7 @@
   {:type (s/enum :default :none)
    (s/optional-key :columns) [{:caption s/Str
                                :field s/Keyword
-                               :sort s/Keyword
+                               :sort (s/either s/Bool s/Keyword)
                                (s/optional-key :col-span) s/Int
                                :data-format (s/enum :default :date :dom :keyword)
                                ;; for date format
@@ -391,7 +395,7 @@
 ;; Public
 
 ;; TODO source should be a DataSource protocol
-(defn grid [source target & {:keys [id read-only onChange events-channel header pager language]
+(defn grid [source target & {:keys [id onChange events-channel header pager language]
                              :as definition}]
   (let [src {:rows (or (:rows source) source)
              :index (or (:index source) 0)
@@ -405,7 +409,6 @@
                        :pager (or pager {:type :default})
                        :events-channel events-channel
                        :max-pages (calculate-max-pages (:total-rows src) page-size)
-                       :read-only read-only
                        :page-size page-size
                        :onChange onChange}
                :opts {:language (or (:language definition) :en)

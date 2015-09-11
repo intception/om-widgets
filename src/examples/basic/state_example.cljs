@@ -43,12 +43,13 @@
             :hours 8
             :sex :male
             :password ""}
-     :grid {:source-simple [{:name "Sebas" :username "kernelp4nic"}
-                            {:name "Guille" :username "guilespi"}
-                            {:name "Fabian" :username "fapenia"}
-                            {:name "Alexis" :username "_axs_"}
-                            {:name "Martin" :username "nartub"}
-                            {:name "Intception" :username "intception"}]
+     :grid {:source-simple [{:name "Sebas" :username "kernelp4nic"  :fecha #inst "2002-04-20"}
+                            {:name "Guille" :username "guilespi" :fecha #inst "2004-04-20"}
+                            {:name "Fabian" :username "fapenia" :fecha #inst "2004-04-21"}
+                            {:name "Alexis" :username "_axs_" :fecha #inst "2012-04-20"}
+                            {:name "Martin" :username "nartub" :fecha #inst "2005-02-17"}
+                            {:name "alexis" :username "_axs_" :fecha #inst "2005-02-17"}
+                            {:name "Intception" :username "intception" :fecha #inst "2001-02-17"}]
 
             :source-custom-cell [{:name "Seba"
                                   :username "kernelp4nic"
@@ -65,8 +66,19 @@
                                    {:name "Alexis" :username "_axs_" :row-type :users}
                                    {:name "Martin" :username "nartub" :row-type :users}]}
             :selected {}
-            :columns [{:caption "Name" :field :name}
-                      {:caption "Username" :field :username}]}
+            :columns [{:caption "Name"
+                       :field :name
+                       :sort true
+                       :sort-fn (fn [a b]
+                                  (compare (:name a) (:name b))
+                                  )}
+                      {:caption "Username"
+                       :field :username}
+                      {:caption "Fecha"
+                       :field :fecha
+                       :sort true
+                       :data-format :date}
+                      ]}
 
      :dropdown {:urls [{:id :first-link :type :entry :text "First Link" :url "#/link/1"}
                        {:id :second-link :type :entry :text "Second Link" :url "#/link/2"}
