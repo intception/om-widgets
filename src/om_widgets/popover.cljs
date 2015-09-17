@@ -1,11 +1,12 @@
 (ns om-widgets.popover
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
+  (:import [goog.events EventType])
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [put! chan <! alts! timeout close!]]
             [sablono.core :as html :refer-macros [html]]
-            [dommy.core :as dommy :refer-macros [sel sel1]]))
-
+            [dommy.core :as dommy :refer-macros [sel sel1]]
+            [goog.events :as events]))
 
 (defn window-size []
   (merge {:scroll-x 0
@@ -207,14 +208,15 @@
                       (dommy/set-style! arrow :left (str arrow-left "%"))
                       (dommy/set-style! arrow :top (str arrow-top "%"))))
                   (recur)))))
-                (dommy/listen! js/window :resize update-position)
+                (events/listen js/window EventType.RESIZE update-position)
                 (put! (om/get-state owner :channel) :update)
           ))
       om/IWillUnmount
       (will-unmount [this]
         (dommy/remove! (om/get-state owner :node))
         (dommy/append! (om/get-state owner :parent) (om/get-state owner :node))
-        (dommy/unlisten! js/window :resize update-position)
+        (events/unlisten js/window EventType.RESIZE update-position)
+
         (put! (om/get-state owner :channel) :quit))
       om/IRenderState
       (render-state [this {:keys [label side has-arrow content-fn mouse-down] :as state}]
