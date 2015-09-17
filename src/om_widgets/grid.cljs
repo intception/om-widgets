@@ -27,8 +27,8 @@
                    :onClick (fn []
                               (let [sort-info (om/get-state owner :sort-info)
                                     column (if (satisfies? IDeref (om/get-state owner :column))
-                                               @(om/get-state owner :column)
-                                               (om/get-state owner :column))]
+                                             @(om/get-state owner :column)
+                                             (om/get-state owner :column))]
                                 (put! (om/get-state owner :channel)
                                       {:sort-info {:column column
                                                    :direction (if (and sort-info
@@ -171,9 +171,11 @@
       (html
         [:td (-> {:class "om-widgets-data-cell"}
                  (merge (when col-span) {:colSpan col-span}))
-         (timef/unparse (timef/formatter (or date-formatter
-                                             "yyyy/MM/dd"))
-                        (time/date-time date))]))))
+         (if date
+           (timef/unparse (timef/formatter (or date-formatter
+                                               "yyyy/MM/dd"))
+                          (time/date-time date))
+           "")]))))
 
 (defmethod cell-builder :keyword [cell owner opts]
   (let [col-span (:col-span (:column-def opts))
