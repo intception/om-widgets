@@ -46,7 +46,8 @@
                                    (name (:direction sort-info))
                                    "both"))}]]))))
 
-(defn standard-sort [column]
+(defn standard-sort
+  [column]
   (reify
     ISortableColumnCaret
     (column-caret [this column sort-info channel]
@@ -89,7 +90,8 @@
 ;; * inconsistence between row-builder and grid-header multimethods, one needs to return
 ;; a valid om component and the other one is just a function that makes the build.
 
-(defn- title-header-cell [{:keys [caption col-span] :as h} owner]
+(defn- title-header-cell
+  [{:keys [caption col-span] :as h} owner]
   (om/component
     (let [sorter (grid-sorter h)]
       (html [:th (when col-span {:colSpan col-span})
@@ -101,7 +103,8 @@
                              (om/get-state owner :channel))
                caption)]))))
 
-(defn- header [columns owner]
+(defn- header
+  [columns owner]
   (om/component
     (dom/thead #js {:className "om-widgets-title-header-row"}
                (apply dom/tr nil
@@ -164,7 +167,8 @@
 (defmulti cell-builder (fn [cell owner opts]
                          (:data-format (:column-def opts))))
 
-(defmethod cell-builder :date [date owner opts]
+(defmethod cell-builder :date
+  [date owner opts]
   (let [col-span (:col-span (:column-def opts))
         date-formatter (:date-formatter (:column-def opts))]
     (om/component
@@ -177,7 +181,8 @@
                           (time/date-time date))
            "")]))))
 
-(defmethod cell-builder :keyword [cell owner opts]
+(defmethod cell-builder :keyword
+  [cell owner opts]
   (let [col-span (:col-span (:column-def opts))
         options (:options (:column-def opts))]
     (om/component
@@ -187,7 +192,8 @@
          (or (get options cell)
              cell)]))))
 
-(defmethod cell-builder :dom [cell owner opts]
+(defmethod cell-builder :dom
+  [cell owner opts]
   (let [col-span (:col-span (:column-def opts))
         content (:fn (:column-def opts))]
     (om/component
@@ -196,7 +202,8 @@
                  (merge (when col-span) {:colSpan col-span}))
          (content cell (:row opts))]))))
 
-(defmethod cell-builder :default [cell owner opts]
+(defmethod cell-builder :default
+  [cell owner opts]
   (let [col-span (:col-span (:column-def opts))]
     (om/component
       (html
@@ -277,7 +284,8 @@
 
 ;; This function where private but we cannot test it from outside given the lack of #' reader
 ;; https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#the-reader
-(defn data-page [source current-page page-size events-channel sort-info]
+(defn data-page
+  [source current-page page-size events-channel sort-info]
   (let [sorter (when sort-info
                  (grid-sorter (:column sort-info)))
         rows (vec (if (and sorter
@@ -308,7 +316,8 @@
          (drop drop-cut)
          (concat))))
 
-(defn- create-grid [target owner opts]
+(defn- create-grid
+  [target owner opts]
   (reify
     om/IDisplayName
     (display-name [_] "Grid")
@@ -400,8 +409,9 @@
 ;; Public
 
 ;; TODO source should be a DataSource protocol
-(defn grid [source target & {:keys [id onChange events-channel header pager language]
-                             :as definition}]
+(defn grid
+  [source target & {:keys [id onChange events-channel header pager language]
+                    :as definition}]
   (let [src {:rows (or (:rows source) source)
              :index (or (:index source) 0)
              :total-rows (or (:total-rows source) (count source))}
