@@ -221,9 +221,9 @@
 
     om/IRenderState
     (render-state [this state]
-      (apply dom/tr #js {:className (str (when (:target opts)
+      (apply dom/tr #js {:className (str (when (:target state)
                                            "om-widgets-default-row")
-                                         (when (= row (:target opts))
+                                         (when (= row (:target state))
                                            (str " " (or (and (:selected-row-style opts)
                                                              (name (:selected-row-style opts)))
                                                         "active"))))
@@ -269,10 +269,10 @@
                            {:state {:channel (:channel state)
                                     :sort-info (:sort-info state)}})
                  (apply dom/tbody #js {}
-                        (om/build-all row-builder rows {:state {:channel (:channel state)}
+                        (om/build-all row-builder rows {:state {:channel (:channel state)
+                                                                :target target}
                                                         :opts {:columns (:columns opts)
-                                                               :selected-row-style (:selected-row-style opts)
-                                                               :target target}}))))))
+                                                               :selected-row-style (:selected-row-style opts)}}))))))
 
 ;; This function where private but we cannot test it from outside given the lack of #' reader
 ;; https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#the-reader
