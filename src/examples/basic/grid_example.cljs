@@ -26,8 +26,9 @@
                    :hover? true
                    :condensed? true
                    :bordered? false
-                   :striped? true
-                   :page-size 2
+                   :striped? false
+                   :selected-row-style :info
+                   :page-size 5
                    :header {:type :default
                             :columns (get-in app [:columns])})]]
 
