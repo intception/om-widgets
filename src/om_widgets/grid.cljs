@@ -24,7 +24,7 @@
     (let [sort-info (om/get-state owner :sort-info)
           column (om/get-state owner :column)]
       (html [:div {:class "om-widgets-sortable-column"
-                   :onClick (fn []
+                   :onClick (fn [e]
                               (let [sort-info (om/get-state owner :sort-info)
                                     column (if (satisfies? IDeref (om/get-state owner :column))
                                              @(om/get-state owner :column)
@@ -37,7 +37,8 @@
                                                                        (= (:direction sort-info)
                                                                           :up))
                                                                 :down
-                                                                :up)}})))}
+                                                                :up)}})
+                                (.preventDefault e)))}
              (:caption column)
              [:span {:class (str "pull-right glyphicon om-widgets-sortable-"
                                  (if (and sort-info
