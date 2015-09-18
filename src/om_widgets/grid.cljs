@@ -143,13 +143,13 @@
                 (dom/li #js {:className (when previous-disabled? "disabled")}
                         (dom/a #js {:onClick #(when (> current-page 0)
                                                (put! (:channel state) {:new-page (dec current-page)})
-                                               false)}
+                                               (.preventDefault %))}
                                (translate language :grid.pager/previous-page)))
                 ;; next page
                 (dom/li #js {:className (when next-disabled? "disabled")}
                         (dom/a #js {:onClick #(when (< current-page max-pages)
                                                (put! (:channel state) {:new-page (inc current-page)})
-                                               false)}
+                                               (.preventDefault %))}
                                (translate language :grid.pager/next-page)))
 
                 ;; total label
@@ -231,7 +231,8 @@
                                         (put! (:channel state)
                                               {:row (if (satisfies? IDeref props)
                                                       @props
-                                                      props)}))}
+                                                      props)})
+                                        (.preventDefault %))}
              (map (fn [{:keys [field] :as column}]
                     (om/build cell-builder (field row) {:opts {:column-def column :row row}}))
                   (:columns opts))))))
