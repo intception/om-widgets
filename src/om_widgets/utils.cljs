@@ -100,3 +100,7 @@
   (str (zero-pad (.getUTCDate date) 2) "/"
        (zero-pad (inc (.getUTCMonth date)) 2) "/"
        (.getUTCFullYear date)))
+
+(defn glyph
+  [icon]
+  (str "glyphicon glyphicon-" (name icon)))

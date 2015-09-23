@@ -33,7 +33,21 @@
                              :text "Grid Row Custom"}]}]
                   [{:text "Popup Window"
                     :id :popup-window
-                    :url "#/popupwindow"}]]
+                    :url "#/popupwindow"}]
+
+                  [{:text "Notifications"
+                    :icon :bell
+                    :badge 10
+                    :id :notifications
+                    :items [{:id :users
+                             :type :entry
+                             :icon :user
+                             :text "Users"}
+                            {:id :inbox
+                             :type :entry
+                             :icon :inbox
+                             :badge 6
+                             :text "Inbox"}]}]]
      :birth-date #inst "1991-01-25"
      :sex :male
      :tab {}

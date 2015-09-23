@@ -67,10 +67,19 @@
                        :items (get-in cursor [:default])}) [:hr]
 
           ;; ---------------------------------------------------------------------
+          ;; Badges
+          (w/dropdown cursor
+                      {:id :testing
+                       :title "With badge"
+                       :badge 10
+                       :korks [:selected-dropdown]
+                       :items (get-in cursor [:default])}) [:hr]
+
+          ;; ---------------------------------------------------------------------
           ;; Icons
           (w/dropdown cursor
                       {:id :testing
-                       :title "with icon"
-                       :icon "glyphicon glyphicon-calendar"
+                       :title "With icon"
+                       :icon :calendar
                        :korks [:selected-dropdown]
                        :items (get-in cursor [:default])})]]))))

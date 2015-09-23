@@ -1,4 +1,4 @@
-(defproject org.clojars.intception/om-widgets "0.2.4"
+(defproject org.clojars.intception/om-widgets "0.2.5"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
 
@@ -16,13 +16,15 @@
                  [prismatic/schema "0.4.0" :exclusions [org.clojure/clojurescript]]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
-            [lein-figwheel "0.2.3-SNAPSHOT"]
+            [lein-figwheel "0.3.9" :exclusions [org.clojure/clojure]]
             [com.cemerick/clojurescript.test "0.3.3"]]
 
   :source-paths ["src"]
   :test-paths ["test"]
 
-  :figwheel {:repl false}
+  :figwheel {:nrepl-port 7889
+             :server-port 3450}
+
   :cljsbuild {:builds [{:id "om-widgets"
                         :source-paths ["src"]
                         :compiler {:output-to "target/om_widgets.js"
@@ -38,6 +40,7 @@
                                    :externs ["react/externs/react.js"]
                                    :optimizations :whitespace}}
                        {:id "basic"
+                        :figwheel {:on-jsload "examples.basic.core/examples"}
                         :source-paths ["src" "src/examples"]
                         :compiler {:output-to "resources/public/examples/basic/main.js"
                                    :output-dir "resources/public/examples/basic/out"

@@ -2,6 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [schema.core :as s :include-macros true]
             [om.core :as om :include-macros true]
+            [om-widgets.utils :as u]
             [shodan.console :as console :include-macros true]
             [cljs.core.async :refer [put! chan <! alts! timeout close!]]
             [sablono.core :as html :refer-macros [html]]))
@@ -25,16 +26,18 @@
         [:li (->> {:class (when (:disabled entry) "disabled")}
                   (merge (when-not (:disabled entry)
                            {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
-                                            (put! channel {:type :entry-click
-                                                           :value (:id e)
-                                                           :link (:url e)})
-                                            (.preventDefault %)
-                                            (.stopPropagation %))})))
+                                           (put! channel {:type :entry-click
+                                                          :value (:id e)
+                                                          :link (:url e)})
+                                           (.preventDefault %)
+                                           (.stopPropagation %))})))
          [:a (->> {}
                   (#(if (:url entry)
-                      (merge {:href (:url entry)} %)
-                      %)))
-          (:text entry)]]))))
+                     (merge {:href (:url entry)} %)
+                     %)))
+          (when (:icon entry) [:span {:class (u/glyph (:icon entry))}])
+          [:span (:text entry)
+           (when (:badge entry) [:span.badge (:badge entry)])]]]))))
 
 (defmethod build-entry :divider
   [entry app]
@@ -42,7 +45,7 @@
     om/IRenderState
     (render-state [this state]
       (html
-       [:li {:class "divider"}]))))
+        [:li {:class "divider"}]))))
 
 ;; ---------------------------------------------------------------------
 ;; Dropdown containers
@@ -60,7 +63,8 @@
               (put! (:channel state) {:type :open-dropdown})
               (.preventDefault e)
               (.stopPropagation e))
-   :onBlur #(put! (:channel state) {:type :close-dropdown})})
+   :onBlur #(do (put! (:channel state) {:type :close-dropdown})
+                (.preventDefault %))})
 
 (defn- channel-processing
   [cursor owner]
@@ -68,20 +72,20 @@
         on-selection (om/get-state owner :on-selection)
         korks (om/get-state owner :korks)]
     (go-loop []
-      (let [msg (<! channel)]
-        (condp = (:type msg)
-          :open-dropdown (om/set-state! owner :opened (not (om/get-state owner :opened)))
-          :close-dropdown (om/set-state! owner :opened false)
-          :entry-click (do
-                         (when (:link msg)
-                           (set! (.-location js/window) (:link msg)))
+             (let [msg (<! channel)]
+               (condp = (:type msg)
+                 :open-dropdown (om/set-state! owner :opened (not (om/get-state owner :opened)))
+                 :close-dropdown (om/set-state! owner :opened false)
+                 :entry-click (do
+                                (when (:link msg)
+                                  (set! (.-location js/window) (:link msg)))
 
-                         (when korks
-                           (om/update! cursor korks (:value msg)))
+                                (when korks
+                                  (om/update! cursor korks (:value msg)))
 
-                         (when on-selection
-                           (on-selection (:value msg)))))
-        (recur)))))
+                                (when on-selection
+                                  (on-selection (:value msg)))))
+               (recur)))))
 
 (defn- dropdown-menu
   [cursor owner]
@@ -89,10 +93,11 @@
     om/IRenderState
     (render-state [this {:keys [channel items] :as state}]
       (html
-       (vec (concat [:ul {:class "dropdown-menu"}]
-                    (map #(om/build build-entry % {:state {:channel channel}}) items)))))))
+        (vec (concat [:ul {:class "dropdown-menu"}]
+                     (map #(om/build build-entry % {:state {:channel channel}}) items)))))))
 
-(defn- dropdown-menu-container [cursor owner]
+(defn- dropdown-menu-container
+  [cursor owner]
   (reify
     om/IInitState
     (init-state [_]
@@ -103,16 +108,19 @@
     (will-mount [_] (channel-processing cursor owner))
 
     om/IRenderState
-    (render-state [_ {:keys [title items channel] :as state}]
+    (render-state [_ {:keys [title items icon badge channel] :as state}]
       (html
-       [:li (build-dropdown-js-options state)
-        [:a {:class "dropdown-toggle" :title title}
-         title
-         [:span {:class "caret"}]]
-        (om/build dropdown-menu cursor {:state {:channel channel
-                                                :items items}})]))))
+        [:li (build-dropdown-js-options state)
+         [:a {:class "dropdown-toggle" :title title}
+          (when icon [:span {:class (u/glyph icon)}])
+          [:span title]
+          (when badge [:span.badge badge])
+          [:span {:class "caret"}]]
+         (om/build dropdown-menu cursor {:state {:channel channel
+                                                 :items items}})]))))
 
-(defn- dropdown-container [cursor owner]
+(defn- dropdown-container
+  [cursor owner]
   (reify
     om/IInitState
     (init-state [_]
@@ -123,7 +131,7 @@
     (will-mount [_] (channel-processing cursor owner))
 
     om/IRenderState
-    (render-state [_ {:keys [title as-link? icon items channel] :as state}]
+    (render-state [_ {:keys [title as-link? icon badge items channel] :as state}]
       (let [title (str (when icon "  ") title " ")]
         (html
           [:div (build-dropdown-js-options state)
@@ -134,8 +142,9 @@
 
              [:button {:class "btn btn-default dropdown-toggle"
                        :type "button"}
-              (when icon [:span {:class icon}])
-              title
+              (when icon [:span {:class (u/glyph icon)}])
+              [:span title]
+              (when badge [:span.badge badge])
               [:span {:class "caret"}]])
            (om/build dropdown-menu cursor {:state {:channel channel
                                                    :items items}})])))))
@@ -148,6 +157,8 @@
   {:id s/Any
    :text s/Str
    :type (s/enum :entry)
+   (s/optional-key :icon) (s/either s/Keyword s/Str)
+   (s/optional-key :badge) (s/either s/Str s/Int)
    (s/optional-key :disabled) s/Bool
    (s/optional-key :url) s/Str})
 
@@ -160,7 +171,8 @@
    :title s/Str
    (s/optional-key :id) (s/either s/Keyword s/Str s/Int)
    (s/optional-key :korks) (s/either s/Any [s/Any])
-   (s/optional-key :icon) s/Str
+   (s/optional-key :icon) s/Any
+   (s/optional-key :badge) (s/either s/Str s/Int)
    (s/optional-key :className) s/Str
    (s/optional-key :on-selection) (s/pred fn?)
    (s/optional-key :as-link?) s/Bool
@@ -172,10 +184,10 @@
 ;; Public
 
 (defmulti dropdown
-  (fn [cursor {:keys [id title items type size] :as options
-               :or {size :default type :default}}]
-    (s/validate DropdownSchema options)
-    (:type options)))
+          (fn [cursor {:keys [id title items type size] :as options
+                       :or {size :default type :default}}]
+            (s/validate DropdownSchema options)
+            (:type options)))
 
 (defmethod dropdown :menu [cursor options]
   (om/build dropdown-menu-container cursor {:state options}))

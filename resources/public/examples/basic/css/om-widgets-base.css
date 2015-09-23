@@ -665,3 +665,22 @@ label.om-widgets-control-label {
     cursor:pointer;
 }
 
+
+/*----------------------------------------------*/
+/* glyphicon spacing*/
+
+.btn .glyphicon {
+  margin-right: 3px;
+}
+
+.navbar-nav .glyphicon {
+  margin-right: 3px;
+}
+
+span .glyphicon {
+  margin-right: 3px;
+}
+
+.badge {
+  margin-left: 3px;
+}

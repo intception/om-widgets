@@ -44,6 +44,8 @@
            :grid (om/build grid-example (get-in app [:grid]))
            :grid-link (om/build grid-link-example (get-in app [:grid]))
            :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
+           :users (html [:div.jumbotron [:h2 "Users Sample"]])
+           :inbox (html [:div.jumbotron [:h2 "Inbox Sample"]])
            :popup-window (om/build popup-window-example app))]))))
 
 (defn ^:export examples

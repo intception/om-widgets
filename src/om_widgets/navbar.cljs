@@ -25,27 +25,35 @@
                               (:id entry))
                        "active")}
 
-        (if (:items entry)
-          (dropdown cursor (->> {:id (:id entry)
-                                 :type :menu
-                                 :title (:text entry)
-                                 :on-selection on-selection
-                                 :items (:items entry)}))
-          [:a (->> {}
-                   ;; TODO write a macro like pallet.thread-expr
-                   ;; but that works on clojurescript
-                   (#(if (:className entry)
+         (if (:items entry)
+           (dropdown cursor (->> {:id (:id entry)
+                                  :type :menu
+                                  :icon (:icon entry)
+                                  :title (:text entry)
+                                  :on-selection on-selection
+                                  :items (:items entry)}))
+           [:a (->> {}
+                    ;; TODO write a macro like pallet.thread-expr
+                    ;; but that works on clojurescript
+                    (#(if (:className entry)
                        (merge {:className (:className entry)} %)
                        %))
-                   (#(if (:url entry)
+                    (#(if (:url entry)
                        (merge {:href (:url entry)} %)
                        %))
-                   (#(if on-selection
+                    (#(if on-selection
                        (merge {:onClick (fn [e]
-                                          (on-selection (:id @entry)))} %)
+                                          (on-selection (:id @entry))
+                                          (.preventDefault e))} %)
                        %)))
-           [:span {:class (:iconClassName entry)}]
-           (:text entry)])]))))
+
+            (when (:icon entry)
+              [:span {:class (u/glyph (:icon entry))}])
+
+            [:span (:text entry)]
+
+            (when (:badge entry)
+              [:span.badge (:badge entry)])])]))))
 
 (defn- navbar-nav
   [{:keys [cursor entries]} owner]
@@ -118,12 +126,15 @@
    (s/optional-key :right-position) s/Bool
    (s/optional-key :url) s/Str
    (s/optional-key :className) s/Str
-   (s/optional-key :iconClassName) s/Str})
+   (s/optional-key :badge) (s/either s/Int s/Str)
+   (s/optional-key :icon) (s/either s/Keyword s/Str)})
 
 (def NavbarDropdownEntry
   {:text s/Str
    :id s/Keyword
    :items [(s/either EntrySchema DividerSchema)]
+   (s/optional-key :icon) (s/either s/Keyword s/Str)
+   (s/optional-key :badge) (s/either s/Int s/Str)
    (s/optional-key :right-position) s/Bool})
 
 (def NavbarSchema
