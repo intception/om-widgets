@@ -235,7 +235,7 @@
     om/IRenderState
     (render-state [this {:keys [visible-content-fn popup-content-fn visible prefered-side channel] :as state}]
       (html
-       [:div {:class "om-widgets-popover-launcher"}
+       [:div {:class (:launcher-class-name opts)}
         (when visible
           (dom/div #js {:style #js {:position "absolute" :display "inline"}}
                    (om/build popover-container nil {:state {:content-fn popup-content-fn
@@ -264,7 +264,7 @@
       {:visible false})
     om/IRenderState
     (render-state [this {:keys [label id disabled class-name visible body prefered-side]}]
-      (dom/div #js {:className "om-widgets-popover-launcher"}
+      (dom/div #js {:className (:launcher-class-name opts)}
                (dom/a #js {:className class-name
                            :href "#"
                            :type "button"
@@ -301,10 +301,12 @@
                                  prefered-side
                                  has-arrow
                                  popover-class
+                                 launcher-class-name
                                  align]
                           :or {class-name "om-widgets-popover-button"
                                prefered-side :bottom
                                popover-class ""
+                               launcher-class-name "om-widgets-popover-launcher"
                                has-arrow true
                                align 0.5}}]
   (cond
@@ -315,6 +317,7 @@
                                      :opts {:for for
                                             :has-arrow has-arrow
                                             :popover-class popover-class
+                                            :launcher-class-name launcher-class-name 
                                             :align align}})
     :else
     (om/build labeled-popover-component nil {:state {:label front-face
@@ -326,5 +329,6 @@
                                                      :body popup-body}
                                              :opts {:align align
                                                     :popover-class popover-class
+                                                    :launcher-class-name launcher-class-name 
                                                     :has-arrow has-arrow}})))
 

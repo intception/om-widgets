@@ -286,7 +286,7 @@
 ;; This function where private but we cannot test it from outside given the lack of #' reader
 ;; https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#the-reader
 (defn data-page
-  [source current-page page-size events-channel sort-info]
+  [source current-page page-size events-channel sort-info force-page-reload]
   (let [sorter (when sort-info
                  (grid-sorter (:column sort-info)))
         rows (vec (if (and sorter
@@ -305,13 +305,15 @@
         take-cut (max 0 (min top (+ (- end (:index source)) end-gap)))]
 
     (when (and events-channel
-               (or (< (max 0 (- start (* 1 page-size))) (:index source))
+               (or @force-page-reload
+                   (< (max 0 (- start (* 1 page-size))) (:index source))
                    (> (min total-rows (+ (+ start page-size) (* 2 page-size))) (+ (:index source) top))))
       (go
         (>! events-channel {:sort-info sort-info
                             :event-type :request-range
                             :start (min total-rows (max 0 (- start (* 4 page-size))))
-                            :end (min total-rows (+ (+ start page-size) (* 5 page-size)))})))
+                            :end (min total-rows (+ (+ start page-size) (* 5 page-size)))})
+        (swap! force-page-reload false)))
     (->> rows
          (take take-cut)
          (drop drop-cut)
@@ -325,7 +327,8 @@
 
     om/IInitState
     (init-state [_]
-      {:channel (chan)})
+      {:channel (chan)
+       :force-page-reload (atom false)})
 
     om/IWillMount
     (will-mount [_]
@@ -335,7 +338,9 @@
                    (cond
                      (and target
                           (:row msg)) (om/update! target (:row msg))
-                     (:sort-info msg) (om/set-state! owner :sort-info (:sort-info msg))
+                     (:sort-info msg) (do 
+                                        (swap! (om/get-state owner :force-page-reload) true)
+                                        (om/set-state! owner :sort-info (:sort-info msg)))
                      (:new-page msg) (om/set-state! owner :current-page (:new-page msg)))
                    (recur)))))
 
@@ -349,7 +354,8 @@
                                                    (:current-page state)
                                                    (:page-size state)
                                                    (:events-channel state)
-                                                   (:sort-info state))
+                                                   (:sort-info state)
+                                                   (:force-page-reload state))
                                   :channel (:channel state)
                                   :sort-info (:sort-info state)}
                           :opts {:columns (:columns header)
