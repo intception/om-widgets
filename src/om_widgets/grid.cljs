@@ -313,7 +313,7 @@
                             :event-type :request-range
                             :start (min total-rows (max 0 (- start (* 4 page-size))))
                             :end (min total-rows (+ (+ start page-size) (* 5 page-size)))})
-        (swap! force-page-reload false)))
+        (reset! force-page-reload false)))
     (->> rows
          (take take-cut)
          (drop drop-cut)
@@ -338,8 +338,8 @@
                    (cond
                      (and target
                           (:row msg)) (om/update! target (:row msg))
-                     (:sort-info msg) (do 
-                                        (swap! (om/get-state owner :force-page-reload) true)
+                     (:sort-info msg) (do
+                                        (reset! (om/get-state owner :force-page-reload) true)
                                         (om/set-state! owner :sort-info (:sort-info msg)))
                      (:new-page msg) (om/set-state! owner :current-page (:new-page msg)))
                    (recur)))))
