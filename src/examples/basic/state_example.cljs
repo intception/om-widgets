@@ -56,7 +56,8 @@
             :birth-date ""
             :hours 8
             :sex :male
-            :password ""}
+            :password ""
+            :some-set #{}}
      :grid {:source-simple [{:name "Sebas" :username "kernelp4nic"  :fecha #inst "2002-04-20"}
                             {:name "Guille" :username "guilespi" :fecha #inst "2004-04-20"}
                             {:name "Fabian" :username "fapenia" :fecha #inst "2004-04-21"}
