@@ -1,6 +1,7 @@
 (ns om-widgets.combobox
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
+            [schema.core :as s :include-macros true]
             [om-widgets.utils :as utils]
             [cljs.reader :as reader]))
 
@@ -25,7 +26,9 @@
                                        (om/refresh! owner))
 
                                      (when (:onChange state)
-                                       ((:onChange state) (:value value)))))
+                                       ((:onChange state) (:value value)))
+
+                                     (.preventDefault e)))
 
                        :className (clojure.string/join " " ["om-widgets-combobox"  (:class-name state)
                                                             (when (and (not (:disabled state)) (:read-only state))
@@ -40,6 +43,17 @@
                (apply conj [(dom/option #js {:value (pr-str {:value nil}) :disabled true})]
                       (om/build-all option options)))))))
 
+;; ---------------------------------------------------------------------
+;; Schema
+
+(def ComboboxSchema
+  {:options [s/Any s/Any]
+   (s/optional-key :id) s/Str
+   (s/optional-key :class-name) s/Str
+   (s/optional-key :onChange) (s/pred fn?)
+   (s/optional-key :read-only) s/Bool
+   (s/optional-key :disabled) s/Bool
+   (s/optional-key :tabIndex) s/Int})
 
 ;; ---------------------------------------------------------------------
 ;; Public
