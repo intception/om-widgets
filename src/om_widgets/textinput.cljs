@@ -369,6 +369,7 @@
          dom/textarea)
        (clj->js {:id (:id state)
                  :name (:id state)
+                 :hidden (:hidden state)
                  :className (clojure.string/join " " ["om-widgets-input-text" (:input-class state)])
                  :autoComplete (:auto-complete state)
                  :readOnly (:read-only state)
@@ -406,7 +407,7 @@
 (defn textinput
   [target path {:keys [input-class input-format multiline onBlur tabIndex autofocus
                        placeholder id decimals align onChange auto-complete read-only disabled onKeyPress
-                       typing-timeout flush-on-enter onEnter] :as opts
+                       typing-timeout flush-on-enter onEnter hidden] :as opts
                 :or {input-class ""}}]
   (om/build create-textinput target
             {:state {:path path
@@ -417,6 +418,7 @@
                      :autofocus autofocus
                      :placeholder placeholder
                      :id id
+                     :hidden hidden
                      :disabled disabled
                      :typing-timeout typing-timeout
                      :flush-on-enter flush-on-enter
