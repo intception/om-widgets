@@ -43,8 +43,7 @@
                        %))
                     (#(if on-selection
                        (merge {:onClick (fn [e]
-                                          (on-selection (:id @entry))
-                                          (.preventDefault e))} %)
+                                          (on-selection (:id @entry)))} %)
                        %)))
 
             (when (:icon entry)
