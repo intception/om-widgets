@@ -48,7 +48,7 @@
 
 
 (defn app-root []
-  (sel1 "div [data-reactid=\".0\"]"))
+  (sel1 "div [data-reactid]"))
 
 (defn popover-overlay
   [_ owner]
