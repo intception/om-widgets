@@ -30,7 +30,20 @@
                    :selected-row-style :info
                    :page-size 5
                    :header {:type :default
-                            :columns (get-in app [:columns])})]]
+                            :start-sorted {:by :fecha
+                                           :direction :down}
+                            :columns [{:caption "Name"
+                                       :field :name
+                                       :sort false
+                                       :sort-fn (fn [a b]
+                                                  (compare (:name a) (:name b))
+                                                  )}
+                                      {:caption "Username"
+                                       :field :username}
+                                      {:caption "Fecha"
+                                       :field :fecha
+                                       :sort true
+                                       :data-format :date}]})]]
 
          [:div.panel.panel-default
           [:div.panel-heading "Empty Grid"]

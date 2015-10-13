@@ -80,20 +80,7 @@
                                    {:name "Fabian" :username "fapenia" :row-type :users}
                                    {:name "Alexis" :username "_axs_" :row-type :users}
                                    {:name "Martin" :username "nartub" :row-type :users}]}
-            :selected {}
-            :columns [{:caption "Name"
-                       :field :name
-                       :sort true
-                       :sort-fn (fn [a b]
-                                  (compare (:name a) (:name b))
-                                  )}
-                      {:caption "Username"
-                       :field :username}
-                      {:caption "Fecha"
-                       :field :fecha
-                       :sort true
-                       :data-format :date}
-                      ]}
+            :selected {}}
 
      :dropdown {:urls [{:id :first-link :type :entry :text "First Link" :url "#/link/1"}
                        {:id :second-link :type :entry :text "Second Link" :url "#/link/2"}

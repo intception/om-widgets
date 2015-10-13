@@ -18,6 +18,9 @@
 (defprotocol ISortableColumnSortData
   (sort-data [_ sort-info rows]))
 
+(defprotocol ISortableColumnDefaultSortData
+  (default-sort-data [_ column]))
+
 (defn standard-sort-caret
   [_ owner]
   (om/component
@@ -50,6 +53,12 @@
 (defn standard-sort
   [column]
   (reify
+
+    ISortableColumnDefaultSortData
+    (default-sort-data [this column]
+      {:column column
+       :direction :up})
+
     ISortableColumnCaret
     (column-caret [this column sort-info channel]
       (om/build standard-sort-caret nil {:state {:column column
@@ -382,17 +391,17 @@
 
 (def HeaderSchema
   {:type (s/enum :default :none)
-   (s/optional-key :columns) [{:caption s/Str
-                               :field s/Keyword
-                               :sort (s/either s/Bool s/Keyword)
-                               (s/optional-key :col-span) s/Int
-                               :data-format (s/enum :default :date :dom :keyword)
-                               ;; for date format
-                               :date-formatter s/Str
-                               ;; for dom format
-                               (s/optional-key :fn) (s/pred fn?)
-                               ;; for keywords
-                               (s/optional-key :options) (s/pred coll?)}]})
+   :columns [{:caption s/Str
+              :field s/Keyword
+              :sort (s/either s/Bool s/Keyword)
+              (s/optional-key :col-span) s/Int
+              :data-format (s/enum :default :date :dom :keyword)
+              ;; for date format
+              :date-formatter s/Str
+              ;; for dom format
+              (s/optional-key :fn) (s/pred fn?)
+              ;; for keywords
+              (s/optional-key :options) (s/pred coll?)}]})
 
 (def GridSourceSchema
   {:rows [{s/Keyword s/Any}]
@@ -400,7 +409,8 @@
    (s/optional-key :total-rows) s/Num})
 
 (def GridSchema
-  {(s/optional-key :id) s/Str
+  {:header HeaderSchema
+   (s/optional-key :id) s/Str
    (s/optional-key :hover?) s/Bool
    (s/optional-key :condensed?) s/Bool
    (s/optional-key :bordered?) s/Bool
@@ -408,7 +418,6 @@
    (s/optional-key :selected-row-style) (s/enum :active :success :info :warning :danger)
    (s/optional-key :onChange) (s/pred fn?)
    (s/optional-key :events-channel) s/Any
-   (s/optional-key :header) HeaderSchema
    (s/optional-key :pager) (s/enum :default :none)
    (s/optional-key :language) (s/enum :en :es)})
 
@@ -422,16 +431,25 @@
   (let [src {:rows (or (:rows source) source)
              :index (or (:index source) 0)
              :total-rows (or (:total-rows source) (count source))}
+        init-sorted-column (first (filter #(= (:field %)
+                                              (get-in header [:start-sorted :by]))
+                                          (:columns header)))
+        sorter (when init-sorted-column
+                 (grid-sorter init-sorted-column))
         page-size (or (:page-size definition) 5)]
     (om/build create-grid
               target
               {:init-state {:current-page (int (/ (:index src) page-size))}
                :state {:src src
-                       :header (or header {:type :default})
+                       :header header
                        :pager (or pager {:type :default})
                        :events-channel events-channel
                        :max-pages (calculate-max-pages (:total-rows src) page-size)
                        :page-size page-size
+                       :sort-info (when (and sorter
+                                             (satisfies? ISortableColumnDefaultSortData sorter))
+                                    (merge (default-sort-data sorter init-sorted-column)
+                                           (get header :start-sorted)))
                        :onChange onChange}
                :opts {:language (or (:language definition) :en)
                       :hover? (:hover? definition)
