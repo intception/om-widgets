@@ -26,7 +26,7 @@
                   :checked (checked? (utils/om-get app path) checked-value)
                   :onChange (fn [e]
                               (let [v (if (.. e -target -checked) checked-value unchecked-value)
-                                    dest (get app path)]
+                                    dest (get @app path)]
 
                                 (if toggle-value
                                   (if (contains? dest checked-value)
@@ -45,8 +45,8 @@
 ;; Schema
 
 (def CheckboxSchema
-  {:label s/Str
-   :checked-value s/Any
+  {(s/optional-key :label) s/Any
+   (s/optional-key :checked-value) s/Any
    (s/optional-key :id) s/Str
    (s/optional-key :disabled) s/Bool
    (s/optional-key :class-name) s/Str
