@@ -84,6 +84,7 @@
             [:div.form-group
              [:label "Checkbox"]
              (w/checkbox app :some-check {:label "  Some Checkbox (Boolean)"
+                                          :title "Some tooltip"
                                           :class-name "form-control"
                                           :checked-value true
                                           :unchecked-value false})]
