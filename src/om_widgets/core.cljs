@@ -15,6 +15,7 @@
             [om-widgets.page-switcher]
             [om-widgets.popover]
             [om-widgets.slider]
+            [om-widgets.editable-list-view]
             [om-widgets.utils]))
 
 (def textinput om-widgets.textinput/textinput)
@@ -38,5 +39,6 @@
 (def modal-launcher  om-widgets.modal-box/modal-launcher)
 
 (def page-switcher om-widgets.page-switcher/page-switcher)
+(def editable-list-view om-widgets.editable-list-view/editable-list-view)
 (def om-get om-widgets.utils/om-get)
 (def om-update! om-widgets.utils/om-update!)

@@ -13,7 +13,8 @@
             [examples.basic.datepicker-example :refer [datepicker-example]]
             [examples.basic.popup-window-example :refer [popup-window-example]]
             [examples.basic.grid-example :refer [grid-example grid-link-example grid-custom-row-sample]]
-            [examples.basic.dropdown-example :refer [dropdown-example]]))
+            [examples.basic.dropdown-example :refer [dropdown-example]]
+            [examples.basic.editable-list-example :refer [editable-list-example]]))
 
 
 
@@ -46,7 +47,9 @@
            :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
            :users (html [:div.jumbotron [:h2 "Users Sample"]])
            :inbox (html [:div.jumbotron [:h2 "Inbox Sample"]])
-           :popup-window (om/build popup-window-example app))]))))
+           :popup-window (om/build popup-window-example app)
+           :editable-list (om/build editable-list-example app))]))))
+
 
 (defn ^:export examples
   []

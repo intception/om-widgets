@@ -104,3 +104,21 @@
 (defn glyph
   [icon]
   (str "glyphicon glyphicon-" (name icon)))
+
+(defn exclude-item-at-pos
+  "Given a vector and position number, will return a new
+  vector with the element excluded.
+
+  Note: Indext start at 0
+
+  Example:
+    (exclude-item-at-pos [1 2 3] 1))
+    [1 3]
+  "
+  [v p]
+  (let [vec-len (count v)
+        has-items? (pos? vec-len)
+        in-bounds? (< p vec-len)]
+    (if (and has-items? in-bounds?)
+      (vec (concat (subvec v 0 p) (subvec v (inc p))))
+      v)))

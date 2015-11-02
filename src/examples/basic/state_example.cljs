@@ -47,7 +47,9 @@
                              :type :entry
                              :icon :inbox
                              :badge 6
-                             :text "Inbox"}]}]]
+                             :text "Inbox"}]}]
+                  [{:text "Editable list"
+                    :id :editable-list}]]
      :birth-date #inst "1991-01-25"
      :sex :male
      :tab {}
@@ -81,6 +83,10 @@
                                    {:name "Alexis" :username "_axs_" :row-type :users}
                                    {:name "Martin" :username "nartub" :row-type :users}]}
             :selected {}}
+     :editable-list-with-strings []
+     :editable-list-with-dates   []
+     :editable-list-with-numbers   []
+
 
      :dropdown {:urls [{:id :first-link :type :entry :text "First Link" :url "#/link/1"}
                        {:id :second-link :type :entry :text "Second Link" :url "#/link/2"}
