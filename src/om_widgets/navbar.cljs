@@ -46,8 +46,9 @@
                                           (on-selection (:id @entry)))} %)
                        %)))
 
-            (when (:icon entry)
-              [:span {:class (u/glyph (:icon entry))}])
+            (when (or (:iconClassName entry) (:icon entry))
+              [:span {:class (or (:iconClassName entry)
+                                 (u/glyph (:icon entry)))}])
 
             [:span (:text entry)]
 
@@ -133,6 +134,7 @@
    :id s/Keyword
    :items [(s/either EntrySchema DividerSchema)]
    (s/optional-key :icon) (s/either s/Keyword s/Str)
+   (s/optional-key :iconClassName) s/Str
    (s/optional-key :badge) (s/either s/Int s/Str)
    (s/optional-key :right-position) s/Bool})
 

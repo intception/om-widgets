@@ -20,26 +20,26 @@
         [:div (-> {:class [(when (checked? (utils/om-get app path) checked-value) "active")]}
                   (merge (when title) {:title title}))
          [:label {:class "om-widgets-label"
-                  :htmlFor id}]
-         [:input {:type "checkbox"
-                  :id id
-                  :disabled disabled
-                  :checked (checked? (utils/om-get app path) checked-value)
-                  :onChange (fn [e]
-                              (let [v (if (.. e -target -checked) checked-value unchecked-value)
-                                    dest (get @app path)]
+                  :htmlFor (name id)}
+          [:input {:type "checkbox"
+                   :id (name id)
+                   :disabled disabled
+                   :checked (checked? (utils/om-get app path) checked-value)
+                   :onChange (fn [e]
+                               (let [v (if (.. e -target -checked) checked-value unchecked-value)
+                                     dest (get @app path)]
 
-                                (if toggle-value
-                                  (if (contains? dest checked-value)
-                                    (utils/om-update! app path (disj dest checked-value))
-                                    (utils/om-update! app path (conj dest checked-value)))
-                                  (utils/om-update! app path v))
+                                 (if toggle-value
+                                   (if (contains? dest checked-value)
+                                     (utils/om-update! app path (disj dest checked-value))
+                                     (utils/om-update! app path (conj dest checked-value)))
+                                   (utils/om-update! app path v))
 
-                                ;; TODO this is done to force a refresh
-                                (when (utils/atom? app)
-                                  (om/set-state! owner ::force-refresh (not (om/get-state owner ::force-refresh))))
+                                 ;; TODO this is done to force a refresh
+                                 (when (utils/atom? app)
+                                   (om/set-state! owner ::force-refresh (not (om/get-state owner ::force-refresh))))
 
-                                (when on-change (on-change v))))}
+                                 (when on-change (on-change v))))}]
           label]]))))
 
 ;; ---------------------------------------------------------------------
