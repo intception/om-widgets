@@ -85,7 +85,6 @@
              [:label "Checkbox"]
              (w/checkbox app :some-check {:label "  Some Checkbox (Boolean)"
                                           :title "Some tooltip"
-                                          :class-name "form-control"
                                           :checked-value true
                                           :unchecked-value false})]
 
@@ -93,12 +92,10 @@
             [:div.form-group
              [:label "Checks - Toggle values on Sets"]
              (w/checkbox app :some-set {:label "check some values (keyword)"
-                                        :class-name "form-control"
                                         :checked-value :some-value
                                         :toggle-value true})
 
              (w/checkbox app :some-set {:label "check some values (keyword)"
-                                        :class-name "form-control"
                                         :checked-value :other-value
                                         :toggle-value true})]
 
