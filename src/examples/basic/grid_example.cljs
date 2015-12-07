@@ -34,10 +34,10 @@
                                            :direction :down}
                             :columns [{:caption "Name"
                                        :field :name
+                                       :text-alignment :left
                                        :sort false
                                        :sort-fn (fn [a b]
-                                                  (compare (:name a) (:name b))
-                                                  )}
+                                                  (compare (:name a) (:name b)))}
                                       {:caption "Username"
                                        :field :username}
                                       {:caption "Fecha"

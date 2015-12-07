@@ -101,10 +101,12 @@
 ;; a valid om component and the other one is just a function that makes the build.
 
 (defn- title-header-cell
-  [{:keys [caption col-span] :as h} owner]
+  [{:keys [caption col-span text-alignment] :as h} owner]
   (om/component
     (let [sorter (grid-sorter h)]
-      (html [:th (when col-span {:colSpan col-span})
+      (html [:th (-> {}
+                     ;(when text-alignment (merge {:class (str "text-" (name text-alignment))}))
+                     (when col-span (merge {:colSpan col-span})))
              (if (and sorter
                       (satisfies? ISortableColumnCaret sorter))
                (column-caret sorter
@@ -173,6 +175,10 @@
                                     total-rows)))))))
 
 
+(defn- text-alignment
+  [opts]
+  (when-let [text-alignment (:text-alignment (:column-def opts))]
+    (str "text-" (name text-alignment))))
 
 (defmulti cell-builder (fn [cell owner opts]
                          (:data-format (:column-def opts))))
@@ -183,7 +189,7 @@
         date-formatter (:date-formatter (:column-def opts))]
     (om/component
       (html
-        [:td (-> {:class "om-widgets-data-cell"}
+        [:td (-> {:class ["om-widgets-data-cell" (text-alignment opts)]}
                  (merge (when col-span) {:colSpan col-span}))
          (if date
            (timef/unparse (timef/formatter (or date-formatter
@@ -197,7 +203,7 @@
         options (:options (:column-def opts))]
     (om/component
       (html
-        [:td (-> {:class "om-widgets-data-cell"}
+        [:td (-> {:class ["om-widgets-data-cell" (text-alignment opts)]}
                  (merge (when col-span) {:colSpan col-span}))
          (or (get options cell)
              cell)]))))
@@ -208,7 +214,7 @@
         content (:fn (:column-def opts))]
     (om/component
       (html
-        [:td (-> {:class "om-widgets-data-cell"}
+        [:td (-> {:class ["om-widgets-data-cell" (text-alignment opts)]}
                  (merge (when col-span) {:colSpan col-span}))
          (content cell (:row opts))]))))
 
@@ -217,7 +223,7 @@
   (let [col-span (:col-span (:column-def opts))]
     (om/component
       (html
-        [:td (-> {:class "om-widgets-data-cell"}
+        [:td (-> {:class ["om-widgets-data-cell" (text-alignment opts)]}
                  (merge (when col-span) {:colSpan col-span}))
          cell]))))
 
@@ -395,6 +401,7 @@
               :field s/Keyword
               :sort (s/either s/Bool s/Keyword)
               (s/optional-key :col-span) s/Int
+              (s/optional-key :text-alignment) (s/enum :left :center :right :justify :nowrap)
               :data-format (s/enum :default :date :dom :keyword)
               ;; for date format
               :date-formatter s/Str
