@@ -52,7 +52,7 @@
                     :id :editable-list}]]
      :birth-date #inst "1991-01-25"
      :sex :male
-     :tab {}
+     :tab {:selected-variant 0}
      :form {:name ""
             :age 25
             :birth-date ""

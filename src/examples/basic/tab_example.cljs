@@ -5,32 +5,16 @@
             [om-widgets.core :as w]))
 
 
-(defn a
-  [cursor owner]
+(defn content
+  [cursor owner {:keys [title]}]
   (reify
-    om/IWillMount
-    (will-mount [_]
-      (println "Mounting A"))
-
     om/IRenderState
     (render-state [_ _]
       (html
-       [:div
-        "TAB A"]))))
-
-(defn b
-  [cursor owner]
-  (reify
-    om/IWillMount
-    (will-mount [_]
-      (println "Mounting B"))
-
-    om/IRenderState
-    (render-state [_ _]
-      (html
-       [:div
-        "TAB B"]))))
-
+       [:div.panel.panel-default
+        [:div.panel-body
+         [:div.jumbotron
+          [:h4 title]]]]))))
 
 (defn tab-example
   [cursor owner]
@@ -43,8 +27,13 @@
       (html
        [:div
         (apply w/tab cursor :selected-variant {}
-               [{:content #(om/build a cursor)
-                 :label "A"}
-                {:content #(om/build b cursor)
-                 :label "B"
+               [{:content #(om/build content cursor {:opts {:title "Inbox"}})
+                 :icon :inbox
+                 :label "Inbox"}
+                {:content #(om/build content cursor {:opts {:title "Config"}})
+                 :icon :wrench
+                 :label "Config"}
+                {:content #(om/build content cursor {:opts {:title "Profile"}})
+                 :icon :user
+                 :label "Profile"
                  :disabled true}])]))))

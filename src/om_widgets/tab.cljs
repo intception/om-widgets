@@ -22,9 +22,10 @@
                                          (when (and on-change (not= (or (utils/om-get (om/get-props parent-owner) :current-page) 0) (:index page)))
                                            (on-change (:index page)))
                                          (utils/om-update! (om/get-props parent-owner) (om/get-state parent-owner :path) (:index page))
+
                                          (when (utils/atom? (om/get-props parent-owner))
                                            (om/refresh! parent-owner))))
-                                     false)}
+                                     (.preventDefault e))}
                      (when (:icon page)
                        (dom/i #js {:className (str "glyphicon glyphicon-" (name (:icon page)))}))
                      (str (when (:icon page) "  ") (:label page)))))))
