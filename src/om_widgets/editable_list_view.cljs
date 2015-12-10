@@ -19,7 +19,8 @@
         (dom/button #js {:className "btn btn-danger pull-right btn-xs"
                          :disabled disabled
                          :onClick (fn [e]
-                                    (put! delete index ) false)}
+                                    (put! delete index )
+                                    nil)}
           (dom/span #js {:dangerouslySetInnerHTML #js {:__html "&nbsp;"}})
           (dom/span #js { :className "glyphicon glyphicon-remove"}))))))
 

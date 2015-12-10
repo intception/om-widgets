@@ -250,7 +250,6 @@
           (if (string? mi)
             (set-caret-pos dom-node pos)
             (set-caret-pos dom-node (inc pos))))))
-
     false))
 
 (defmethod handlekeypress :numeric
@@ -373,8 +372,12 @@
                  :className (clojure.string/join " " ["om-widgets-input-text" (:input-class state)])
                  :autoComplete (:auto-complete state)
                  :readOnly (:read-only state)
-                 :onKeyDown #(handlekeydown target owner state %)
-                 :onKeyUp #(handlekeyup target owner state %)
+                 :onKeyDown #(if (false? (handlekeydown target owner state %))
+                              (.preventDefault %)
+                              nil)
+                 :onKeyUp #(if (false? (handlekeyup target owner state %))
+                            (.preventDefault %)
+                            nil)
                  :onKeyPress #(do
                                 (when (= "Enter" (.-key %))
                                   (do
@@ -386,15 +389,19 @@
 
                                 (when (:onKeyPress state)
                                   ((:onKeyPress state) %))
-                                (handlekeypress target owner state %))
+                                (if (false?  (handlekeypress target owner state %))
+                                  (.preventDefault %)
+                                  nil))
                  :autoFocus (:autofocus state)
                  :tabIndex (:tabIndex state)
                  :onBlur (fn [e]
                            (update-target target owner state true)
                            (when (:onBlur state)
                              ((:onBlur state)))
-                           false)
-                 :onPaste #(handlepaste target owner state %)
+                           nil)
+                 :onPaste #(if (false? (handlepaste target owner state %))
+                            (.preventDefault %)
+                            nil)
                  :placeholder (:placeholder state)
                  :disabled (:disabled state)
                  :typing-timeout (:typing-timeout state)

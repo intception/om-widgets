@@ -70,7 +70,9 @@
     (render-state [this {:keys [mouse-down]}]
       (html
        [:div {:class "om-widgets-popover-overlay"
-              :onMouseDown #(when mouse-down (mouse-down) false)}]))))
+              :onMouseDown #(when mouse-down
+                             (mouse-down)
+                             nil)}]))))
 (defn arrow-offset-align [vl0 vl1 align]
   (+ vl0 (* align (- vl1 vl0))))
 
@@ -272,7 +274,7 @@
                            :disabled disabled
                            :onClick #(do
                                        (om/set-state! owner :visible true)
-                                       false)}
+                                       nil)}
                       label
                       (when visible (om/build popover-container nil {:state {:content-fn body :prefered-side prefered-side}
                                                                      :opts {:align (:align opts)

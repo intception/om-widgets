@@ -1,4 +1,4 @@
-(defproject org.clojars.intception/om-widgets "0.2.16"
+(defproject org.clojars.intception/om-widgets "0.2.17"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
 
@@ -10,7 +10,7 @@
                  [com.andrewmcveigh/cljs-time "0.3.13"]
                  [prismatic/dommy "1.0.0"]
                  [net.unit8/tower-cljs "0.1.0"] ;; translations
-                 [sablono "0.2.22"]
+                 [sablono "0.4.0"]
                  [shodan "0.4.1"]
                  [com.cemerick/clojurescript.test "0.3.3"]
                  [prismatic/schema "0.4.0" :exclusions [org.clojure/clojurescript]]]
