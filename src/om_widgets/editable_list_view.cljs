@@ -64,6 +64,7 @@
                              :disabled disabled
                              :input-class (str (or input-class-name "form-control list-group-item ")
                                                (when input-size (name input-size)))
+                             :typing-timeout 100
                              :onChange (fn [e]
                                          (om/set-state! owner :field-is-valid
                                                         (condp = input-format
