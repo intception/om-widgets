@@ -274,7 +274,7 @@
                            :disabled disabled
                            :onClick #(do
                                        (om/set-state! owner :visible true)
-                                       nil)}
+                                       (.preventDefault %))}
                       label
                       (when visible (om/build popover-container nil {:state {:content-fn body :prefered-side prefered-side}
                                                                      :opts {:align (:align opts)
