@@ -3,7 +3,6 @@
   (:require [schema.core :as s :include-macros true]
             [om.core :as om :include-macros true]
             [om-widgets.utils :as u]
-            [shodan.console :as console :include-macros true]
             [cljs.core.async :refer [put! chan <! alts! timeout close!]]
             [sablono.core :as html :refer-macros [html]]))
 

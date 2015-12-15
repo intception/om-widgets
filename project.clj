@@ -11,7 +11,6 @@
                  [prismatic/dommy "1.0.0"]
                  [net.unit8/tower-cljs "0.1.0"] ;; translations
                  [sablono "0.4.0"]
-                 [shodan "0.4.1"]
                  [com.cemerick/clojurescript.test "0.3.3"]
                  [prismatic/schema "0.4.0" :exclusions [org.clojure/clojurescript]]]
 
