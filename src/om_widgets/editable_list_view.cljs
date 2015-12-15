@@ -25,7 +25,8 @@
                    :onClick (fn [e]
                               (put! delete index)
                               nil)}
-          [:span {:dangerouslySetInnerHTML #js {:__html "&nbsp;"}}]
+          (when (not btn-remove-icon-class)
+            [:span {:dangerouslySetInnerHTML #js {:__html "&nbsp;"}}])
           [:span {:className (or btn-remove-icon-class "glyphicon glyphicon-remove")}]]]))))
 
 (defn- editable-list
@@ -87,7 +88,8 @@
                                                        (conj w (om/get-state owner :input-value))))
                                    (om/set-state! owner :input-value "")
                                    (om/set-state! owner :field-is-valid nil))}
-               [:span {:dangerouslySetInnerHTML #js {:__html "&nbsp;"}}]
+               (when (not (:btn-add-icon-class state))
+                 [:span {:dangerouslySetInnerHTML #js {:__html "&nbsp;"}}])
                [:span {:class (or (:btn-add-icon-class state) "glyphicon glyphicon-plus")}]
                (when btn-text btn-text)]]]]]
 
