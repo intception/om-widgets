@@ -1,11 +1,8 @@
 (ns examples.basic.editable-list-example
-(:require [om.core :as om :include-macros true]
-  [om.dom :as dom :include-macros true]
-  [sablono.core :as html :refer-macros [html]]
-  [om-widgets.core :as w]))
-
-
-
+  (:require [om.core :as om :include-macros true]
+            [om.dom :as dom :include-macros true]
+            [sablono.core :as html :refer-macros [html]]
+            [om-widgets.core :as w]))
 
 (defn editable-list-example
   [app owner]
