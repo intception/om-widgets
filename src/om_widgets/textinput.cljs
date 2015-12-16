@@ -121,7 +121,7 @@
     (let [dom-node (:dom-node @private-state)
           value (convert-output input-format (.-value dom-node))]
       (do
-        (swap! private-state assoc :cbtimeout nil)
+        (swap! private-state assoc :cbtimeout nil :prev-value value)
         (utils/om-update! target path value)
         (when (and onChange (not bInternal))
           (onChange value))))))
