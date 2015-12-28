@@ -19,7 +19,9 @@
       (html
         [:div (-> {:class [class-name (when (checked? (utils/om-get app path) checked-value) "active")]}
                   (merge (when title) {:title title}))
-         [:label {:class "om-widgets-label"
+         [:label {:class (str "om-widgets-label "
+                              (when disabled
+                                " text-muted "))
                   :htmlFor (name id)}
           [:input {:type "checkbox"
                    :id (name id)
@@ -53,6 +55,8 @@
    (s/optional-key :disabled) s/Bool
    (s/optional-key :class-name) s/Str
    (s/optional-key :on-change) (s/pred fn?)
+   (s/optional-key :onChange) (s/pred fn?)
+
    (s/optional-key :unchecked-value) s/Any
    (s/optional-key :toggle-value) s/Bool
    (s/optional-key :tabIndex) s/Int})
@@ -60,12 +64,11 @@
 ;; ---------------------------------------------------------------------
 ;; Public
 (defn checkbox
-  [app path {:keys [label id title disabled class-name on-change checked-value unchecked-value toggle-value] :as opts
+  [app path {:keys [label id title disabled class-name on-change onChange checked-value unchecked-value toggle-value] :as opts
              :or {class-name "checkbox"
                   checked-value true
                   unchecked-value false
                   toggle-value false}}]
-  (s/validate CheckboxSchema opts)
   (om/build check app {:state {:label label
                                :title title
                                :id (or id path)
@@ -74,5 +77,5 @@
                                :unchecked-value unchecked-value
                                :toggle-value toggle-value
                                :disabled disabled
-                               :on-change on-change
+                               :on-change (or on-change onChange)
                                :path path}}))

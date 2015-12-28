@@ -10,7 +10,9 @@
     om/IRenderState
     (render-state [this {:keys [label id path checked-value disabled class-name label-class tabIndex onChange]}]
       (dom/div #js {:className (str class-name (if (= (utils/om-get entity [path]) checked-value) " active" ""))}
-               (dom/label #js {:className (or label-class "")}
+               (dom/label #js {:className (str (or label-class "")
+                                               (when disabled
+                                                 " text-muted "))}
                           (dom/input #js {:type "radio"
                                           :id id
                                           :disabled disabled
