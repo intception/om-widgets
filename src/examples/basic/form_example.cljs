@@ -92,10 +92,12 @@
             [:div.form-group
              [:label "Checks - Toggle values on Sets"]
              (w/checkbox app :some-set {:label "check some values (keyword)"
+                                        :id "some-value-set"
                                         :checked-value :some-value
                                         :toggle-value true})
 
              (w/checkbox app :some-set {:label "check some values (keyword)"
+                                        :id "some-other-value-set"
                                         :checked-value :other-value
                                         :toggle-value true})]
 
