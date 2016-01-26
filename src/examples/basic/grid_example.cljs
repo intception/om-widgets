@@ -16,12 +16,40 @@
     (render-state [this state]
       (html
         [:div
+
          [:div.panel.panel-default
           [:div.panel-heading (str "Grid (selected cursor value: "
-                                   (:name (get-in app [:selected])) " )")]
+                                   (get-in app [:selected :name]) " )")]
           [:div.panel-body
            (w/grid (get-in app [:source-simple])
                    (get-in app [:selected])
+                   :container-class-name ""
+                   :selected-row-style :info
+                   :page-size 5
+                   :header {:type :default
+                            :start-sorted {:by :fecha
+                                           :direction :down}
+                            :columns [{:caption "Name"
+                                       :field :name
+                                       :text-alignment :left
+                                       :sort true
+                                       :sort-fn (fn [a b]
+                                                  (compare (clojure.string/lower-case (:name a))
+                                                           (clojure.string/lower-case (:name b))))}
+                                      {:caption "Username"
+                                       :field :username}
+                                      {:caption "Fecha"
+                                       :field :fecha
+                                       :sort true
+                                       :data-format :date}]})]]
+
+         [:div.panel.panel-default
+          [:div.panel-heading (str "MultiSelect Grid (selected cursor value: "
+                                   (map #(:name %) (get-in app [:multiselect])) " )")]
+          [:div.panel-body
+           (w/grid (get-in app [:source-simple])
+                   (get-in app [:multiselect])
+                   :multiselect? true
                    :container-class-name ""
                    :hover? true
                    :condensed? true
@@ -34,15 +62,11 @@
                                            :direction :down}
                             :columns [{:caption "Name"
                                        :field :name
-                                       :text-alignment :left
-                                       :sort false
-                                       :sort-fn (fn [a b]
-                                                  (compare (:name a) (:name b)))}
+                                       :text-alignment :left}
                                       {:caption "Username"
                                        :field :username}
                                       {:caption "Fecha"
                                        :field :fecha
-                                       :sort true
                                        :data-format :date}]})]]
 
          [:div.panel.panel-default

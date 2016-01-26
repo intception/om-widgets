@@ -19,29 +19,29 @@
       (html
         [:div (-> {:class [class-name (when (checked? (utils/om-get app path) checked-value) "active")]}
                   (merge (when title) {:title title}))
-         [:label {:class (str "om-widgets-label "
-                              (when disabled
-                                " text-muted "))
+         [:label {:class ["om-widgets-label"
+                          (when disabled "text-muted")]
                   :htmlFor (name id)}
           [:input {:type "checkbox"
                    :id (name id)
                    :disabled disabled
                    :checked (checked? (utils/om-get app path) checked-value)
                    :onChange (fn [e]
-                               (let [v (if (.. e -target -checked) checked-value unchecked-value)
-                                     dest (get @app path)]
+                               (let [app (om/get-props owner)
+                                     v (if (.. e -target -checked) checked-value unchecked-value)
+                                     dest (get @(om/get-props owner) path)]
 
                                  (if toggle-value
                                    (if (contains? dest checked-value)
-                                     (utils/om-update! app path (disj dest checked-value))
-                                     (utils/om-update! app path (conj dest checked-value)))
-                                   (utils/om-update! app path v))
+                                     (utils/om-update! (om/get-props owner) path (disj dest checked-value))
+                                     (utils/om-update! (om/get-props owner) path (conj dest checked-value)))
+                                   (utils/om-update! (om/get-props owner) path v))
 
                                  ;; TODO this is done to force a refresh
-                                 (when (utils/atom? app)
+                                 (when (utils/atom? (om/get-props owner))
                                    (om/set-state! owner ::force-refresh (not (om/get-state owner ::force-refresh))))
 
-                                 (when on-change (on-change v))))}]
+                                 (when on-change (on-change e v))))}]
           label]]))))
 
 ;; ---------------------------------------------------------------------

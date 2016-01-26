@@ -65,7 +65,6 @@
                             {:name "Fabian" :username "fapenia" :fecha #inst "2004-04-21"}
                             {:name "Alexis" :username "_axs_" :fecha #inst "2012-04-20"}
                             {:name "Martin" :username "nartub" :fecha #inst "2005-02-17"}
-                            {:name "alexis" :username "_axs_" :fecha #inst "2005-02-17"}
                             {:name "Intception" :username "intception" :fecha #inst "2001-02-17"}]
 
             :source-custom-cell [{:name "Seba"
@@ -82,7 +81,9 @@
                                    {:name "Fabian" :username "fapenia" :row-type :users}
                                    {:name "Alexis" :username "_axs_" :row-type :users}
                                    {:name "Martin" :username "nartub" :row-type :users}]}
-            :selected {}}
+            :selected {}
+            :multiselect #{}
+            }
      :editable-list-with-strings []
      :editable-list-with-dates   []
      :editable-list-with-numbers   []

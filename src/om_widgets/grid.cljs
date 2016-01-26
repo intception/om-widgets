@@ -3,6 +3,7 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [om-widgets.utils :as utils]
+            [om-widgets.checkbox :refer [checkbox]]
             [cljs-time.core :as time]
             [cljs-time.format :as timef]
             [sablono.core :as html :refer-macros [html]]
@@ -33,7 +34,8 @@
                                              @(om/get-state owner :column)
                                              (om/get-state owner :column))]
                                 (put! (om/get-state owner :channel)
-                                      {:sort-info {:column column
+                                      {:type :sort
+                                       :sort-info {:column column
                                                    :direction (if (and sort-info
                                                                        (= (:column sort-info)
                                                                           column)
@@ -45,15 +47,14 @@
              (:caption column)
              [:span {:class (str "pull-right glyphicon om-widgets-sortable-"
                                  (if (and sort-info
-                                          (= (:column sort-info)
-                                             column))
+                                          (= (get-in sort-info [:column :field])
+                                             (:field column)))
                                    (name (:direction sort-info))
                                    "both"))}]]))))
 
 (defn standard-sort
   [column]
   (reify
-
     ISortableColumnDefaultSortData
     (default-sort-data [this column]
       {:column column
@@ -101,11 +102,10 @@
 ;; a valid om component and the other one is just a function that makes the build.
 
 (defn- title-header-cell
-  [{:keys [caption col-span text-alignment] :as h} owner]
+  [{:keys [caption col-span] :as h} owner]
   (om/component
     (let [sorter (grid-sorter h)]
       (html [:th (-> {}
-                     ;(when text-alignment (merge {:class (str "text-" (name text-alignment))}))
                      (when col-span (merge {:colSpan col-span})))
              (if (and sorter
                       (satisfies? ISortableColumnCaret sorter))
@@ -115,13 +115,28 @@
                              (om/get-state owner :channel))
                caption)]))))
 
+
 (defn- header
   [columns owner]
-  (om/component
-    (dom/thead #js {:className "om-widgets-title-header-row"}
-               (apply dom/tr nil
-                      (om/build-all title-header-cell columns {:state {:channel (om/get-state owner :channel)
-                                                                       :sort-info (om/get-state owner :sort-info)}})))))
+  (reify
+    om/IRenderState
+    (render-state [this {:keys [channel sort-info all-selected?] :as state}]
+      (html
+        [:thead {:class "om-widgets-title-header-row"}
+         (utils/make-childs [:tr
+                             (when (om/get-state owner :multiselect?)
+                               [:th {:class "col-md-1 col-sm-1 col-lg-1 col-xs-1"}
+                                [:input {:type "checkbox"
+                                         :id "select-all"
+                                         :checked all-selected?
+                                         :onChange (fn [e]
+                                                     (do (put! (om/get-state owner :selection-channel)
+                                                               {:type :select-all
+                                                                :checked? (.. e -target -checked)})
+                                                         (.preventDefault e)))}]])]
+
+                            (om/build-all title-header-cell columns {:state {:channel channel
+                                                                             :sort-info sort-info}}))]))))
 
 (defn build-page-boundaries
   "Given the pagination information will return where the
@@ -140,9 +155,6 @@
 (defn- default-pager
   [pager-definition owner {:keys [language] :as opts}]
   (reify
-    om/IDisplayName
-    (display-name [_] "GridPager")
-
     om/IRenderState
     (render-state [this {:keys [current-page max-pages total-rows
                                 page-size current-page-total] :as state}]
@@ -157,13 +169,15 @@
                 ;; previous page
                 (dom/li #js {:className (when previous-disabled? "disabled")}
                         (dom/a #js {:onClick #(when (> current-page 0)
-                                               (put! (:channel state) {:new-page (dec current-page)})
+                                               (put! (:channel state) {:type :change-page
+                                                                       :new-page (dec current-page)})
                                                (.preventDefault %))}
                                (translate language :grid.pager/previous-page)))
                 ;; next page
                 (dom/li #js {:className (when next-disabled? "disabled")}
                         (dom/a #js {:onClick #(when (< current-page max-pages)
-                                               (put! (:channel state) {:new-page (inc current-page)})
+                                               (put! (:channel state) {:type :change-page
+                                                                       :new-page (inc current-page)})
                                                (.preventDefault %))}
                                (translate language :grid.pager/next-page)))
 
@@ -234,31 +248,49 @@
 ;; row, you just need to require row-builder ([om-widgets.grid :refer [row-builder]])
 ;; and extend the multimethod with a valid om component.
 
+(defn row-class
+  [row target opts]
+  (let [style-class (or (and (:selected-row-style opts)
+                             (name (:selected-row-style opts)))
+                        "active")]
+    [(when target
+       "om-widgets-default-row")
+
+     (if (:multiselect? opts)
+       (when (contains? target row) style-class)
+       (when (= row target) style-class))]))
+
 (defmulti row-builder (fn [row owner opts] (:row-type row)))
 
 (defmethod row-builder :default
   [row owner opts]
   (reify
-    om/IDisplayName
-    (display-name [_] "DefaultRow")
-
     om/IRenderState
     (render-state [this state]
-      (apply dom/tr #js {:className (str (when (:target state)
-                                           "om-widgets-default-row")
-                                         (when (= row (:target state))
-                                           (str " " (or (and (:selected-row-style opts)
-                                                             (name (:selected-row-style opts)))
-                                                        "active"))))
-                         :onMouseDown #(let [props (om/get-props owner)]
-                                        (put! (:channel state)
-                                              {:row (if (satisfies? IDeref props)
-                                                      @props
-                                                      props)})
-                                        (.preventDefault %))}
-             (map (fn [{:keys [field] :as column}]
-                    (om/build cell-builder (field row) {:opts {:column-def column :row row}}))
-                  (:columns opts))))))
+      (html
+        (utils/make-childs
+          [:tr {:class (row-class row (:target state) opts)
+                :onClick #(do
+                           (put! (om/get-state owner :channel)
+                                 {:type :select
+                                  :row @(om/get-props owner)})
+                           (.preventDefault %))}
+
+           (when (:multiselect? opts)
+             [:td
+              [:input {:type "checkbox"
+                       :id (str "multiselect-" (:index state))
+                       :checked (contains? (:target state) row)
+                       :onChange (fn [e]
+                                   (do (put! (om/get-state owner :channel)
+                                             {:type :multiselect
+                                              :checked? (.. e -target -checked)
+                                              :row @(om/get-props owner)})
+                                       (.preventDefault e)))}]])]
+
+          (map (fn [{:keys [field] :as column}]
+                 (om/build cell-builder (field row) {:opts {:column-def column :row row}}))
+               (:columns opts)))))))
 
 ;; ---------------------------------------------------------------------
 ;; Grid Pager Multimethod
@@ -279,26 +311,72 @@
 (defn- grid-body
   [target owner opts]
   (reify
-    om/IDisplayName
-    (display-name [_] "GridBody")
+    om/IInitState
+    (init-state [_]
+      {:selection-channel (chan)})
+
+    om/IWillMount
+    (will-mount [_]
+      (go-loop
+        []
+        (let [msg (<! (om/get-state owner :selection-channel))]
+          (when-not (= msg :quit)
+            (condp = (:type msg)
+              :select
+              (do
+                (when-not (:multiselect? opts)
+                  (om/update! (om/get-props owner) (:row msg)))
+
+                (when (om/get-state owner :events-channel)
+                  (put! (om/get-state owner :events-channel)
+                        {:event-type :row-selected
+                         :row (:row msg)})))
+
+              :multiselect
+              (do
+                (om/transact! (om/get-props owner)
+                              (fn [s]
+                                (if (:checked? msg)
+                                  (conj s (:row msg))
+                                  (disj s (:row msg)))))
+                (when (not (:checked? msg))
+                  (om/set-state! owner :all-selected? false)))
+
+              :select-all
+              (do
+                (om/transact! (om/get-props owner)
+                              (fn [s]
+                                (if (:checked? msg)
+                                  (into #{} (om/get-state owner :rows))
+                                  #{})))
+                (om/set-state! owner :all-selected? (:checked? msg))))
+            (recur)))))
 
     om/IRenderState
     (render-state [this {:keys [rows] :as state}]
-      (dom/table #js {:className (str "table data"
-                                      (when (:hover? opts) " table-hover")
-                                      (when (:condensed? opts) " table-condensed")
-                                      (when (:bordered? opts) " table-bordered")
-                                      (when (:striped? opts) " table-striped"))}
-                 (om/build header (:columns opts)
-                           {:state {:channel (:channel state)
-                                    :sort-info (:sort-info state)}})
-                 (apply dom/tbody #js {}
-                        (om/build-all row-builder rows {:state {:channel (:channel state)
-                                                                :target target}
-                                                        :opts {:columns (:columns opts)
-                                                               :selected-row-style (:selected-row-style opts)}}))))))
+      (html
+        [:table {:className ["table data"
+                             (when (:hover? opts) "table-hover")
+                             (when (:condensed? opts) "table-condensed")
+                             (when (:bordered? opts) "table-bordered")
+                             (when (:striped? opts) "table-striped")]}
+         (om/build header (:columns opts)
+                   {:state {:channel (:channel state)
+                            :selection-channel (:selection-channel state)
+                            :all-selected? (:all-selected? state)
+                            :sort-info (:sort-info state)
+                            :multiselect? (:multiselect? opts)}})
 
-;; This function where private but we cannot test it from outside given the lack of #' reader
+         (utils/make-childs [:tbody]
+                            (map-indexed #(om/build row-builder %2 {:state {:channel (:selection-channel state)
+                                                                            :target target
+                                                                            :index %1}
+                                                                    :opts {:columns (:columns opts)
+                                                                           :multiselect? (:multiselect? opts)
+                                                                           :selected-row-style (:selected-row-style opts)}})
+                                         rows))]))))
+
+;; This function where private but we cannot test it from outside given the lack of #' reader in clojurescript
 ;; https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#the-reader
 (defn data-page
   [source current-page page-size events-channel sort-info force-page-reload]
@@ -337,9 +415,6 @@
 (defn- create-grid
   [target owner opts]
   (reify
-    om/IDisplayName
-    (display-name [_] "Grid")
-
     om/IInitState
     (init-state [_]
       {:channel (chan)
@@ -347,43 +422,51 @@
 
     om/IWillMount
     (will-mount [_]
-      (go-loop []
-               (let [msg (<! (om/get-state owner :channel))]
-                 (when-not (= msg :quit)
-                   (cond
-                     (and target
-                          (:row msg)) (om/update! target (:row msg))
-                     (:sort-info msg) (do
-                                        (reset! (om/get-state owner :force-page-reload) true)
-                                        (om/set-state! owner :sort-info (:sort-info msg)))
-                     (:new-page msg) (om/set-state! owner :current-page (:new-page msg)))
-                   (recur)))))
+      (go-loop
+        []
+        (let [msg (<! (om/get-state owner :channel))]
+          (when-not (= msg :quit)
+            (condp = (:type msg)
+              :sort
+              (do
+                (reset! (om/get-state owner :force-page-reload) true)
+                (om/set-state! owner :sort-info (:sort-info msg)))
+
+              :change-page
+              (om/set-state! owner :current-page (:new-page msg)))
+
+            (recur)))))
 
     om/IRenderState
     (render-state [this {:keys [header src] :as state}]
-      (dom/div #js {:className "om-widgets-grid"
-                    :id (:id opts)}
-               (om/build grid-body
-                         target
-                         {:state {:rows (data-page src
-                                                   (:current-page state)
-                                                   (:page-size state)
-                                                   (:events-channel state)
-                                                   (:sort-info state)
-                                                   (:force-page-reload state))
-                                  :channel (:channel state)
-                                  :sort-info (:sort-info state)}
-                          :opts {:columns (:columns header)
-                                 :hover? (:hover? opts)
-                                 :condensed? (:condensed? opts)
-                                 :bordered? (:bordered? opts)
-                                 :striped? (:striped? opts)
-                                 :selected-row-style (:selected-row-style opts)}})
-               (grid-pager (:pager state) {:total-rows (:total-rows src)
-                                           :channel (:channel state)
-                                           :page-size (:page-size state)
-                                           :current-page (:current-page state)
-                                           :max-pages (:max-pages state)} opts)))))
+      (html
+        [:div (-> {:className "om-widgets-grid"}
+                  (merge (when (:id opts)) {:id (:id opts)}))
+
+         (om/build grid-body
+                   target
+                   {:state {:rows (data-page src
+                                             (:current-page state)
+                                             (:page-size state)
+                                             (:events-channel state)
+                                             (:sort-info state)
+                                             (:force-page-reload state))
+                            :events-channel (:events-channel state)
+                            :channel (:channel state)
+                            :sort-info (:sort-info state)}
+                    :opts {:columns (:columns header)
+                           :hover? (:hover? opts)
+                           :condensed? (:condensed? opts)
+                           :bordered? (:bordered? opts)
+                           :striped? (:striped? opts)
+                           :multiselect? (:multiselect? opts)
+                           :selected-row-style (:selected-row-style opts)}})
+
+         (grid-pager (:pager state) {:total-rows (:total-rows src)
+                                     :channel (:channel state)
+                                     :page-size (:page-size state)
+                                     :current-page (:current-page state)
+                                     :max-pages (:max-pages state)} opts)]))))
 
 ;; This function where private but we cannot test it from outside given the lack of #' reader
 ;; https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#the-reader
@@ -422,6 +505,7 @@
    (s/optional-key :condensed?) s/Bool
    (s/optional-key :bordered?) s/Bool
    (s/optional-key :striped?) s/Bool
+   (s/optional-key :multiselect?) s/Any
    (s/optional-key :selected-row-style) (s/enum :active :success :info :warning :danger)
    (s/optional-key :onChange) (s/pred fn?)
    (s/optional-key :events-channel) s/Any
@@ -431,10 +515,9 @@
 ;; ---------------------------------------------------------------------
 ;; Public
 
-;; TODO source should be a DataSource protocol
+;; TODO source should be a DataSource protocol?
 (defn grid
-  [source target & {:keys [id onChange events-channel header pager language]
-                    :as definition}]
+  [source target & {:keys [id onChange events-channel header pager language] :as definition}]
   (let [src {:rows (or (:rows source) source)
              :index (or (:index source) 0)
              :total-rows (or (:total-rows source) (count source))}
@@ -446,22 +529,23 @@
         page-size (or (:page-size definition) 5)]
     (om/build create-grid
               target
-              {:init-state {:current-page (int (/ (:index src) page-size))}
+              {:init-state {:current-page (int (/ (:index src) page-size))
+                            :sort-info (when (and sorter
+                                                  (satisfies? ISortableColumnDefaultSortData sorter))
+                                         (merge (default-sort-data sorter init-sorted-column)
+                                                (get header :start-sorted)))}
                :state {:src src
                        :header header
                        :pager (or pager {:type :default})
                        :events-channel events-channel
                        :max-pages (calculate-max-pages (:total-rows src) page-size)
                        :page-size page-size
-                       :sort-info (when (and sorter
-                                             (satisfies? ISortableColumnDefaultSortData sorter))
-                                    (merge (default-sort-data sorter init-sorted-column)
-                                           (get header :start-sorted)))
                        :onChange onChange}
-               :opts {:language (or (:language definition) :en)
+               :opts {:language (or language :en)
                       :hover? (:hover? definition)
                       :condensed? (:condensed? definition)
                       :bordered? (:bordered? definition)
                       :striped? (:striped? definition)
+                      :multiselect? (:multiselect? definition)
                       :selected-row-style (:selected-row-style definition)
                       :id id}})))
