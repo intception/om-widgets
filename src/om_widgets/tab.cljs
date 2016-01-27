@@ -2,6 +2,7 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [om-widgets.utils :as utils]
+            [sablono.core :as html :refer-macros [html]]
             [cljs.reader :as reader]))
 
 
@@ -28,7 +29,9 @@
                                      (.preventDefault e))}
                      (when (:icon page)
                        (dom/i #js {:className (str "glyphicon glyphicon-" (name (:icon page)))}))
-                     (str (when (:icon page) "  ") (:label page)))))))
+                     (if (vector? (:label page))
+                       (html (:label page))
+                       (str (when (:icon page) "  ") (:label page))))))))
 
 (defn- tab-page
   [page owner]
