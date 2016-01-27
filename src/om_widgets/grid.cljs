@@ -47,8 +47,8 @@
              (:caption column)
              [:span {:class (str "pull-right glyphicon om-widgets-sortable-"
                                  (if (and sort-info
-                                          (= (get-in sort-info [:column :field])
-                                             (:field column)))
+                                          (= (select-keys (:column sort-info) [:field :caption])
+                                             (select-keys column [:field :caption])))
                                    (name (:direction sort-info))
                                    "both"))}]]))))
 

@@ -91,11 +91,8 @@
 (defn navbar-container
   [cursor owner]
   (reify
-    om/IDisplayName
-    (display-name [_] "NavBarContainer")
-
     om/IRenderState
-    (render-state [this state]
+    (render-state [this {:keys [items] :as state}]
       (html
         [:nav {:class ["navbar"
                        "navbar-default"
@@ -115,7 +112,7 @@
                                                      :entries %}
                                          {:state {:active-path (:active-path state)
                                                   :on-selection (:on-selection state)}})
-                              (:menu-items cursor)))]]))))
+                              items))]]))))
 
 ;; ---------------------------------------------------------------------
 ;; Schema
@@ -152,6 +149,6 @@
 ;; Public
 
 (defn navbar
-  [app active-path {:keys [brand-image-url brand-title on-selection] :as options}]
+  [app active-path {:keys [items brand-image-url brand-title on-selection] :as options}]
   (s/validate NavbarSchema options)
   (om/build navbar-container app {:state (merge {:active-path active-path} options)}))
