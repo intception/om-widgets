@@ -21,18 +21,17 @@
                                           :onChange (fn [e]
                                                       (when onChange
                                                         (onChange checked-value))
-                                                      (utils/om-update! entity path checked-value)
-                                                      (when (utils/atom? entity)
+                                                      (utils/om-update! (om/get-props owner) path checked-value)
+                                                      (when (utils/atom? (om/get-props owner))
                                                         (om/refresh! owner)))})
                           (dom/span nil label))))))
-
 
 (defn- group
   [entity]
   (reify
     om/IRenderState
-    (render-state [this {:keys [path options disabled class-name label-class]}]
-      (apply dom/ul nil
+    (render-state [this {:keys [path options disabled class-name label-class group-class]}]
+      (apply dom/ul #js {:className group-class}
              (map (fn [option]
                     (dom/li nil
                       (om/build radio entity {:state {:label (:label option)
@@ -51,7 +50,8 @@
 
 (defn radiobutton
   [entity path {:keys [label class-name id checked-value disabled label-class tabIndex onChange]
-                :or {checked-value true class-name "om-widgets-radio"}}]
+                :or {checked-value true
+                     class-name "om-widgets-radio"}}]
   (om/build radio entity {:state {:label label
                                   :id id
                                   :tabIndex tabIndex
@@ -63,8 +63,10 @@
                                   :path path}}))
 
 (defn radiobutton-group
-  [entity path {:keys [options disabled class-name label-class]}]
+  [entity path {:keys [options disabled class-name label-class group-class]
+                :or {group-class "om-widgets-radio-group"}}]
   (om/build group entity {:state {:options options
+                                  :group-class group-class
                                   :disabled disabled
                                   :class-name class-name
                                   :label-class label-class
