@@ -165,28 +165,28 @@
                                    (= 0 current-page-total))
             next-disabled? (or (= 0 total-rows)
                                (= current-page max-pages))]
-        (dom/ul #js {:className "pager"}
-                ;; previous page
-                (dom/li #js {:className (when previous-disabled? "disabled")}
-                        (dom/a #js {:onClick #(when (> current-page 0)
-                                               (put! (:channel state) {:type :change-page
-                                                                       :new-page (dec current-page)})
-                                               (.preventDefault %))}
-                               (translate language :grid.pager/previous-page)))
-                ;; next page
-                (dom/li #js {:className (when next-disabled? "disabled")}
-                        (dom/a #js {:onClick #(when (< current-page max-pages)
-                                               (put! (:channel state) {:type :change-page
-                                                                       :new-page (inc current-page)})
-                                               (.preventDefault %))}
-                               (translate language :grid.pager/next-page)))
+        (html
+          [:nav
+           [:span {:class "current-page pull-right"}
+            (u/format (translate language :grid.pager/total-rows)
+                      (:start page-info)
+                      (:end page-info)
+                      total-rows)]
 
-                ;; total label
-                (dom/span #js {:className "pull-right"}
-                          (u/format (translate language :grid.pager/total-rows)
-                                    (:start page-info)
-                                    (:end page-info)
-                                    total-rows)))))))
+           [:ul {:class "pager"}
+            [:li {:class (when previous-disabled? "disabled")}
+             [:a {:onClick #(when (> current-page 0)
+                             (put! (:channel state) {:type :change-page
+                                                     :new-page (dec current-page)})
+                             (.preventDefault %))}
+              (translate language :grid.pager/previous-page)]]
+
+            [:li {:class (when next-disabled? "disabled")}
+             [:a {:onClick #(when (< current-page max-pages)
+                             (put! (:channel state) {:type :change-page
+                                                     :new-page (inc current-page)})
+                             (.preventDefault %))}
+              (translate language :grid.pager/next-page)]]]])))))
 
 
 (defn- text-alignment
@@ -355,11 +355,11 @@
     om/IRenderState
     (render-state [this {:keys [rows] :as state}]
       (html
-        [:table {:className ["table data"
-                             (when (:hover? opts) "table-hover")
-                             (when (:condensed? opts) "table-condensed")
-                             (when (:bordered? opts) "table-bordered")
-                             (when (:striped? opts) "table-striped")]}
+        [:table {:class ["table data"
+                         (when (:hover? opts) "table-hover")
+                         (when (:condensed? opts) "table-condensed")
+                         (when (:bordered? opts) "table-bordered")
+                         (when (:striped? opts) "table-striped")]}
          (om/build header (:columns opts)
                    {:state {:channel (:channel state)
                             :selection-channel (:selection-channel state)
@@ -440,7 +440,7 @@
     om/IRenderState
     (render-state [this {:keys [header src] :as state}]
       (html
-        [:div (-> {:className "om-widgets-grid"}
+        [:div (-> {:class "om-widgets-grid"}
                   (merge (when (:id opts)) {:id (:id opts)}))
 
          (om/build grid-body
