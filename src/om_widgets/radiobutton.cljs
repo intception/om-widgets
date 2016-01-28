@@ -23,24 +23,26 @@
                                                         (onChange checked-value))
                                                       (utils/om-update! entity path checked-value)
                                                       (when (utils/atom? entity)
-                                                        (om/refresh! owner)))}
-                                     label))))))
+                                                        (om/refresh! owner)))})
+                          (dom/span nil label))))))
+
 
 (defn- group
   [entity]
   (reify
     om/IRenderState
     (render-state [this {:keys [path options disabled class-name label-class]}]
-      (apply dom/div nil
+      (apply dom/ul nil
              (map (fn [option]
-                    (om/build radio entity {:state {:label (:label option)
-                                                    :tabIndex (:tabIndex option)
-                                                    :disabled disabled
-                                                    :class-name class-name
-                                                    :label-class label-class
-                                                    :onChange (:onChange option)
-                                                    :checked-value (:checked-value option)
-                                                    :path path}}))
+                    (dom/li nil
+                      (om/build radio entity {:state {:label (:label option)
+                                                      :tabIndex (:tabIndex option)
+                                                      :disabled disabled
+                                                      :class-name class-name
+                                                      :label-class label-class
+                                                      :onChange (:onChange option)
+                                                      :checked-value (:checked-value option)
+                                                      :path path}})))
                   options)))))
 
 
