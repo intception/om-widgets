@@ -1,4 +1,4 @@
-(defproject org.clojars.intception/om-widgets "0.2.28"
+(defproject org.clojars.intception/om-widgets "0.2.29"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
 
@@ -25,6 +25,7 @@
              :server-port 3450}
 
   :cljsbuild {:builds [{:id "om-widgets"
+                        :figwheel false
                         :source-paths ["src"]
                         :compiler {:output-to "target/om_widgets.js"
                                    :output-dir "target"

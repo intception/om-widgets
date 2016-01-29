@@ -253,7 +253,8 @@
   (let [style-class (or (and (:selected-row-style opts)
                              (name (:selected-row-style opts)))
                         "active")]
-    [(when target
+    [(when (and target
+                (not (:disable-selection? opts)))
        "om-widgets-default-row")
 
      (if (:multiselect? opts)
@@ -269,12 +270,15 @@
     (render-state [this state]
       (html
         (utils/make-childs
-          [:tr {:class (row-class row (:target state) opts)
-                :onClick #(let [props (om/get-props owner)]
-                           (put! (om/get-state owner :channel)
-                                 {:type :select
-                                  :row (if (satisfies? IDeref props) @props props)})
-                           (.preventDefault %))}
+          [:tr (-> {:class (row-class row (:target state) opts)}
+                   (merge (when-not (:disable-selection? opts)
+                            ;; we use mousedown because onClick its triggered before,
+                            ;; this make links inside cells work as expected
+                            {:onMouseDown #(let [props (om/get-props owner)]
+                                            (put! (om/get-state owner :channel)
+                                                  {:type :select
+                                                   :row (if (satisfies? IDeref props) @props props)})
+                                            (.preventDefault %))})))
 
            (when (:multiselect? opts)
              [:td
@@ -282,11 +286,12 @@
                        :id (str "multiselect-" (:index state))
                        :checked (contains? (:target state) row)
                        :onChange (fn [e]
-                                   (do (put! (om/get-state owner :channel)
-                                             {:type :multiselect
-                                              :checked? (.. e -target -checked)
-                                              :row @(om/get-props owner)})
-                                       (.preventDefault e)))}]])]
+                                   (let [props (om/get-props owner)]
+                                     (put! (om/get-state owner :channel)
+                                           {:type :multiselect
+                                            :checked? (.. e -target -checked)
+                                            :row (if (satisfies? IDeref props) @props props)})
+                                     (.preventDefault e)))}]])]
 
           (map (fn [{:keys [field] :as column}]
                  (om/build cell-builder (field row) {:opts {:column-def column :row row}}))
@@ -373,6 +378,7 @@
                                                                             :index %1}
                                                                     :opts {:columns (:columns opts)
                                                                            :multiselect? (:multiselect? opts)
+                                                                           :disable-selection? (:disable-selection? opts)
                                                                            :selected-row-style (:selected-row-style opts)}})
                                          rows))]))))
 
@@ -460,6 +466,7 @@
                            :bordered? (:bordered? opts)
                            :striped? (:striped? opts)
                            :multiselect? (:multiselect? opts)
+                           :disable-selection? (:disable-selection? opts)
                            :selected-row-style (:selected-row-style opts)}})
 
          (grid-pager (:pager state) {:total-rows (:total-rows src)
@@ -517,7 +524,7 @@
 
 ;; TODO source should be a DataSource protocol?
 (defn grid
-  [source target & {:keys [id onChange events-channel header pager language] :as definition}]
+  [source target & {:keys [id onChange events-channel header pager language disable-selection?] :as definition}]
   (let [src {:rows (or (:rows source) source)
              :index (or (:index source) 0)
              :total-rows (or (:total-rows source) (count source))}
@@ -547,5 +554,6 @@
                       :bordered? (:bordered? definition)
                       :striped? (:striped? definition)
                       :multiselect? (:multiselect? definition)
+                      :disable-selection? disable-selection?
                       :selected-row-style (:selected-row-style definition)
                       :id id}})))
