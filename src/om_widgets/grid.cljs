@@ -270,10 +270,10 @@
       (html
         (utils/make-childs
           [:tr {:class (row-class row (:target state) opts)
-                :onClick #(do
+                :onClick #(let [props (om/get-props owner)]
                            (put! (om/get-state owner :channel)
                                  {:type :select
-                                  :row @(om/get-props owner)})
+                                  :row (if (satisfies? IDeref props) @props props)})
                            (.preventDefault %))}
 
            (when (:multiselect? opts)
