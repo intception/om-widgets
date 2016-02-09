@@ -374,6 +374,7 @@
 
          (utils/make-childs [:tbody]
                             (map-indexed #(om/build row-builder %2 {:state {:channel (:selection-channel state)
+                                                                            :events-channel (:events-channel state)
                                                                             :target target
                                                                             :index %1}
                                                                     :opts {:columns (:columns opts)
