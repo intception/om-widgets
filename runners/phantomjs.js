@@ -1,36 +1,54 @@
 #!/usr/bin/env phantomjs
 
-// reusable phantomjs script for running clojurescript.test tests
-// see http://github.com/cemerick/clojurescript.test for more info
+var system = require('system');
+var url,args;
 
-var p = require('webpage').create();
-var sys = require('system');
-
-p.settings.XSSAuditingEnabled=false;
-p.settings.localToRemoteUrlAccessEnabled=true;
-p.settings.webSecurityEnabled=false;
-
-for (var i = 1; i < sys.args.length; i++) {
-  p.injectJs(sys.args[i]);
+if (phantom.version.major > 1) {
+    args = system.args;
+    if (args.length < 2) {
+        system.stderr.write('Expected a target URL parameter.');
+        phantom.exit(1);
+    }
+    url = args[1];
+} else {
+    args = phantom.args;
+    if (args.length < 1) {
+        system.stderr.write('Expected a target URL parameter.');
+        phantom.exit(1);
+    }
+    url = args[0];
 }
 
-p.onConsoleMessage = function (x) {
-  var line = x;
-  if (line !== "[NEWLINE]") {
-    console.log(line.replace(/\[NEWLINE\]/g, "\n"));
-  }
+var page = require('webpage').create();
+
+page.onConsoleMessage = function (message) {
+    console.log("Test console: " + message);
 };
 
-p.evaluate(function () {
-  cemerick.cljs.test.set_print_fn_BANG_(function(x) {
-    console.log(x.replace(/\n/g, "[NEWLINE]")); // since console.log *itself* adds a newline
-  });
-});
+console.log("Loading URL: " + url);
 
-var success = p.evaluate(function () {
-  var results = cemerick.cljs.test.run_all_tests();
-  console.log(results);
-  return cemerick.cljs.test.successful_QMARK_(results);
-});
+page.open(url, function (status) {
+    if (status != "success") {
+        console.log('Failed to open ' + url);
+        phantom.exit(1);
+    }
 
-phantom.exit(success ? 0 : 1);
+    console.log("Running test.");
+
+    var result = page.evaluate(function() {
+        return om_widgets.runner_test.run();
+    });
+
+    // NOTE: PhantomJS 1.4.0 has a bug that prevents the exit codes
+    //        below from being returned properly. :(
+    //
+    // http://code.google.com/p/phantomjs/issues/detail?id=294
+
+    if (result != 0) {
+        console.log("*** Test failed! ***");
+        phantom.exit(1);
+    }
+
+    console.log("Test succeeded.");
+    phantom.exit(0);
+});

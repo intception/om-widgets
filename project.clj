@@ -11,15 +11,16 @@
                  [prismatic/dommy "1.0.0"]
                  [net.unit8/tower-cljs "0.1.0"] ;; translations
                  [sablono "0.4.0"]
-                 [com.cemerick/clojurescript.test "0.3.3"]
                  [prismatic/schema "0.4.0" :exclusions [org.clojure/clojurescript]]]
 
-  :plugins [[lein-cljsbuild "1.0.5"]
-            [lein-figwheel "0.3.9" :exclusions [org.clojure/clojure]]
-            [com.cemerick/clojurescript.test "0.3.3"]]
+  :plugins [[lein-cljsbuild "1.1.2"]
+            [lein-figwheel "0.3.9" :exclusions [org.clojure/clojure]]]
 
   :source-paths ["src"]
   :test-paths ["test"]
+
+  ; Enable the lein hooks for: compile, test, and jar.
+  :hooks [leiningen.cljsbuild]
 
   :figwheel {:nrepl-port 7889
              :server-port 3450}
@@ -46,8 +47,6 @@
                                    :output-dir "resources/public/examples/basic/out"
                                    :optimizations :none
                                    :source-map true}}]
-              :test-commands {"unit-tests" ["phantomjs" :runner
-                                            "test/vendor/es5-shim.js"
-                                            "test/vendor/es5-sham.js"
-                                            "test/vendor/console-polyfill.js"
-                                            "target/test/unit-test.js"]}})
+              :test-commands {"unit-tests" ["phantomjs"
+                                            "runners/phantomjs.js"
+                                            "resources/private/html/unit-test.html"]}})
