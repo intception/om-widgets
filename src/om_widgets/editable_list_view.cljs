@@ -118,7 +118,7 @@
    (s/optional-key :id) s/Str
    (s/optional-key :disabled) s/Bool
    (s/optional-key :field-validation-fn) (s/pred fn?)
-   (s/optional-key :btn-add-text) s/Str
+   (s/optional-key :btn-text) s/Str
    (s/optional-key :btn-add-class) s/Str
    (s/optional-key :btn-add-icon-class) s/Str
    (s/optional-key :btn-remove-class) s/Str
