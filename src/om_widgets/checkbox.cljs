@@ -41,7 +41,7 @@
                                  (when (utils/atom? (om/get-props owner))
                                    (om/set-state! owner ::force-refresh (not (om/get-state owner ::force-refresh))))
 
-                                 (when on-change (on-change e v))))}]
+                                 (when on-change (on-change v))))}]
           label]]))))
 
 ;; ---------------------------------------------------------------------
