@@ -1,5 +1,6 @@
 (ns om-widgets.runner-test
-  (:require-macros [cljs.test :refer (run-tests run-all-tests)]))
+  (:require-macros [cljs.test :refer (run-tests run-all-tests)])
+  (:require [cljs.test]))
 
 (def success 0)
 
