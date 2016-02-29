@@ -16,7 +16,6 @@
 
     om/IRenderState
     (render-state [this state]
-
       (html
         [:div.panel.panel-default
          [:div.panel-heading "Popup window sample"]
@@ -100,6 +99,7 @@
             {:prefered-side :right
              :label ""
              :popover-class ""
+             :channel (:channel state)
              :for "popup-close-btn-sample"})
 
           [:hr]
