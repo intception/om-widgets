@@ -1,6 +1,8 @@
-(defproject org.clojars.intception/om-widgets "0.2.33"
+(defproject org.clojars.intception/om-widgets "0.2.34"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
+  :license {:name "Eclipse Public License"
+            :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.122" :scope "provided"]
