@@ -27,21 +27,20 @@
                    :disabled disabled
                    :checked (checked? (utils/om-get app path) checked-value)
                    :onChange (fn [e]
-                               (let [app (om/get-props owner)
-                                     v (if (.. e -target -checked) checked-value unchecked-value)
+                               (let [value (if (.. e -target -checked) checked-value unchecked-value)
                                      dest (get @(om/get-props owner) path)]
 
                                  (if toggle-value
                                    (if (contains? dest checked-value)
                                      (utils/om-update! (om/get-props owner) path (disj dest checked-value))
                                      (utils/om-update! (om/get-props owner) path (conj dest checked-value)))
-                                   (utils/om-update! (om/get-props owner) path v))
+                                   (utils/om-update! (om/get-props owner) path value))
 
                                  ;; TODO this is done to force a refresh
                                  (when (utils/atom? (om/get-props owner))
                                    (om/set-state! owner ::force-refresh (not (om/get-state owner ::force-refresh))))
 
-                                 (when on-change (on-change v))))}]
+                                 (when on-change (on-change value))))}]
           label]]))))
 
 ;; ---------------------------------------------------------------------
