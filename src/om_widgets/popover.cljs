@@ -279,9 +279,9 @@
         [:div {:class (:launcher-class-name opts)}
          (when visible
            (dom/div #js {:style #js {:position "absolute" :display "inline"}}
-                    (om/build popover-container nil {:state {:content-fn popup-content-fn
-                                                             :prefered-side prefered-side
-                                                             :channel channel}
+                    (om/build popover-container nil {:init-state {:channel channel}
+                                                     :state {:content-fn popup-content-fn
+                                                             :prefered-side prefered-side}
                                                      :opts {:for (:for opts)
                                                             :align (:align opts)
                                                             :has-arrow (:has-arrow opts)

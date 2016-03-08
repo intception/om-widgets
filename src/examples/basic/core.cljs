@@ -40,7 +40,7 @@
            :tab (om/build tab-example (get-in app [:tab]))
            :form (om/build form-example (get-in app [:form]))
            :dropdown (om/build dropdown-example (get-in app [:dropdown]))
-           :datepicker (om/build datepicker-example app)
+           :datepicker (om/build datepicker-example (get-in app [:datepicker]))
            :modal (om/build modal-example app)
            :grid (om/build grid-example (get-in app [:grid]))
            :grid-link (om/build grid-link-example (get-in app [:grid]))
