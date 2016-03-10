@@ -31,6 +31,7 @@
                                     :autofocus true
                                     :tabIndex 2
                                     :input-format "numeric"
+                                    :align "left"
                                     :placeholder "Your age (numbers only)"})]
 
             [:div.form-group

@@ -439,10 +439,11 @@
                                  (= input-format "numeric") (if (not decimals) 2 decimals)
                                  :else 0)
                      :currency (if (= input-format "currency") true false)
-                     :align (cond (= input-format "numeric") "right"
+                     :align (or align
+                                (cond (= input-format "numeric") "right"
                                   (= input-format "integer") "right"
                                   (= input-format "currency") "right"
-                                  :else align)
+                                  :else "left"))
                      :onChange onChange
                      :onBlur onBlur
                      :onKeyPress onKeyPress
