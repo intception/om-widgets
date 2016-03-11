@@ -95,7 +95,11 @@
             (fn [_]
               (html
                 [:div.jumbotron
-                 [:h3 "Click outside to close!"]]))
+                 [:h3 "Click outside to close!"]
+                 (w/checkbox app :some-check {:label "  Some Checkbox (Boolean)"
+                                              :title "Some tooltip"
+                                              :checked-value true
+                                              :unchecked-value false})]))
             {:prefered-side :right
              :label ""
              :popover-class ""
