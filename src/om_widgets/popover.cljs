@@ -312,18 +312,18 @@
                    :onClick #(do
                               (om/set-state! owner :visible true)
                               nil)}
-          label]
-         (when visible
-           (om/build popover-container nil {:state {:content-fn body
-                                                    :prefered-side prefered-side
-                                                    :channel channel}
-                                            :opts {:align (:align opts)
-                                                   :has-arrow (:has-arrow opts)
-                                                   :mouse-down #(om/set-state! owner :visible false)
-                                                   :popover-class (:popover-class opts)
-                                                   :close-fn #(go
-                                                               (<! (timeout 10))
-                                                               (om/set-state! owner :visible false))}}))]))))
+          label
+          (when visible
+            (om/build popover-container nil {:state {:content-fn body
+                                                     :prefered-side prefered-side
+                                                     :channel channel}
+                                             :opts {:align (:align opts)
+                                                    :has-arrow (:has-arrow opts)
+                                                    :mouse-down #(om/set-state! owner :visible false)
+                                                    :popover-class (:popover-class opts)
+                                                    :close-fn #(go
+                                                                (<! (timeout 10))
+                                                                (om/set-state! owner :visible false))}}))]]))))
 
 
 ;; ---------------------------------------------------------------------
