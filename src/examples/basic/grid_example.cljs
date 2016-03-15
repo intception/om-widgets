@@ -9,9 +9,6 @@
 (defn grid-example
   [app owner]
   (reify
-    om/IDisplayName
-    (display-name[_] "GridSample")
-
     om/IRenderState
     (render-state [this state]
       (html
@@ -26,6 +23,7 @@
                    :container-class-name ""
                    :selected-row-style :info
                    :page-size 5
+                   :hover? true
                    :header {:type :default
                             :start-sorted {:by :fecha
                                            :direction :down}
