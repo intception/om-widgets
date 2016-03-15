@@ -66,13 +66,26 @@
 
             [:div.form-group
              [:label "Marital Status"]
-             [:br]
              (w/combobox app :marital-status
                          {:tabIndex 6
+                          :class-name "form-control"
                           :options (sorted-map :single "Single"
                                                :married "Married"
                                                :divorced "Divorced"
                                                :widowed "Widowed")})]
+
+            [:div.form-group
+             [:label "Favorite Food"]
+             (w/combobox app :favorite-food
+                         {:tabIndex 6
+                          :class-name "form-control"
+                          :options {"Dairy products" {:cheese "Cheese"
+                                                      :egg "Egg"}
+                                    "Vegetables" {:cabbage "Cabbage"
+                                                  :lettuce "Lettuce"
+                                                  :beans "Beans"
+                                                  :onions "Onions"
+                                                  :courgettes "Courgettes"}}})]
 
             [:div.form-group
              [:label "Password"]

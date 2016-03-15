@@ -2,21 +2,27 @@
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [schema.core :as s :include-macros true]
+            [sablono.core :refer-macros [html]]
             [om-widgets.utils :as utils]
-            [cljs.reader :as reader]))
+            [cljs.reader :as reader]
+            [om-widgets.utils :as u]))
 
 
 (defn- option
-  [[value name]]
+  [[k v]]
   (om/component
-   (dom/option #js {:value (pr-str {:value value})} name)))
+    (html
+      (if (map? v)
+        (u/make-childs [:optgroup {:label k}] (om/build-all option v))
+        (dom/option #js {:value (pr-str {:value k})} v)))))
 
 (defn- combo
   [app owner]
   (reify
     om/IRenderState
     (render-state [this {:keys [options path] :as state}]
-      (let [value (when (get (into {} options) (utils/om-get app path)) (utils/om-get app path))
+      (let [flatten-opts (reduce (fn [acc [k v]] (conj acc (if (coll? v) v {k v}))) {} options)
+            value (when (get flatten-opts (utils/om-get app path)) (utils/om-get app path))
             opts (->> {:onChange (fn [e]
                                    (let [value (reader/read-string (.. e -target -value))]
                                      (utils/om-update! app
@@ -40,6 +46,8 @@
                       (merge (when (:tabIndex state)) {:tabIndex (:tabIndex state)})
                       (merge (when (:read-only state) {:readOnly true})))]
         (apply dom/select (clj->js opts)
+               ;; create an empty value to override <select> default behaviour of always selecting the first item
+               ;; this plays well with required values or form validation
                (apply conj [(dom/option #js {:value (pr-str {:value nil}) :disabled true})]
                       (om/build-all option options)))))))
 
