@@ -17,7 +17,9 @@
     om/IRenderState
     (render-state [this {:keys [label id class-name title path disabled on-change checked-value unchecked-value toggle-value]}]
       (html
-        [:div (-> {:class [class-name (when (checked? (utils/om-get app path) checked-value) "active")]}
+        [:div (-> {:class [class-name
+                           (when disabled "disabled")
+                           (when (checked? (utils/om-get app path) checked-value) "active")]}
                   (merge (when title) {:title title}))
          [:label {:class ["om-widgets-label"
                           (when disabled "text-muted")]
