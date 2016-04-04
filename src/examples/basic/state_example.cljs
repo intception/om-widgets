@@ -55,7 +55,7 @@
                   :input-group-right #inst "1991-01-25"
                   :input-group-close-on-change #inst "1991-01-25"}
      :sex :male
-     :tab {:selected-variant 0}
+     :tab {:selected-tab :inbox}
      :form {:name ""
             :age 25
             :birth-date ""

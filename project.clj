@@ -1,4 +1,4 @@
-(defproject org.clojars.intception/om-widgets "0.2.44"
+(defproject org.clojars.intception/om-widgets "0.3.0"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
   :license {:name "Eclipse Public License"
@@ -8,7 +8,7 @@
                  [org.clojure/clojurescript "1.7.122" :scope "provided"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [org.omcljs/om "0.8.8" :scope "provided"]
-                 [com.palletops/thread-expr "1.3.0"]
+                 [org.clojars.intception/thread-expr "1.4.0"]
                  [com.andrewmcveigh/cljs-time "0.3.13"]
                  [prismatic/dommy "1.0.0"]
                  [net.unit8/tower-cljs "0.1.0"] ;; translations

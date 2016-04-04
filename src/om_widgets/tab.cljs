@@ -1,73 +1,106 @@
 (ns om-widgets.tab
+  (:require-macros [pallet.thread-expr :as th])
   (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
-            [om-widgets.utils :as utils]
-            [sablono.core :as html :refer-macros [html]]
-            [cljs.reader :as reader]))
+            [om-widgets.utils :as u]
+            [sablono.core :refer-macros [html]]
+            [schema.core :as s]))
 
 
 (defn- tab-header
   [page]
   (reify
     om/IRenderState
-    (render-state [this state]
-      (dom/li #js {:className (cond
-                                (:disabled page) "disabled"
-                                (= (:current-page page) (:index page)) "active"
-                                :else "inactive")}
-              (dom/a #js {:className "om-widgets-tab-item"
-                          :onClick (fn [e]
-                                     (when (not (:disabled page))
-                                       (let [parent-owner (:parent-owner page)
-                                             on-change (om/get-state parent-owner :on-change)]
-                                         (when (and on-change (not= (or (utils/om-get (om/get-props parent-owner) :current-page) 0) (:index page)))
-                                           (on-change (:index page)))
-                                         (utils/om-update! (om/get-props parent-owner) (om/get-state parent-owner :path) (:index page))
+    (render-state [_ _]
+      (html
+        [:li {:class (cond
+                       (= (:current-page page) (:id page)) "active"
+                       (:disabled page) "disabled"
+                       :else "inactive")}
+         (if (fn? (:label page))
+           ((:label page))
+           [:a {:class "om-widgets-tab-item"
+                :onClick (fn [e]
+                           (when (not (:disabled page))
+                             (let [parent-owner (:parent-owner page)
+                                   on-change (om/get-state parent-owner :on-change)]
+                               (when (and on-change
+                                          (not= (u/om-get (om/get-props parent-owner) :current-page)
+                                                page))
+                                 (on-change (:id page)))
 
-                                         (when (utils/atom? (om/get-props parent-owner))
-                                           (om/refresh! parent-owner))))
-                                     (.preventDefault e))}
-                     (when (:icon page)
-                       (dom/i #js {:className (str "glyphicon glyphicon-" (name (:icon page)))}))
-                     (if (vector? (:label page))
-                       (html (:label page))
-                       (str (when (:icon page) "  ") (:label page))))))))
+                               (u/om-update! (om/get-props parent-owner) (om/get-state parent-owner :path) (:id page))
+
+                               (when (u/atom? (om/get-props parent-owner))
+                                 (om/refresh! parent-owner))))
+                           (.preventDefault e))}
+            (when (:icon page)
+              [:i {:class (str "glyphicon glyphicon-" (name (:icon page)))}])
+
+            (if (vector? (:label page))
+              (html (:label page))
+              (str (when (:icon page) "  ") (:label page)))])]))))
 
 (defn- tab-page
-  [page owner]
+  [page _]
   (reify
     om/IRenderState
-    (render-state [this state]
-      (dom/div #js {:className (if (= (:current-page page) (:index page))
-                                 "om-widgets-active-tab"
-                                 "om-widgets-inactive-tab")
-                    :key (str "k" (:index page))}
-               (if (fn? (:content page))
-                 ((:content page))
-                 (:content page))))))
+    (render-state [_ _]
+      (html
+        [:div {:class "om-widgets-active-tab"}
+         (when (:content page)
+           (if (fn? (:content page))
+             ((:content page))
+             (:content page)))]))))
 
 (defn- tab-component
   [cursor owner]
   (reify
     om/IRenderState
-    (render-state [this {:keys [pages id right-panel path class-name]}]
-      (let [current-page (or (utils/om-get cursor path) 0)
-            opts (map #(merge % {:current-page current-page
-                                 :parent-owner owner
-                                 :index %2})  pages (range))]
-        (dom/div #js {:className (str "om-widgets-tab " class-name)
-                      :id id}
-                 (dom/div #js {:className "om-widgets-top-row"}
-                          (apply dom/ul #js {:className "nav nav-tabs om-widgets-nav om-widgets-nav-tabs"}
-                                 (conj (om/build-all tab-header opts)
-                                       (when right-panel
-                                         (dom/li #js {:className "om-widgets-right-panel"}
-                                                 right-panel)))))
-                 (dom/div nil
-                          (om/build tab-page (nth opts current-page))))))))
+    (render-state [_ {:keys [pages id right-panel path class-name]}]
+      (let [page-id (u/om-get cursor path)
+            page-config (->> pages (filter #(and (:id %) (= (:id %) page-id))) first)
+            active-page (or page-config (first pages))
+            header-opts (map #(merge % {:current-page (:id active-page)
+                                        :parent-owner owner})
+                             pages)]
 
+        (html
+          [:div.om-widgets-tab (-> {:class class-name}
+                                   (th/when-> id (merge {:id id})))
+
+           [:div.om-widgets-top-row
+            (u/make-childs
+              [:ul.nav.nav-tabs.om-widgets-nav.om-widgets-nav-tabs]
+              (conj (om/build-all tab-header header-opts)
+                    (when right-panel
+                      [:li.om-widgets-right-panel right-panel])))]
+
+           [:div
+            (om/build tab-page active-page)]])))))
+
+
+;; ---------------------------------------------------------------------
+;; Schema
+(def Pages
+  [{:label (s/either (s/pred fn?) [s/Any] s/Str)
+    (s/optional-key :id) s/Any
+    (s/optional-key :content) s/Any
+    (s/optional-key :disabled) s/Bool
+    (s/optional-key :icon) s/Keyword}])
+
+(def TabSchema
+  {(s/optional-key :id) s/Str
+   (s/optional-key :on-change) (s/pred fn?)
+   (s/optional-key :right-panel) s/Any
+   (s/optional-key :class-name) s/Str})
+
+
+;; ---------------------------------------------------------------------
+;; Public
 (defn tab
-  [cursor path {:keys [id on-change right-panel class-name]} & pages]
+  [cursor path {:keys [id on-change right-panel class-name] :as opts} & pages]
+  (s/validate TabSchema opts)
+  (s/validate Pages pages)
   (om/build tab-component cursor {:state {:id id
                                           :path path
                                           :pages pages

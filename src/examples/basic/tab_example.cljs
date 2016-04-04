@@ -1,39 +1,40 @@
 (ns examples.basic.tab-example
   (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
-            [sablono.core :as html :refer-macros [html]]
+            [sablono.core :refer-macros [html]]
             [om-widgets.core :as w]))
 
 
 (defn content
-  [cursor owner {:keys [title]}]
+  [_ _ {:keys [title]}]
   (reify
     om/IRenderState
     (render-state [_ _]
       (html
-       [:div.panel.panel-default
-        [:div.panel-body
-         [:div.jumbotron
-          [:h4 title]]]]))))
+        [:div.panel.panel-default
+         [:div.panel-body
+          [:div.jumbotron
+           [:h4 title]]]]))))
 
 (defn tab-example
-  [cursor owner]
+  [cursor _]
   (reify
-    om/IDisplayName
-    (display-name [_] "TabSample")
-
     om/IRenderState
-    (render-state [this state]
+    (render-state [_ _]
       (html
-       [:div
-        (apply w/tab cursor :selected-variant {}
-               [{:content #(om/build content cursor {:opts {:title "Inbox"}})
+        [:div
+         (w/tab cursor :selected-tab {}
+                {:content #(om/build content cursor {:opts {:title "Inbox"}})
                  :icon :inbox
+                 :id :inbox
                  :label "Inbox"}
+
                 {:content #(om/build content cursor {:opts {:title "Config"}})
                  :icon :wrench
+                 :id :config
                  :label "Config"}
+
                 {:content #(om/build content cursor {:opts {:title "Profile"}})
                  :icon :user
-                 :label "Profile"
-                 :disabled true}])]))))
+                 :id :user
+                 :label [:span " Profile"]
+                 :disabled true})]))))
