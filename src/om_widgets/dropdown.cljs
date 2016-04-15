@@ -28,6 +28,7 @@
                                            (put! channel {:type :entry-click
                                                           :value (:id e)
                                                           :link (:url e)})
+                                           (put! (:channel state) {:type :close-dropdown})
                                            (.preventDefault %)
                                            (.stopPropagation %))})))
          [:a (->> {}
