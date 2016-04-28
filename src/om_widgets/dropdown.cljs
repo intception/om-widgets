@@ -25,10 +25,10 @@
         [:li (->> {:class (when (:disabled entry) "disabled")}
                   (merge (when-not (:disabled entry)
                            {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
+                                           (put! (:channel state) {:type :close-dropdown})
                                            (put! channel {:type :entry-click
                                                           :value (:id e)
                                                           :link (:url e)})
-                                           (put! (:channel state) {:type :close-dropdown})
                                            (.preventDefault %)
                                            (.stopPropagation %))})))
          [:a (->> {}
