@@ -116,18 +116,20 @@
     :mask))
 
 (defn- update-target
-  [target owner {:keys [cbtimeout input-format prev-value path onChange private-state] :as state} bInternal]
+  [target owner {:keys [input-format path onChange private-state] :as state} bInternal]
   (when target
     (let [dom-node (:dom-node @private-state)
           value (convert-output input-format (.-value dom-node))]
       (do
         (swap! private-state assoc :cbtimeout nil :prev-value value)
         (utils/om-update! target path value)
-        (when (and onChange (not bInternal))
+        (when (and onChange
+                   (not bInternal)
+                   (not= value (path target)))
           (onChange value))))))
 
 (defn- fire-on-change
-  [target owner {:keys [cbtimeout typing-timeout prev-value path private-state onChange] :as state}]
+  [target owner {:keys [typing-timeout private-state] :as state}]
   (let [cbtimeout (:cbtimeout @private-state)]
     (when cbtimeout
       (.clearTimeout js/window cbtimeout))
