@@ -1,6 +1,5 @@
 (ns om-widgets.utils
   (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
             [cljs.reader :as reader]
             [goog.string :as gstring]
             [goog.string.format]
@@ -122,3 +121,22 @@
     (if (and has-items? in-bounds?)
       (vec (concat (subvec v 0 p) (subvec v (inc p))))
       v)))
+
+(defn get-window-boundaries!
+  "Get js/window bounderies {:width, :height}
+  Note: fn with side-effects"
+  []
+  (cond
+    (not= nil (type (.-innerWidth js/window)))
+    {:width (.-innerWidth js/window)
+     :height (.-innerHeight js/window)}
+
+    (and (not= nil (type (.-documentElement js/document)))
+         (.-clientWidth js/document.documentElement)
+         (not= 0 (.-documentElement.clientWidth js/document)))
+    {:width (.-clientWidth js/document.documentElement)
+     :height (.-clientHeight js/document.documentElement)}
+
+    :else
+    {:width (.-clientWidth (aget (.getElementsByTagName js/document "body") 0))
+     :height (.-clientHeight (aget (.getElementsByTagName js/document "body") 0))}))

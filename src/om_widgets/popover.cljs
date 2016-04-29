@@ -6,27 +6,8 @@
             [cljs.core.async :refer [put! chan <! alts! timeout close!]]
             [sablono.core :refer-macros [html]]
             [dommy.core :as dommy :refer-macros [sel sel1]]
-            [goog.events :as events]))
-
-
-(defn- get-window-boundaries!
-  "Get js/window bounderies {:width, :height}
-  Note: fn with side-effects"
-  []
-  (cond
-    (not= nil (type (.-innerWidth js/window)))
-    {:width (.-innerWidth js/window)
-     :height (.-innerHeight js/window)}
-
-    (and (not= nil (type (.-documentElement js/document)))
-         (.-clientWidth js/document.documentElement)
-         (not= 0 (.-documentElement.clientWidth js/document)))
-    {:width (.-clientWidth js/document.documentElement)
-     :height (.-clientHeight js/document.documentElement)}
-
-    :else
-    {:width (.-clientWidth (aget (.getElementsByTagName js/document "body") 0))
-     :height (.-clientHeight (aget (.getElementsByTagName js/document "body") 0))}))
+            [goog.events :as events]
+            [om-widgets.utils :as u]))
 
 
 (defn- get-window-scroll!
@@ -48,7 +29,7 @@
 (defn window-size []
   (merge {:scroll-x 0
           :scroll-y 0}
-         (get-window-boundaries!)
+         (u/get-window-boundaries!)
          (get-window-scroll!)))
 
 (defn client-rects
