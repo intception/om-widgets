@@ -447,7 +447,7 @@
     om/IRenderState
     (render-state [this {:keys [header src] :as state}]
       (html
-        [:div (-> {:class "om-widgets-grid"}
+        [:div (-> {:class ["om-widgets-grid" (when (:responsive? opts) "table-responsive")]}
                   (merge (when (:id opts)) {:id (:id opts)}))
 
          (om/build grid-body
@@ -525,7 +525,7 @@
 
 ;; TODO source should be a DataSource protocol?
 (defn grid
-  [source target & {:keys [id onChange events-channel header pager language disable-selection?] :as definition}]
+  [source target & {:keys [id onChange events-channel header pager language disable-selection? responsive?] :as definition}]
   (let [src {:rows (or (:rows source) source)
              :index (or (:index source) 0)
              :total-rows (or (:total-rows source) (count source))}
@@ -555,6 +555,7 @@
                       :bordered? (:bordered? definition)
                       :striped? (:striped? definition)
                       :multiselect? (:multiselect? definition)
+                      :responsive? responsive?
                       :disable-selection? disable-selection?
                       :selected-row-style (:selected-row-style definition)
                       :id id}})))

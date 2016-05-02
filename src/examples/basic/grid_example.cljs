@@ -24,6 +24,7 @@
                    :selected-row-style :info
                    :page-size 5
                    :hover? true
+                   :responsive? false
                    :header {:type :default
                             :start-sorted {:by :fecha
                                            :direction :down}
@@ -36,6 +37,7 @@
                                                            (clojure.string/lower-case (:name b))))}
                                       {:caption "Username"
                                        :field :username}
+
                                       {:caption "Fecha"
                                        :field :fecha
                                        :sort true
