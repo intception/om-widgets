@@ -33,14 +33,16 @@
         (dommy/unlisten! (sel1 :body) :keydown handle-keydown)))
 
     om/IRenderState
-    (render-state [this {:keys [title body footer close-fn class-name] :as state}]
+    (render-state [this {:keys [title body footer close-fn class-name size] :as state}]
       (dom/div #js {:className "modal"
                     :role "dialog"
                     :tabIndex -1
                     :style #js {:display "block"}}
                (dom/div #js {:className "om-widgets-overlay"})
                (dom/div #js {:className "om-widgets-modal-box"}
-                        (dom/div #js {:className (str "om-widgets-modal-dialog " class-name)}
+                        (dom/div #js {:className (str "om-widgets-modal-dialog "
+                                                      (when size (str " modal-" (name size)))
+                                                      class-name)}
                                  (dom/div #js {:className "om-widgets-modal-content"}
                                           (if (string? title)
                                             (dom/div #js {:className "om-widgets-modal-header"}
@@ -69,13 +71,14 @@
 
 (defn modal-box
   "Arguments title, body and footer  [string or vector of components]"
-  [target {:keys [title body footer close-fn class-name close-on-esc]
+  [target {:keys [title body footer close-fn class-name close-on-esc size]
            :or {body "Missing body parameter!"}}]
   (om/build create-modal-box target {:state {:body body
                                              :close-fn close-fn
                                              :footer footer
                                              :title title
                                              :close-on-esc close-on-esc
+                                             :size size
                                              :class-name class-name}}))
 
 (defn install-modal-box!

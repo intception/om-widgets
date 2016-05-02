@@ -8,45 +8,91 @@
             [om-widgets.core :as w]))
 
 
-;; TODO parent is a workarround, normally you should pass a core.async channel
-(defn- modal-component [cursor parent]
-  (mb/modal-box cursor {:title (fn [_ target]
-                                 (html
-                                   [:h4 "Title"]))
-                        :close-fn #(om/set-state! parent :show-modal false)
-                        :close-on-esc true
-                        :body (fn [_ target]
-                                (html
-                                  [:label "This is the modal's body..."]))
-                        :footer (fn [close-fn target]
-                                  (html
-                                    [:div
-                                     (w/button "Close" {:onClick #(close-fn)
-                                                        :class-name "btn btn-link"})
-                                     (w/button (html [:div
-                                                      [:span {:class "icn-ok"}]
-                                                      "Save Changes"])
-                                               {:onClick #(close-fn)
-                                                :class-name "btn btn-primary"})]))
-                        :class-name "modal-lg"}))
-
 (defn modal-example
-  [cursor owner opts]
+  [cursor owner]
   (reify
-    om/IDisplayName
-    (display-name[_] "ModalSample")
-
     om/IInitState
     (init-state [_]
-                {:show-modal false})
+      {:show-modal false})
 
     om/IRenderState
-    (render-state [this state]
-                  (html
-                    [:div.panel.panel-collapsable
-                     [:div.panel-heading "Modal"
-                      [:div.well
-                       (when (:show-modal state)
-                         (modal-component cursor owner))
-                       [:button.btn.btn-default {:on-click #(om/set-state! owner :show-modal true)}
-                        "Open Modal"]]]]))))
+    (render-state [_ state]
+      (html
+        [:div.panel.panel-default
+         [:div.panel-heading "Modal"]
+         [:div.panel-body
+
+          [:div.well
+           (when (:show-small-modal state)
+             (mb/modal-box cursor {:title (fn [_ _]
+                                            (html
+                                              [:h4 "Title"]))
+                                   :close-fn #(om/set-state! owner :show-small-modal false)
+                                   :close-on-esc true
+                                   :body (fn [_ _]
+                                           (html
+                                             [:label "This is the modal's body..."]))
+                                   :footer (fn [close-fn _]
+                                             (html
+                                               [:div
+                                                (w/button "Close" {:onClick #(close-fn)
+                                                                   :class-name "btn btn-link"})
+                                                (w/button (html [:div
+                                                                 [:span {:class "icn-ok"}]
+                                                                 "Save Changes"])
+                                                          {:onClick #(close-fn)
+                                                           :class-name "btn btn-primary"})]))
+                                   :size :sm}))
+
+           [:button.btn.btn-default {:on-click #(om/set-state! owner :show-small-modal true)}
+            "Open Small Modal"]]
+
+          [:div.well
+           (when (:show-modal state)
+             (mb/modal-box cursor {:title (fn [_ _]
+                                            (html
+                                              [:h4 "Title"]))
+                                   :close-fn #(om/set-state! owner :show-modal false)
+                                   :close-on-esc true
+                                   :body (fn [_ _]
+                                           (html
+                                             [:label "This is the modal's body..."]))
+                                   :footer (fn [close-fn _]
+                                             (html
+                                               [:div
+                                                (w/button "Close" {:onClick #(close-fn)
+                                                                   :class-name "btn btn-link"})
+                                                (w/button (html [:div
+                                                                 [:span {:class "icn-ok"}]
+                                                                 "Save Changes"])
+                                                          {:onClick #(close-fn)
+                                                           :class-name "btn btn-primary"})]))}))
+
+           [:button.btn.btn-default {:on-click #(om/set-state! owner :show-modal true)}
+            "Open Medium Modal"]]
+
+
+          [:div.well
+           (when (:show-large-modal state)
+             (mb/modal-box cursor {:title (fn [_ _]
+                                            (html
+                                              [:h4 "Title"]))
+                                   :close-fn #(om/set-state! owner :show-large-modal false)
+                                   :close-on-esc true
+                                   :body (fn [_ _]
+                                           (html
+                                             [:label "This is the modal's body..."]))
+                                   :footer (fn [close-fn _]
+                                             (html
+                                               [:div
+                                                (w/button "Close" {:onClick #(close-fn)
+                                                                   :class-name "btn btn-link"})
+                                                (w/button (html [:div
+                                                                 [:span {:class "icn-ok"}]
+                                                                 "Save Changes"])
+                                                          {:onClick #(close-fn)
+                                                           :class-name "btn btn-primary"})]))
+                                   :size :lg}))
+
+           [:button.btn.btn-default {:on-click #(om/set-state! owner :show-large-modal true)}
+            "Open Large Modal"]]]]))))
