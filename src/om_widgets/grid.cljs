@@ -285,12 +285,15 @@
               [:input {:type "checkbox"
                        :id (str "multiselect-" (:index state))
                        :checked (contains? (:target state) row)
+                       :onMouseDown (fn [e] (.stopPropagation e))
                        :onChange (fn [e]
-                                   (let [props (om/get-props owner)]
-                                     (put! (om/get-state owner :channel)
+                                   (let [props (om/get-props owner)
+                                         channel (om/get-state owner :channel)]
+                                     (when channel
+                                       (put! channel
                                            {:type :multiselect
                                             :checked? (.. e -target -checked)
-                                            :row (if (satisfies? IDeref props) @props props)})
+                                            :row (if (satisfies? IDeref props) @props props)}))
                                      (.preventDefault e)))}]])]
 
           (map (fn [{:keys [field] :as column}]
@@ -324,7 +327,8 @@
     (will-mount [_]
       (go-loop
         []
-        (let [msg (<! (om/get-state owner :selection-channel))]
+        (let [events-chan (om/get-state owner :events-channel)
+              msg (<! (om/get-state owner :selection-channel))]
           (when-not (= msg :quit)
             (condp = (:type msg)
               :select
@@ -332,8 +336,8 @@
                 (when-not (:multiselect? opts)
                   (om/update! (om/get-props owner) (:row msg)))
 
-                (when (om/get-state owner :events-channel)
-                  (put! (om/get-state owner :events-channel)
+                (when events-chan
+                  (put! events-chan
                         {:event-type :row-selected
                          :row (:row msg)})))
 
@@ -344,18 +348,30 @@
                                 (if (:checked? msg)
                                   (conj s (:row msg))
                                   (disj s (:row msg)))))
+
+                (when events-chan
+                  (put! events-chan
+                        {:event-type :multiselect-row
+                         :row (:row msg)}))
+
                 (when (not (:checked? msg))
                   (om/set-state! owner :all-selected? false)))
 
               :select-all
-              (do
-                (om/transact! (om/get-props owner)
-                              (fn [s]
-                                (if (:checked? msg)
-                                  (into #{} (om/get-state owner :rows))
-                                  #{})))
+              (let [rows (om/get-state owner :rows)]
+                (om/update! (om/get-props owner) (if (:checked? msg) (into #{} rows) #{}))
+                (when events-chan
+                  (put! events-chan
+                        {:event-type :multiselect-all
+                         :rows rows
+                         :all-selected? (:checked? msg)}))
                 (om/set-state! owner :all-selected? (:checked? msg))))
             (recur)))))
+
+    om/IWillUnmount
+    (will-unmount [this]
+      (go
+        (put! (om/get-state owner :channel) :quit)))
 
     om/IRenderState
     (render-state [this {:keys [rows] :as state}]
