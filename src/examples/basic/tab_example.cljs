@@ -37,4 +37,7 @@
                  :icon :user
                  :id :user
                  :label [:span " Profile"]
-                 :disabled true})]))))
+                 :disabled true}
+
+                {:class-name "pull-right"
+                 :label [:button.btn.btn-primary {:onClick #(println %)} "Click!"]})]))))

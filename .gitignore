@@ -18,3 +18,5 @@ pom.xml.asc
 .tags
 .tags_sorted_by_file
 *.iml
+*.sublime-workspace
+*.sublime-project

@@ -12,10 +12,11 @@
     om/IRenderState
     (render-state [_ _]
       (html
-        [:li {:class (cond
-                       (= (:current-page page) (:id page)) "active"
-                       (:disabled page) "disabled"
-                       :else "inactive")}
+        [:li {:class [(:class-name page)
+                      (cond
+                        (= (:current-page page) (:id page)) "active"
+                        (:disabled page) "disabled"
+                        :else "inactive")]}
          (if (fn? (:label page))
            ((:label page))
            [:a {:class "om-widgets-tab-item"
@@ -86,6 +87,7 @@
     (s/optional-key :id) s/Any
     (s/optional-key :content) s/Any
     (s/optional-key :disabled) s/Bool
+    (s/optional-key :class-name) s/Str
     (s/optional-key :icon) s/Keyword}])
 
 (def TabSchema
