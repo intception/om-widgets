@@ -41,8 +41,8 @@
                (dom/div #js {:className "om-widgets-overlay"})
                (dom/div #js {:className "om-widgets-modal-box"}
                         (dom/div #js {:className (str "om-widgets-modal-dialog "
-                                                      (when size (str " modal-" (name size)))
-                                                      class-name)}
+                                                      class-name
+                                                      (when size (str " modal-" (name size))))}
                                  (dom/div #js {:className "om-widgets-modal-content"}
                                           (if (string? title)
                                             (dom/div #js {:className "om-widgets-modal-header"}
