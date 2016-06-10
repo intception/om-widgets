@@ -389,14 +389,16 @@
                             :multiselect? (:multiselect? opts)}})
 
          (utils/make-childs [:tbody]
-                            (map-indexed #(om/build row-builder %2 {:state {:channel (:selection-channel state)
-                                                                            :events-channel (:events-channel state)
-                                                                            :target target
-                                                                            :index %1}
-                                                                    :opts {:columns (:columns opts)
-                                                                           :multiselect? (:multiselect? opts)
-                                                                           :disable-selection? (:disable-selection? opts)
-                                                                           :selected-row-style (:selected-row-style opts)}})
+                            (map-indexed #(om/build row-builder %2 (merge {:state {:channel (:selection-channel state)
+                                                                                   :events-channel (:events-channel state)
+                                                                                   :target target
+                                                                                   :index %1}
+                                                                           :opts {:columns (:columns opts)
+                                                                                  :multiselect? (:multiselect? opts)
+                                                                                  :disable-selection? (:disable-selection? opts)
+                                                                                  :selected-row-style (:selected-row-style opts)}}
+                                                                          (when (:key-field state)
+                                                                            {:react-key (get %2 (:key-field state))})))
                                          rows))]))))
 
 ;; This function where private but we cannot test it from outside given the lack of #' reader in clojurescript
@@ -475,6 +477,7 @@
                                              (:sort-info state)
                                              (:force-page-reload state))
                             :events-channel (:events-channel state)
+                            :key-field (:key-field state)
                             :channel (:channel state)
                             :sort-info (:sort-info state)}
                     :opts {:columns (:columns header)
@@ -541,7 +544,7 @@
 
 ;; TODO source should be a DataSource protocol?
 (defn grid
-  [source target & {:keys [id onChange events-channel header pager language disable-selection? responsive?] :as definition}]
+  [source target & {:keys [id onChange events-channel key-field header pager language disable-selection? responsive?] :as definition}]
   (let [src {:rows (or (:rows source) source)
              :index (or (:index source) 0)
              :total-rows (or (:total-rows source) (count source))}
@@ -562,6 +565,7 @@
                        :header header
                        :pager (or pager {:type :default})
                        :events-channel events-channel
+                       :key-field key-field
                        :max-pages (calculate-max-pages (:total-rows src) page-size)
                        :page-size page-size
                        :onChange onChange}
