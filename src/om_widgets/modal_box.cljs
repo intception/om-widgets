@@ -7,14 +7,17 @@
             [cljs.core.async :refer [put! chan <! alts! timeout]]))
 
 
+(defn handle-keydown
+  [owner event]
+  (let [ESC 27
+        k (.-keyCode event)]
+    (when (#{ESC} k)
+      (condp = k
+        ESC ((om/get-state owner :close-fn))))))
+
 (defn create-modal-box
   [target owner]
-  (let [ESC 27
-        handle-keydown #(let [k (.-keyCode %)]
-                           (when (#{ESC} k)
-                             (condp = k
-                               ESC ((om/get-state owner :close-fn)))))]
-    (reify
+  (reify
 
     om/IDidMount
     (did-mount [this]
@@ -22,15 +25,17 @@
           (dommy/add-class! "om-widgets-modal-is-open"))
 
       (when (om/get-state owner :close-on-esc)
-        (dommy/listen! (sel1 :body) :keydown handle-keydown)))
+        (let [handle-keydown-fn (partial handle-keydown owner)]
+          (om/set-state! owner :handle-keydown-fn handle-keydown-fn)
+          (dommy/listen! (sel1 :body) :keydown handle-keydown-fn))))
 
     om/IWillUnmount
     (will-unmount [this]
       (-> (sel1 "body")
           (dommy/remove-class! "om-widgets-modal-is-open"))
 
-      (when (om/get-state owner :close-on-esc)
-        (dommy/unlisten! (sel1 :body) :keydown handle-keydown)))
+      (when-let [handle-keydown-fn (om/get-state owner :handle-keydown-fn)]
+        (dommy/unlisten! (sel1 :body) :keydown handle-keydown-fn)))
 
     om/IRenderState
     (render-state [this {:keys [title body footer close-fn class-name size] :as state}]
@@ -66,7 +71,7 @@
                                                                   (seq? footer) footer
                                                                   (not= nil footer) [footer]
                                                                   :else nil)]
-                                            (apply dom/div #js {:className "om-widgets-modal-footer"} footer-seq))))))))))
+                                            (apply dom/div #js {:className "om-widgets-modal-footer"} footer-seq)))))))))
 
 
 (defn modal-box
