@@ -65,6 +65,14 @@
                                                        :checked-value :female}]})]
 
             [:div.form-group
+             [:label "Describe yourself:"]
+             (w/textinput app :description {:input-class "form-control"
+                                            :tabIndex 5
+                                            :multiline true
+                                            :resize :vertical
+                                            :placeholder "A short description of yourself"})]
+
+            [:div.form-group
              [:label "Marital Status"]
              (w/combobox app :marital-status
                          {:tabIndex 6
@@ -77,7 +85,7 @@
             [:div.form-group
              [:label "Favorite Food"]
              (w/combobox app :favorite-food
-                         {:tabIndex 6
+                         {:tabIndex 7
                           :class-name "form-control"
                           :options {"Dairy products" {:cheese "Cheese"
                                                       :egg "Egg"}

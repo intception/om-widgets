@@ -1,11 +1,11 @@
 (ns om-widgets.textinput
+  (:require-macros [pallet.thread-expr :as th])
   (:require [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [om-widgets.utils :as utils]
             [cljs-time.format :as time-format]
-            [cljs-time.core :as time]
-            [cljs-time.local :as time-local]
-            [cljs-time.coerce :as timec]))
+            [cljs-time.coerce :as timec]
+            [pallet.thread-expr :as th]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -366,55 +366,58 @@
       ((if (not (:multiline state))
          dom/input
          dom/textarea)
-       (clj->js {:id (:id state)
-                 :name (:id state)
-                 :hidden (:hidden state)
-                 :className (clojure.string/join " " ["om-widgets-input-text" (:input-class state)])
-                 :autoComplete (:auto-complete state)
-                 :readOnly (:read-only state)
-                 :onKeyDown #(if (false? (handlekeydown target owner state %))
-                              (.preventDefault %)
-                              nil)
-                 :onKeyUp #(if (false? (handlekeyup target owner state %))
-                            (.preventDefault %)
-                            nil)
-                 :onKeyPress #(do
-                                (when (= "Enter" (.-key %))
-                                  (do
-                                    (when (and (:flush-on-enter state)
-                                               (not (:multiline state)))
-                                      (update-target target owner state true))
-                                    (when (:onEnter state)
-                                      ((:onEnter state) %))))
-
-                                (when (:onKeyPress state)
-                                  ((:onKeyPress state) %))
-                                (if (false?  (handlekeypress target owner state %))
+       (clj->js (-> {:id (:id state)
+                     :name (:id state)
+                     :hidden (:hidden state)
+                     :className (clojure.string/join " " ["om-widgets-input-text" (:input-class state)])
+                     :autoComplete (:auto-complete state)
+                     :readOnly (:read-only state)
+                     :onKeyDown #(if (false? (handlekeydown target owner state %))
                                   (.preventDefault %)
-                                  nil))
-                 :autoFocus (:autofocus state)
-                 :tabIndex (:tabIndex state)
-                 :onBlur (fn [e]
-                           (update-target target owner state true)
-                           (when (:onBlur state)
-                             ((:onBlur state)))
-                           nil)
-                 :onPaste #(if (false? (handlepaste target owner state %))
-                            (.preventDefault %)
-                            nil)
-                 :placeholder (:placeholder state)
-                 :disabled (:disabled state)
-                 :typing-timeout (:typing-timeout state)
-                 :type (if (= (:input-format state) "password")
-                         "password"
-                         "text")
-                 :style {:textAlign (:align state)}})))))
+                                  nil)
+                     :onKeyUp #(if (false? (handlekeyup target owner state %))
+                                (.preventDefault %)
+                                nil)
+                     :onKeyPress #(do
+                                   (when (= "Enter" (.-key %))
+                                     (do
+                                       (when (and (:flush-on-enter state)
+                                                  (not (:multiline state)))
+                                         (update-target target owner state true))
+                                       (when (:onEnter state)
+                                         ((:onEnter state) %))))
+
+                                   (when (:onKeyPress state)
+                                     ((:onKeyPress state) %))
+                                   (if (false?  (handlekeypress target owner state %))
+                                     (.preventDefault %)
+                                     nil))
+                     :autoFocus (:autofocus state)
+                     :tabIndex (:tabIndex state)
+                     :onBlur (fn [e]
+                               (update-target target owner state true)
+                               (when (:onBlur state)
+                                 ((:onBlur state)))
+                               nil)
+                     :onPaste #(if (false? (handlepaste target owner state %))
+                                (.preventDefault %)
+                                nil)
+                     :placeholder (:placeholder state)
+                     :disabled (:disabled state)
+                     :typing-timeout (:typing-timeout state)
+                     :type (if (= (:input-format state) "password")
+                             "password"
+                             "text")
+                     :style {:textAlign (:align state)}}
+
+                    (th/when-> (:resize state)
+                      (merge {:resize (name (:resize state))}))))))))
 
 
 (defn textinput
   [target path {:keys [input-class input-format multiline onBlur tabIndex autofocus
                        placeholder id decimals align onChange auto-complete read-only disabled onKeyPress
-                       typing-timeout flush-on-enter onEnter hidden] :as opts
+                       typing-timeout flush-on-enter onEnter hidden resize] :as opts
                 :or {input-class ""}}]
   (om/build create-textinput target
             {:state {:path path
@@ -425,6 +428,7 @@
                      :autofocus autofocus
                      :placeholder placeholder
                      :id id
+                     :resize resize
                      :hidden hidden
                      :disabled disabled
                      :typing-timeout typing-timeout
