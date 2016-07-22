@@ -378,6 +378,7 @@
                      :onKeyUp #(if (false? (handlekeyup target owner state %))
                                 (.preventDefault %)
                                 nil)
+
                      :onKeyPress #(do
                                    (when (= "Enter" (.-key %))
                                      (do
@@ -405,9 +406,11 @@
                      :placeholder (:placeholder state)
                      :disabled (:disabled state)
                      :typing-timeout (:typing-timeout state)
-                     :type (if (= (:input-format state) "password")
-                             "password"
+                     :type (condp = (:input-format state)
+                             "password" "password"
+                             "numeric" "number"
                              "text")
+
                      :style {:textAlign (:align state)}}
 
                     (th/when-> (:resize state)
