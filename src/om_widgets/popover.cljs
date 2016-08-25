@@ -326,12 +326,14 @@
                                  popover-class
                                  launcher-class-name
                                  channel
-                                 align]
+                                 align
+                                 visible]
                           :or {class-name "om-widgets-popover-button"
                                prefered-side :bottom
                                popover-class ""
                                launcher-class-name "om-widgets-popover-launcher"
                                has-arrow true
+                               visible false
                                channel (chan)
                                align 0.5}}]
   (cond
@@ -339,6 +341,7 @@
     (om/build popover-component nil {:state {:visible-content-fn front-face
                                              :popup-content-fn popup-body
                                              :prefered-side prefered-side
+                                             :visible visible
                                              :channel channel}
                                      :opts {:for for
                                             :has-arrow has-arrow
@@ -351,10 +354,10 @@
                                                      :disabled disabled
                                                      :class-name class-name
                                                      :prefered-side prefered-side
+                                                     :visible visible
                                                      :body popup-body
                                                      :channel channel}
                                              :opts {:align align
                                                     :popover-class popover-class
                                                     :launcher-class-name launcher-class-name
                                                     :has-arrow has-arrow}})))
-
