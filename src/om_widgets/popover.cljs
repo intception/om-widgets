@@ -338,10 +338,10 @@
                                align 0.5}}]
   (cond
     (fn? front-face)
-    (om/build popover-component nil {:state {:visible-content-fn front-face
+    (om/build popover-component nil {:init-state {:visible visible}
+                                     :state {:visible-content-fn front-face
                                              :popup-content-fn popup-body
                                              :prefered-side prefered-side
-                                             :visible visible
                                              :channel channel}
                                      :opts {:for for
                                             :has-arrow has-arrow
@@ -349,12 +349,12 @@
                                             :launcher-class-name launcher-class-name
                                             :align align}})
     :else
-    (om/build labeled-popover-component nil {:state {:label front-face
+    (om/build labeled-popover-component nil {:init-state {:visible visible}
+                                             :state {:label front-face
                                                      :id (or id front-face)
                                                      :disabled disabled
                                                      :class-name class-name
                                                      :prefered-side prefered-side
-                                                     :visible visible
                                                      :body popup-body
                                                      :channel channel}
                                              :opts {:align align
