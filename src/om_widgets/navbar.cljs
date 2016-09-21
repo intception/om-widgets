@@ -137,8 +137,10 @@
                        (when collapsed? "collapsed")
                        (when (:fixed-top state) "navbar-fixed-top")]}
 
-         [:div {:class ["container"
-                        (when (= (:container state) :fluid) "-fluid")]}
+         [:div {:class (condp = (:container state)
+                         :default "container"
+                         :fluid "container-fluid"
+                         "container")}
 
           (om/build nav-header
                     cursor
