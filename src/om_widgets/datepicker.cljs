@@ -86,19 +86,19 @@
 
 (defn current-day?
   ([date-node]
-   (current-day? date-node (time/date-time (time/now))))
-  ([date-node date-time]
+   (current-day? date-node (time/now)))
+  ([date-node date]
    (and (= (:belongs-to-month date-node) :current)
-        (= (:day date-node) (time/day date-time))
-        (= (:month date-node) (time/month date-time))
-        (= (:year date-node) (time/year date-time)))))
+        (= (:day date-node) (time/day (time/date-time date)))
+        (= (:month date-node) (time/month (time/date-time date)))
+        (= (:year date-node) (time/year (time/date-time date))))))
 
 (defmulti build-day-class-name
   (fn [day-node date]
     (:belongs-to-month day-node)))
 
 (defmethod build-day-class-name :current [day-node date]
-  (if (current-day? day-node (time/date-time date))
+  (if (current-day? day-node date)
     "day active"
     "day"))
 
@@ -205,14 +205,11 @@
 
   note: we assume today date if the cursor does not have a date
   "
-  [app path {:keys [id hidden onChange local-date?] :or {hidden true}}]
+  [app path {:keys [id hidden onChange] :or {hidden true}}]
   (om/build body-component app {:state {:id id
                                         :hidden hidden
-                                        :date (let [cursor-date (utils/om-get app [path])]
-                                                (if local-date?
-                                                  (time/local-date-time (time/now))
-                                                  (if (instance? js/Date cursor-date)
-                                                    (time/date-time cursor-date)
-                                                    (time/now))))
+                                        :date (if (instance? js/Date (utils/om-get app [path]))
+                                                (time/date-time (utils/om-get app [path]))
+                                                (time/now))
                                         :path path
                                         :onChange onChange}}))
