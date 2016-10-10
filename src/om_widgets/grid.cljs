@@ -458,7 +458,12 @@
                 (om/set-state! owner :sort-info (:sort-info msg)))
 
               :change-page
-              (om/set-state! owner :current-page (:new-page msg)))
+              (do
+                (om/set-state! owner :current-page (:new-page msg))
+                (when-let [events-chan (om/get-state owner :events-channel)]
+                  (put! events-chan
+                        {:event-type :page-changed
+                         :new-page (:new-page msg)}))))
 
             (recur)))))
 
@@ -536,7 +541,9 @@
    (s/optional-key :selected-row-style) (s/enum :active :success :info :warning :danger)
    (s/optional-key :onChange) (s/pred fn?)
    (s/optional-key :events-channel) s/Any
-   (s/optional-key :pager) (s/enum :default :none)
+   (s/optional-key :page-size) s/Int
+   (s/optional-key :current-page) s/Int
+   (s/optional-key :pager) {:type (s/enum :default :none)}
    (s/optional-key :language) (s/enum :en :es)})
 
 ;; ---------------------------------------------------------------------
@@ -553,11 +560,11 @@
                                           (:columns header)))
         sorter (when init-sorted-column
                  (grid-sorter init-sorted-column))
-        page-size (or (:page-size definition) 5)]
+        page-size (or (:page-size definition) 5)
+        current-page (or (:current-page definition) (int (/ (:index src) page-size)))]
     (om/build create-grid
               target
-              {:init-state {:current-page (int (/ (:index src) page-size))
-                            :sort-info (when (and sorter
+              {:init-state {:sort-info (when (and sorter
                                                   (satisfies? ISortableColumnDefaultSortData sorter))
                                          (merge (default-sort-data sorter init-sorted-column)
                                                 (get header :start-sorted)))}
@@ -567,6 +574,7 @@
                        :events-channel events-channel
                        :key-field key-field
                        :max-pages (calculate-max-pages (:total-rows src) page-size)
+                       :current-page current-page
                        :page-size page-size
                        :onChange onChange}
                :opts {:language (or language :en)

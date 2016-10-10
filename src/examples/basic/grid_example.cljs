@@ -44,6 +44,46 @@
                                       :sort true
                                       :data-format :date}]})]]))))
 
+(defn- grid-persist-paging
+  [cursor owner]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:channel (chan)})
+
+    om/IWillMount
+    (will-mount [_]
+      (go-loop []
+        (let [msg (<! (om/get-state owner :channel))]
+          (condp = (:event-type msg)
+            :page-changed (om/update! cursor :current-page (:new-page msg))
+            :row-selected ())
+          (recur))))
+
+    om/IRenderState
+    (render-state [_ state]
+      (html
+        [:div.panel.panel-default
+         [:div.panel-heading (str "Grid current page: "
+                                  (get-in cursor [:current-page]))]
+         [:div.panel-body
+          (w/grid (get-in cursor [:source-simple])
+                  (get-in cursor [:persist-paging])
+                  :container-class-name ""
+                  :selected-row-style :info
+                  :page-size 5
+                  :current-page (:current-page cursor)
+                  :events-channel (:channel state)
+                  :hover? true
+                  :header {:type :default
+                           :columns [{:caption "Username"
+                                      :field :username}
+
+                                     {:caption "Fecha"
+                                      :field :fecha
+                                      :sort true
+                                      :data-format :date}]})]]))))
+
 (defn- multiselect
   [cursor owner]
   (reify
@@ -52,19 +92,6 @@
       {:errors nil
        :channel (chan)
        :feedback nil})
-
-    om/IWillMount
-    (will-mount [this]
-      (go (loop []
-            (let [message (<! (om/get-state owner :channel))]
-              (when-not (or (= (:event-type message) :quit))
-                (println message)
-                (recur))))))
-
-    om/IWillUnmount
-    (will-unmount [this]
-      (go
-        (put! (om/get-state owner :channel) :quit)))
 
     om/IRenderState
     (render-state [_ {:keys [channel]}]
@@ -105,6 +132,7 @@
       (html
         [:div
          (om/build grid-simple cursor)
+         (om/build grid-persist-paging cursor)
          (om/build multiselect cursor)
 
          [:div.panel.panel-default

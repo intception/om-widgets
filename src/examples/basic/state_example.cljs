@@ -85,6 +85,8 @@
                                    {:name "Alexis" :username "_axs_" :row-type :users}
                                    {:name "Martin" :username "nartub" :row-type :users}]}
             :selected {}
+            :persist-paging {}
+            :current-page 0
             :multiselect #{}
             }
      :editable-list-with-strings []
