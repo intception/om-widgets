@@ -140,3 +140,8 @@
     :else
     {:width (.-clientWidth (aget (.getElementsByTagName js/document "body") 0))
      :height (.-clientHeight (aget (.getElementsByTagName js/document "body") 0))}))
+
+(defn re-quote [s]
+  (let [special (set ".?*+^$[]\\(){}|")
+        escfn #(if (special %) (str \\ %) %)]
+    (apply str (map escfn s))))

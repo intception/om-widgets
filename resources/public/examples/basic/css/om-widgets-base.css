@@ -624,3 +624,32 @@ span .glyphicon {
 .badge {
   margin-left: 3px;
 }
+
+
+.shadow, .om-widgets-popover .popover-header, .om-widgets-popover .popover-footer {
+  -webkit-box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 4px;
+  box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 4px; }
+
+/*
+$line-height-large:         1.33;
+*/
+.om-widgets-popover .popover-header, .om-widgets-popover .popover-footer {
+  padding: 10px 15px; }
+.om-widgets-popover .popover-header {
+  background-color: rgba(248, 248, 248, 0.95);
+  border-bottom: 1px solid rgba(153, 153, 153, 0.3); }
+.om-widgets-popover .popover-header li a, .om-widgets-popover .popover-header li a:link, .om-widgets-popover .popover-header li a:visited {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 250px; }
+.om-widgets-popover .popover-footer {
+  border-top: 1px solid rgba(153, 153, 153, 0.3); }
+.om-widgets-popover.multi-select {
+  padding: 0; }
+  .om-widgets-popover.multi-select .multi-content {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 0 15px; }
+  .om-widgets-popover.multi-select.multi-select-sm .multi-content label, .om-widgets-popover.multi-select.multi-select-sm .multi-content .om-widgets-label {
+    display: block; }
