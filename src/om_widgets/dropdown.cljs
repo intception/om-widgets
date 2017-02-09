@@ -15,7 +15,7 @@
 (defmulti build-entry (fn [entry app] (:type entry)))
 
 (defmethod build-entry :entry
-  [entry app]
+  [entry owner]
   (reify
     om/IRenderState
     (render-state [this {:keys [channel] :as state}]
@@ -24,7 +24,7 @@
         ;; onClick event, we use onBlur to close the dropdown
         [:li (->> {:class (when (:disabled entry) "disabled")}
                   (merge (when-not (:disabled entry)
-                           {:onMouseDown #(let [e (if (om/cursor? entry) @entry entry)]
+                           {:onMouseDown #(let [e (if (om/cursor? entry) (om/get-props owner) entry)]
                                            (put! (:channel state) {:type :close-dropdown})
                                            (put! channel {:type :entry-click
                                                           :value (:id e)
