@@ -14,10 +14,11 @@
     om/IRenderState
     (render-state [this state]
       (html
-        [:div.panel.panel-default
-         [:div.panel-heading "Form"]
-         [:div.panel-body
-           [:form
+        [:div.panel.sdsdpanel-default
+         [:div.sdpanel-body.row
+          [:div.form-group.col-lg-3]
+          [:form.col-lg-6
+
             [:div.form-group
              [:label "Name"]
              (w/textinput app :name {:input-class "form-control"
@@ -110,6 +111,12 @@
                                           :checked-value true
                                           :unchecked-value false})]
 
+            [:div.form-group
+             [:label "Switcher"]
+             [:br]
+             (w/switcher app :some-switch {:options [{:value 1 :text "1"}
+                                                     {:value 2 :text "2"}
+                                                     {:value 3 :text "3"}]})]
 
             [:div.form-group
              [:label "Checks - Toggle values on Sets"]

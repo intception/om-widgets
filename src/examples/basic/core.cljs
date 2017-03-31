@@ -1,11 +1,7 @@
 (ns examples.basic.core
   (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
-            [om-widgets.layouts :as layout :include-macros true]
             [om-widgets.core :as w]
-            [om-widgets.navbar :as navbar]
-            [sablono.core :as html :refer-macros [html]]
-            [om-widgets.grid :refer [row-builder]]
+            [sablono.core  :refer-macros [html]]
             [examples.basic.state-example :as state]
             [examples.basic.tab-example :refer [tab-example]]
             [examples.basic.form-example :refer [form-example]]

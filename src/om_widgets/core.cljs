@@ -1,7 +1,5 @@
 (ns om-widgets.core
-  (:require [om.core :as om :include-macros true]
-            [om.dom :as dom :include-macros true]
-            [om-widgets.textinput]
+  (:require [om-widgets.textinput]
             [om-widgets.checkbox]
             [om-widgets.dropdown]
             [om-widgets.navbar]
@@ -15,6 +13,7 @@
             [om-widgets.page-switcher]
             [om-widgets.popover]
             [om-widgets.slider]
+            [om-widgets.switcher]
             [om-widgets.editable-list-view]
             [om-widgets.utils]))
 
@@ -25,6 +24,7 @@
 (def datepicker om-widgets.datepicker/datepicker)
 (def radiobutton om-widgets.radiobutton/radiobutton)
 (def radiobutton-group om-widgets.radiobutton/radiobutton-group)
+(def switcher om-widgets.switcher/switch)
 (def combobox om-widgets.combobox/combobox)
 (def button om-widgets.button/button)
 (def grid om-widgets.grid/grid)
