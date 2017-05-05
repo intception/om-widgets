@@ -3,7 +3,7 @@
 
 (def app-state
   (atom
-    {:menu-selected :grid
+    {:menu-selected :form
      :menu-items [[{:text "Form"
                     :id :form
                     :url "#/form"}
@@ -58,6 +58,7 @@
      :tab {:selected-tab :inbox}
      :form {:name ""
             :age 25
+            :decimal 1.5
             :birth-date ""
             :hours 8
             :sex :male
