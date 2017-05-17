@@ -110,7 +110,8 @@
 (defn- mask-handler-selector
   [target owner state]
   (condp = (:input-format state)
-    "numeric" :numeric
+    ;; don't use custom mask if native control is supported
+    "numeric" (if (utils/browser-support-input-type? "number") :unmasked :numeric)
     "password" :unmasked
     nil :unmasked
     :mask))
@@ -410,51 +411,39 @@
                              "password" "password"
                              "numeric" "number"
                              "text")
-
                      :style {:textAlign (:align state)}}
+
+                    (th/when-> (:step state)
+                      (merge {:step (:step state)}))
+
+                    (th/when-> (:pattern state)
+                      (merge {:pattern (:pattern state)}))
+
+                    (th/when-> (:min state)
+                      (merge {:min (:min state)}))
+
+                    (th/when-> (:max state)
+                      (merge {:max (:max state)}))
 
                     (th/when-> (:resize state)
                       (merge {:resize (name (:resize state))}))))))))
 
 
 (defn textinput
-  [target path {:keys [input-class input-format multiline onBlur tabIndex autofocus
-                       placeholder id decimals align onChange auto-complete read-only disabled onKeyPress
-                       typing-timeout flush-on-enter onEnter hidden resize] :as opts
+  [target path {:keys [input-class input-format align] :as opts
                 :or {input-class ""}}]
   (om/build create-textinput target
-            {:state {:path path
-                     :input-class input-class
-                     :input-format input-format
-                     :multiline multiline
-                     :tabIndex tabIndex
-                     :autofocus autofocus
-                     :placeholder placeholder
-                     :id id
-                     :resize resize
-                     :hidden hidden
-                     :disabled disabled
-                     :typing-timeout typing-timeout
-                     :flush-on-enter flush-on-enter
-                     :read-only read-only
-                     :input-mask (cond
-                                   (= input-format "numeric") "numeric"
-                                   (= input-format "integer") "numeric"
-                                   (= input-format "currency") "numeric"
-                                   (= input-format "date") date-local-mask
-                                   :else input-format)
-                     :decimals (cond
-                                 (= input-format "currency") (if (not decimals) 2 decimals)
-                                 (= input-format "numeric") (if (not decimals) 2 decimals)
-                                 :else 0)
-                     :currency (if (= input-format "currency") true false)
-                     :align (or align
-                                (cond (= input-format "numeric") "right"
-                                  (= input-format "integer") "right"
-                                  (= input-format "currency") "right"
-                                  :else "left"))
-                     :onChange onChange
-                     :onBlur onBlur
-                     :onKeyPress onKeyPress
-                     :onEnter onEnter
-                     :auto-complete auto-complete}}))
+            {:state (-> opts
+                        (merge {:path path
+                                :input-mask (cond
+                                              (= input-format "numeric") "numeric"
+                                              (= input-format "integer") "numeric"
+                                              (= input-format "currency") "numeric"
+                                              (= input-format "date") date-local-mask
+                                              :else input-format)
+                                :currency (if (= input-format "currency") true false)
+                                :align (or align
+                                           (cond (= input-format "numeric") "right"
+                                                 (= input-format "integer") "right"
+                                                 (= input-format "currency") "right"
+                                                 :else "left"))}))}))

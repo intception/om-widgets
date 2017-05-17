@@ -55,7 +55,12 @@
           (get-in tgt ks))
         tgt))))
 
-
+(defn browser-support-input-type?
+  "More info: http://diveintohtml5.info/detect.html#input-types"
+  [input-type]
+  (let [e (.createElement js/document "input")]
+    (.setAttribute e "type" input-type)
+    (not= "text" (.-type e))))
 
 (defn el-data
   " Example:

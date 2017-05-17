@@ -14,8 +14,8 @@
     om/IRenderState
     (render-state [this state]
       (html
-        [:div.panel.sdsdpanel-default
-         [:div.sdpanel-body.row
+        [:div.panel.panel-default
+         [:div.panel-body.row
           [:div.form-group.col-lg-3]
           [:form.col-lg-6
 
@@ -32,8 +32,20 @@
                                     :autofocus true
                                     :tabIndex 2
                                     :input-format "numeric"
+                                    :pattern "[0-9]"
+                                    :min "18"
+                                    :max "100"
                                     :align "left"
-                                    :placeholder "Your age (numbers only)"})]
+                                    :placeholder "Adults only! (older than 18 years-old)"})]
+
+           [:div.form-group
+            [:label "Decimal are supported too"]
+            (w/textinput app :decimal {:input-class "form-control"
+                                       :autofocus true
+                                       :input-format "numeric"
+                                       :step "0.1"
+                                       :align "left"
+                                       :placeholder "Enter a decimal number"})]
 
             [:div.form-group
              [:label "Email"]
