@@ -118,11 +118,13 @@
 
 (defn- update-target
   [target owner {:keys [input-format path onChange private-state] :as state} bInternal]
-  (when target
+  (when (and target
+             (not= 0 (:cbtimeout @private-state)))
     (let [dom-node (:dom-node @private-state)
           value (convert-output input-format (.-value dom-node))]
       (do
-        (swap! private-state assoc :cbtimeout nil :prev-value value)
+        (.clearTimeout js/window (:cbtimeout @private-state))
+        (swap! private-state assoc :cbtimeout 0 :prev-value value)
         (utils/om-update! target path value)
         (when (and onChange
                    (not bInternal)
@@ -132,10 +134,18 @@
 (defn- fire-on-change
   [target owner {:keys [typing-timeout private-state] :as state}]
   (let [cbtimeout (:cbtimeout @private-state)]
-    (when cbtimeout
+    (when-not (= 0 cbtimeout)
       (.clearTimeout js/window cbtimeout))
     (swap! private-state assoc :cbtimeout (.setTimeout js/window #(update-target target owner state false)
                                                        (or typing-timeout 500)))))
+
+(defn- flush-on-change
+  [target owner {:keys [typing-timeout private-state] :as state}]
+  (let [cbtimeout (:cbtimeout @private-state)]
+    (when-not (= 0 cbtimeout)
+      (.clearTimeout js/window cbtimeout)
+      (update-target target owner state false)
+      (swap! private-state assoc :cbtimeout 0))))
 
 
 ;; ---------------------------------------------------------------------
@@ -360,6 +370,9 @@
         (swap! private-state assoc :dom-node (om.core/get-node owner))
         (applymask! target owner state (utils/om-get target (:path state)))))
 
+    om/IWillUnmount
+    (will-unmount [this]
+      (flush-on-change target owner (om/get-state owner)))
 
     om/IRenderState
     (render-state [this state]
