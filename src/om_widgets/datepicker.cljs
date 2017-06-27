@@ -127,6 +127,41 @@
                                (when onChange (onChange date-updated)))}
               (day-renderer app owner {:day day})))))
 
+(defn days-of-week
+  [date]
+  (let [start-day (time/minus date
+                              (time/days (time/day-of-week date)))]
+    (map #(time/plus start-day
+                     (time/days %))
+         (range 1 8))))
+
+(defn current-week
+  "Returns a list of days for the current week"
+  [date]
+  (let [dow (days-of-week date)
+        start-day (first dow)]
+    (map (fn [d]
+           {:day (time/day d)
+            :month (time/month d)
+            :year (time/year d)
+            :belongs-to-month (cond
+                                (< (time/month d) (time/month start-day)) :previous
+                                (> (time/month d) (time/month start-day)) :next
+                                :else :current)} )
+         dow)))
+
+(defn week-component [app owner]
+  (reify
+    om/IDisplayName
+    (display-name [_] "DatepickerWeek")
+    om/IRenderState
+    (render-state [this {:keys [date path onChange] :as state}]
+      (dom/tbody nil
+                 (apply dom/tr nil
+                        (map (fn [d]
+                               (om/build day-component app {:state {:day d :path path :date date :onChange onChange}}))
+                             (current-week date)))))))
+
 (defn- weeks-component [app owner]
   (reify
     om/IDisplayName
