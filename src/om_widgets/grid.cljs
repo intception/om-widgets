@@ -72,14 +72,14 @@
             sort-fn (get-in sort-info [:column :sort-fn])]
         (-> (if-not sort-fn
               (sort-by #(let [v (get % field)]
-                         (if (string? v)
-                           (clojure.string/lower-case v)
-                           v))
+                          (if (string? v)
+                            (clojure.string/lower-case v)
+                            v))
                        rows)
               (sort sort-fn rows))
             (#(if (= :down direction)
-               (reverse %)
-               %)))))))
+                (reverse %)
+                %)))))))
 
 (defmulti grid-sorter :sort)
 
@@ -176,16 +176,16 @@
            [:ul {:class "pager"}
             [:li {:class (when previous-disabled? "disabled")}
              [:a {:onClick #(when (> current-page 0)
-                             (put! (:channel state) {:type :change-page
-                                                     :new-page (dec current-page)})
-                             (.preventDefault %))}
+                              (put! (:channel state) {:type :change-page
+                                                      :new-page (dec current-page)})
+                              (.preventDefault %))}
               (translate language :grid.pager/previous-page)]]
 
             [:li {:class (when next-disabled? "disabled")}
              [:a {:onClick #(when (< current-page max-pages)
-                             (put! (:channel state) {:type :change-page
-                                                     :new-page (inc current-page)})
-                             (.preventDefault %))}
+                              (put! (:channel state) {:type :change-page
+                                                      :new-page (inc current-page)})
+                              (.preventDefault %))}
               (translate language :grid.pager/next-page)]]]])))))
 
 
@@ -275,10 +275,10 @@
                             ;; we use mousedown because onClick its triggered before,
                             ;; this make links inside cells work as expected
                             {:onMouseDown #(let [props (om/get-props owner)]
-                                            (put! (om/get-state owner :channel)
-                                                  {:type :select
-                                                   :row (if (satisfies? IDeref props) @props props)})
-                                            (.preventDefault %))})))
+                                             (put! (om/get-state owner :channel)
+                                                   {:type :select
+                                                    :row (if (satisfies? IDeref props) @props props)})
+                                             (.preventDefault %))})))
 
            (when (:multiselect? opts)
              [:td
@@ -291,9 +291,9 @@
                                          channel (om/get-state owner :channel)]
                                      (when channel
                                        (put! channel
-                                           {:type :multiselect
-                                            :checked? (.. e -target -checked)
-                                            :row (if (satisfies? IDeref props) @props props)}))
+                                             {:type :multiselect
+                                              :checked? (.. e -target -checked)
+                                              :row (if (satisfies? IDeref props) @props props)}))
                                      (.preventDefault e)))}]])]
 
           (map (fn [{:keys [field] :as column}]
@@ -564,19 +564,22 @@
         current-page (or (:current-page definition) (int (/ (:index src) page-size)))]
     (om/build create-grid
               target
-              {:init-state {:sort-info (when (and sorter
+              {:init-state {:current-page current-page
+                            :sort-info (when (and sorter
                                                   (satisfies? ISortableColumnDefaultSortData sorter))
                                          (merge (default-sort-data sorter init-sorted-column)
                                                 (get header :start-sorted)))}
-               :state {:src src
-                       :header header
-                       :pager (or pager {:type :default})
-                       :events-channel events-channel
-                       :key-field key-field
-                       :max-pages (calculate-max-pages (:total-rows src) page-size)
-                       :current-page current-page
-                       :page-size page-size
-                       :onChange onChange}
+               :state (-> {:src src
+                           :header header
+                           :pager (or pager {:type :default})
+                           :events-channel events-channel
+                           :key-field key-field
+                           :max-pages (calculate-max-pages (:total-rows src) page-size)
+                           :page-size page-size
+                           :onChange onChange}
+                          (merge (when (or (:current-page definition)
+                                           (:index source))
+                                   {:current-page current-page})))
                :opts {:language (or language :en)
                       :hover? (:hover? definition)
                       :condensed? (:condensed? definition)
