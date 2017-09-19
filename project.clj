@@ -1,4 +1,4 @@
-(defproject org.clojars.intception/om-widgets "0.3.28"
+(defproject org.clojars.intception/om-widgets "0.3.29"
   :description "Widgets for OM/React"
   :url "https://github.com/orgs/intception/"
   :license {:name "Eclipse Public License"

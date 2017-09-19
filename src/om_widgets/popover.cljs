@@ -156,6 +156,7 @@
       (did-mount [this]
         (let [node (om.core/get-node owner)
               align (or (:align opts) 0.5)
+              coordinates (om/get-state owner :coordinates)
               parent (dommy/remove! node)
               target (if (:for opts)
                        (or (sel1 (keyword (str "#" (:for opts)))) parent)
@@ -173,7 +174,14 @@
                                   (max o (- m))
                                   (min o m)))
                       wz (window-size)
-                      trect (first (client-rects target))
+                      trect (if coordinates
+                              {:top (:y coordinates)
+                               :bottom (+ (:y coordinates) 1)
+                               :left (:x coordinates)
+                               :right (+ (:x coordinates) 1)
+                               :width 1
+                               :height 1}
+                              (first (client-rects target)))
                       target-pos (merge trect
                                         {:top (+ (:top trect) (:scroll-y wz))
                                          :bottom (+ (:bottom trect) (:scroll-y wz))
@@ -255,14 +263,15 @@
   [_ owner opts]
   (reify
     om/IRenderState
-    (render-state [this {:keys [visible-content-fn popup-content-fn visible prefered-side channel] :as state}]
+    (render-state [this {:keys [visible-content-fn popup-content-fn visible prefered-side channel coordinates] :as state}]
       (html
         [:div {:class (:launcher-class-name opts)}
          (when visible
            (dom/div #js {:style #js {:position "absolute" :display "inline"}}
                     (om/build popover-container nil {:init-state {:channel channel}
                                                      :state {:content-fn popup-content-fn
-                                                             :prefered-side prefered-side}
+                                                             :prefered-side prefered-side
+                                                             :coordinates coordinates}
                                                      :opts {:for (:for opts)
                                                             :align (:align opts)
                                                             :has-arrow (:has-arrow opts)
@@ -284,7 +293,7 @@
       {:visible false})
 
     om/IRenderState
-    (render-state [this {:keys [label id disabled class-name visible body prefered-side channel]}]
+    (render-state [this {:keys [label id disabled class-name visible body prefered-side channel coordinates]}]
       (html
         [:div {:class (:launcher-class-name opts)}
          [:a {:class class-name
@@ -297,6 +306,7 @@
          (when visible
            (om/build popover-container nil {:state {:content-fn body
                                                     :prefered-side prefered-side
+                                                    :coordinates coordinates
                                                     :channel channel}
                                             :opts {:align (:align opts)
                                                    :has-arrow (:has-arrow opts)
@@ -327,7 +337,8 @@
                                  launcher-class-name
                                  channel
                                  align
-                                 visible]
+                                 visible
+                                 coordinates]
                           :or {class-name "om-widgets-popover-button"
                                prefered-side :bottom
                                popover-class ""
@@ -342,7 +353,8 @@
                                      :state {:visible-content-fn front-face
                                              :popup-content-fn popup-body
                                              :prefered-side prefered-side
-                                             :channel channel}
+                                             :channel channel
+                                             :coordinates coordinates}
                                      :opts {:for for
                                             :has-arrow has-arrow
                                             :popover-class popover-class
@@ -356,7 +368,8 @@
                                                      :class-name class-name
                                                      :prefered-side prefered-side
                                                      :body popup-body
-                                                     :channel channel}
+                                                     :channel channel
+                                                     :coordinates coordinates}
                                              :opts {:align align
                                                     :popover-class popover-class
                                                     :launcher-class-name launcher-class-name
