@@ -205,3 +205,45 @@
                                              (w/grid (get-in app [:source-custom :rows])
                                                      (get-in app [:selected])
                                                      :header {:type :none})))))))
+
+
+(defn grid-request-range-sample
+  [app owner]
+  (letfn [(get-data [start end]
+            {:index start
+             :total-rows 50000
+             :rows (->> (range start (min 50000 end))
+                        (map #(do {:item (str "Item " (inc %))}))
+                        vec)})]
+    (reify
+      om/IInitState
+      (init-state [_]
+        {:channel (chan)})
+
+      om/IWillMount
+      (will-mount [_]
+        (go
+          (om/update! (om/get-props owner) :request-range (get-data 0 50))
+          (loop []
+
+            (let [cmd (<! (om/get-state owner :channel))]
+              (when-not (= (:event-type cmd) :unmount)
+                (condp = (:event-type cmd)
+                  :request-range (go
+                                   (<! (timeout 1000))
+                                   (om/update! (om/get-props owner) :request-range (get-data (:start cmd)
+                                                                                                  (:end cmd))))
+                  nil)
+                (recur))))))
+      om/IRenderState
+      (render-state [this {:keys [channel] :as state}]
+        (dom/div #js {:className "panel panel-default"}
+                 (dom/div #js {:className "panel-heading"} "Grid Request Range, 1s data retrieve delay ")
+                 (dom/div #js {:className "panel-body"}
+                          (dom/div #js {:className ""}
+                                   (w/grid (get-in app [:request-range])
+                                           (get-in app [:selected])
+                                           :page-size 12
+                                           :events-channel channel
+                                           :header {:type :default
+                                                    :columns [{:caption "Item" :field :item}]}))))))))

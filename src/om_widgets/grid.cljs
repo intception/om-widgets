@@ -561,7 +561,7 @@
         sorter (when init-sorted-column
                  (grid-sorter init-sorted-column))
         page-size (or (:page-size definition) 5)
-        current-page (or (:current-page definition) (int (/ (:index src) page-size)))]
+        current-page (or (:current-page definition))]
     (om/build create-grid
               target
               {:init-state {:current-page current-page
@@ -577,9 +577,8 @@
                            :max-pages (calculate-max-pages (:total-rows src) page-size)
                            :page-size page-size
                            :onChange onChange}
-                          (merge (when (or (:current-page definition)
-                                           (:index source))
-                                   {:current-page current-page})))
+                          (merge (when  (:current-page definition)
+                                          {:current-page current-page})))
                :opts {:language (or language :en)
                       :hover? (:hover? definition)
                       :condensed? (:condensed? definition)

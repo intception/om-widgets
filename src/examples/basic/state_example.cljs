@@ -30,7 +30,13 @@
                              :text "Grid With Custom Cells"}
                             {:id :grid-custom-row
                              :type :entry
-                             :text "Grid Row Custom"}]}]
+                             :text "Grid Row Custom"}
+
+                            {:id :grid-request-range
+                             :type :entry
+                             :text "Grid Request Range"}
+
+                            ]}]
                   [{:text "Popup Window"
                     :id :popup-window
                     :url "#/popupwindow"}]
@@ -64,7 +70,8 @@
             :sex :male
             :password ""
             :some-set #{}}
-     :grid {:source-simple [{:name "Sebas" :username "kernelp4nic"  :fecha #inst "2002-04-20"}
+     :grid {:request-range {}
+            :source-simple [{:name "Sebas" :username "kernelp4nic"  :fecha #inst "2002-04-20"}
                             {:name "Guille" :username "guilespi" :fecha #inst "2004-04-20"}
                             {:name "Fabian" :username "fapenia" :fecha #inst "2004-04-21"}
                             {:name "Alexis" :username "_axs_" :fecha #inst "2012-04-20"}

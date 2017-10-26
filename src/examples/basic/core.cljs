@@ -8,7 +8,7 @@
             [examples.basic.modal-example :refer [modal-example]]
             [examples.basic.datepicker-example :refer [datepicker-example]]
             [examples.basic.popup-window-example :refer [popup-window-example]]
-            [examples.basic.grid-example :refer [grid-example grid-link-example grid-custom-row-sample]]
+            [examples.basic.grid-example :refer [grid-example grid-link-example grid-custom-row-sample grid-request-range-sample]]
             [examples.basic.dropdown-example :refer [dropdown-example]]
             [examples.basic.editable-list-example :refer [editable-list-example]]))
 
@@ -41,6 +41,7 @@
            :grid (om/build grid-example (get-in app [:grid]))
            :grid-link (om/build grid-link-example (get-in app [:grid]))
            :grid-custom-row (om/build grid-custom-row-sample (get-in app [:grid]))
+           :grid-request-range (om/build grid-request-range-sample (get-in app [:grid]))
            :users (html [:div.jumbotron [:h2 "Users Sample"]])
            :inbox (html [:div.jumbotron [:h2 "Inbox Sample"]])
            :popup-window (om/build popup-window-example app)
