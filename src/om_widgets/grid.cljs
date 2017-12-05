@@ -298,7 +298,7 @@
 
           (map (fn [{:keys [field] :as column}]
                  (om/build cell-builder (field row) {:opts {:column-def column :row row}}))
-               (:columns opts)))))))
+               (:columns state)))))))
 
 ;; ---------------------------------------------------------------------
 ;; Grid Pager Multimethod
@@ -381,7 +381,7 @@
                          (when (:condensed? opts) "table-condensed")
                          (when (:bordered? opts) "table-bordered")
                          (when (:striped? opts) "table-striped")]}
-         (om/build header (:columns opts)
+         (om/build header (:columns state)
                    {:state {:channel (:channel state)
                             :selection-channel (:selection-channel state)
                             :all-selected? (:all-selected? state)
@@ -392,9 +392,9 @@
                             (map-indexed #(om/build row-builder %2 (merge {:state {:channel (:selection-channel state)
                                                                                    :events-channel (:events-channel state)
                                                                                    :target target
-                                                                                   :index %1}
-                                                                           :opts {:columns (:columns opts)
-                                                                                  :multiselect? (:multiselect? opts)
+                                                                                   :index %1
+                                                                                   :columns (:columns state)}
+                                                                           :opts {:multiselect? (:multiselect? opts)
                                                                                   :disable-selection? (:disable-selection? opts)
                                                                                   :selected-row-style (:selected-row-style opts)}}
                                                                           (when (:key-field state)
@@ -484,9 +484,9 @@
                             :events-channel (:events-channel state)
                             :key-field (:key-field state)
                             :channel (:channel state)
-                            :sort-info (:sort-info state)}
-                    :opts {:columns (:columns header)
-                           :hover? (:hover? opts)
+                            :sort-info (:sort-info state)
+                            :columns (:columns header)}
+                    :opts {:hover? (:hover? opts)
                            :condensed? (:condensed? opts)
                            :bordered? (:bordered? opts)
                            :striped? (:striped? opts)
