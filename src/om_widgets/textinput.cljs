@@ -168,6 +168,7 @@
 (defmethod handle-custom-keys! :default
   [target owner state k]
   true)
+
 ;; ---------------------------------------------------------------------
 ;; handlekeydown
 (defmulti handlekeydown mask-handler-selector)
@@ -179,6 +180,7 @@
       (do
         (fire-on-change target owner state)
         (handle-custom-keys! target owner state k)))))
+
 (defmethod handlekeydown :numeric
   [target owner state e]
   (let [k (.-which e)]
@@ -187,10 +189,38 @@
       (do
         (fire-on-change target owner state)
         (handle-custom-keys! target owner state k)))))
+
 (defmethod handlekeydown :default
   [target owner state e]
   (fire-on-change target owner state)
   true)
+
+;; ---------------------------------------------------------------------
+;; on-input
+(defmulti handle-on-input mask-handler-selector)
+(defmethod handle-on-input :mask
+  [target owner state e]
+  (let [k (.-which e)]
+    (if (special-key? k)
+      true
+      (do
+        (fire-on-change target owner state)
+        (handle-custom-keys! target owner state k)))))
+
+(defmethod handle-on-input :numeric
+  [target owner state e]
+  (let [k (.-which e)]
+    (if (special-key? k)
+      true
+      (do
+        (fire-on-change target owner state)
+        (handle-custom-keys! target owner state k)))))
+
+(defmethod handle-on-input :default
+  [target owner state e]
+  (fire-on-change target owner state)
+  true)
+
 ;; ---------------------------------------------------------------------
 ;; handlekeyup
 (defmulti handlekeyup mask-handler-selector)
@@ -337,6 +367,9 @@
                                     (.preventDefault %)
                                     nil)
                       :onKeyUp #(if (false? (handlekeyup target owner state %))
+                                  (.preventDefault %)
+                                  nil)
+                      :onInput #(if (false? (handle-on-input target owner state %))
                                   (.preventDefault %)
                                   nil)
                       :onKeyPress #(do
