@@ -561,7 +561,7 @@
         sorter (when init-sorted-column
                  (grid-sorter init-sorted-column))
         page-size (or (:page-size definition) 5)
-        current-page (or (:current-page definition))]
+        current-page (or (:current-page definition) 0)]
     (om/build create-grid
               target
               {:init-state {:current-page current-page
