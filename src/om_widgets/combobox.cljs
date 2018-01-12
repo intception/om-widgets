@@ -9,12 +9,16 @@
 
 
 (defn- option
-  [[k v]]
-  (om/component
-    (html
-      (if (map? v)
-        (u/make-childs [:optgroup {:label k}] (om/build-all option v))
-        (dom/option #js {:value (pr-str {:value k})} v)))))
+  [[k v] owner]
+  (reify
+    om/IRenderState
+    (render-state [_ {:keys [selected]}]
+      (let [opts (->> {:value (pr-str {:value k})}
+                      (merge (when (= k selected) {:selected 1})))]
+        (html
+          (if (map? v)
+            (u/make-childs [:optgroup {:label k}] (om/build-all option v))
+            (dom/option (clj->js opts) v)))))))
 
 (defn- combo
   [app owner]
@@ -36,20 +40,24 @@
 
                                      (.preventDefault e)))
 
-                       :className (clojure.string/join " " ["om-widgets-combobox"  (:class-name state)
+                       :className (clojure.string/join " " ["om-widgets-combobox" (:class-name state)
                                                             (when (and (not (:disabled state)) (:read-only state))
                                                               "om-widgets-combobox-readonly")])
                        :disabled (or (:disabled state) (if (:read-only state) true false))
                        :onBlur (:onBlur state)
-                       :value (pr-str {:value value})
+                       ;:value (pr-str {:value value})
                        :id (:id state)}
                       (merge (when (:tabIndex state)) {:tabIndex (:tabIndex state)})
-                      (merge (when (:read-only state) {:readOnly true})))]
+                      (merge (when (:read-only state) {:readOnly true}))
+                      (merge (when (nil? value) {:value (pr-str {:value nil})})))]
         (apply dom/select (clj->js opts)
                ;; create an empty value to override <select> default behaviour of always selecting the first item
                ;; this plays well with required values or form validation
-               (apply conj [(dom/option #js {:value (pr-str {:value nil}) :disabled true})]
-                      (om/build-all option options)))))))
+               (apply conj [(dom/option (clj->js (-> {:value (pr-str {:value nil})
+                                                      :disabled true}
+                                                     (merge (when (nil? value)
+                                                              {:selected 1})))))]
+                      (om/build-all option options {:state {:selected value}})))))))
 
 ;; ---------------------------------------------------------------------
 ;; Schema

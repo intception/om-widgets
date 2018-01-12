@@ -108,6 +108,17 @@
                                                   :onions "Onions"
                                                   :courgettes "Courgettes"}}})]
 
+           [:div.form-group
+            [:label "Car (value is a map)"]
+            (w/combobox app :car
+                        {:tabIndex 8
+                         :class-name "form-control"
+                         :options [[{:id :audi :year 2012} "Audi 2012"]
+                                   [{:id :mbenz :year 2013} "Mercedes Benz"]
+                                   [{:id :porsche :year 2001} "Porsche TS 211"]
+                                   ]})]
+
+
             [:div.form-group
              [:label "Password"]
              (w/textinput app :password {:input-class "form-control"
