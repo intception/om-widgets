@@ -28,9 +28,9 @@
     om/IRenderState
     (render-state [_ {:keys [channel on-selection active-path]}]
       (html
-        [:li {:class (when (= (get-in cursor [active-path])
-                              (:id entry))
-                       "active")}
+        [:li {:class [(when (= (get-in cursor [active-path])
+                               (:id entry))
+                        "active")]}
 
          (if (:items entry)
            (dropdown cursor (->> {:id (:id entry)
@@ -41,23 +41,27 @@
                                                   (on-selection v)
                                                   (when (om/get-state owner :collapsed?)
                                                     (put! channel :toggle-menu)))
-                                  :items (:items entry)}))
+                                  :items (:items entry)}
+                                 (th/when->> (:className entry)
+                                   (merge {:className (:className entry)}))))
            [:a (->> {}
                     (th/when->> (:className entry)
-                                (merge {:className (:className entry)}))
+                      (merge {:className (:className entry)}))
                     (th/when->> (:url entry)
-                                (merge {:href (:url entry)}))
+                      (merge {:href (:url entry)}))
                     (th/when->> on-selection
-                                (merge {:onClick (fn [e]
-                                                   (on-selection (:id @entry))
-                                                   (when (om/get-state owner :collapsed?)
-                                                     (put! channel :toggle-menu)))})))
+                      (merge {:onClick (fn [e]
+                                         (on-selection (:id @entry))
+                                         (when (om/get-state owner :collapsed?)
+                                           (put! channel :toggle-menu)))})))
 
             (when (or (:iconClassName entry) (:icon entry))
               [:span {:class (or (:iconClassName entry)
                                  (u/glyph (:icon entry)))}])
 
-            [:span (:text entry)]
+            (if (fn? (:text entry))
+              ((:text entry))
+              [:span (:text entry)])
 
             (when (:badge entry)
               [:span.badge (:badge entry)])])]))))
@@ -166,7 +170,7 @@
 ;; Schema
 
 (def NavbarEntry
-  {:text s/Str
+  {:text (s/either s/Str (s/pred fn?))
    :id s/Keyword
    (s/optional-key :right-position) s/Bool
    (s/optional-key :url) s/Str
@@ -175,9 +179,10 @@
    (s/optional-key :icon) (s/either s/Keyword s/Str)})
 
 (def NavbarDropdownEntry
-  {:text s/Str
+  {:text (s/either s/Str (s/pred fn?))
    :id s/Keyword
    :items [(s/either EntrySchema DividerSchema)]
+   (s/optional-key :className) s/Str
    (s/optional-key :icon) (s/either s/Keyword s/Str)
    (s/optional-key :iconClassName) s/Str
    (s/optional-key :badge) (s/either s/Int s/Str)

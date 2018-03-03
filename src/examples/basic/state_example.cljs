@@ -1,5 +1,5 @@
-(ns examples.basic.state-example)
-
+(ns examples.basic.state-example
+  (:require [sablono.core :as html :refer-macros [html]]))
 
 (def app-state
   (atom
@@ -55,7 +55,17 @@
                              :badge 6
                              :text "Inbox"}]}]
                   [{:text "Editable list"
-                    :id :editable-list}]]
+                    :id :editable-list}]
+                  [{:text (fn [] (html [:label "Current user"]))
+                    :className "profile-user"
+                    :id :profile
+                    :right-position true
+                    :items [{:id :profile
+                             :type :entry
+                             :text "Profile"}
+                            {:id :logout
+                             :type :entry
+                             :text "Logout"}]}]]
      :datepicker {:inline #inst "1991-01-25"
                   :input-group-left #inst "1991-01-25"
                   :input-group-right #inst "1991-01-25"

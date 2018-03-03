@@ -1,10 +1,12 @@
 (ns om-widgets.dropdown
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]]
+                   [pallet.thread-expr :as th])
   (:require [schema.core :as s :include-macros true]
             [om.core :as om :include-macros true]
             [om-widgets.utils :as u]
             [cljs.core.async :refer [put! chan <! alts! timeout close!]]
-            [sablono.core :as html :refer-macros [html]]))
+            [sablono.core :as html :refer-macros [html]]
+            [pallet.thread-expr :as th]))
 
 
 ;; TODO support headings: <li class="dropdown-header">Nav header</li>
@@ -51,10 +53,11 @@
 ;; Dropdown containers
 
 (defn- build-dropdown-js-options
-  [{:keys [size opened channel] :as state}]
+  [{:keys [size opened channel className] :as state}]
   {:class ["om-widgets-dropdown dropdown btn-group"
            (str "btn-group-" (name (or size :md)))
-           (when opened " open")]
+           (when opened " open")
+           (when className className)]
    ;; tab index is set to 0 to force focus on the container,
    ;; this way, the onBlur event will be called when the user
    ;; clicks outside and we can close the dropdown.
@@ -111,11 +114,16 @@
     (render-state [_ {:keys [title items icon badge channel] :as state}]
       (html
         [:li (build-dropdown-js-options state)
-         [:a {:class "dropdown-toggle" :title title}
+         [:a (-> {:class "dropdown-toggle"}
+                 (th/when-> (string? title)
+                   (merge {:title title})))
           (when icon [:span {:class (u/glyph icon)}])
-          [:span title]
-          (when badge [:span.badge badge])
-          [:span {:class "caret"}]]
+          (if (fn? title)
+            (title)
+            [:div
+             [:span title]
+             [:span {:class "caret"}]])
+          (when badge [:span.badge badge])]
          (om/build dropdown-menu cursor {:state {:channel channel
                                                  :items items}})]))))
 
@@ -143,7 +151,9 @@
              [:button {:class "btn btn-default dropdown-toggle"
                        :type "button"}
               (when icon [:span {:class (u/glyph icon)}])
-              [:span title]
+              (if (fn? title)
+                (title)
+                [:span title])
               (when badge [:span.badge badge])
               [:span {:class "caret"}]])
            (om/build dropdown-menu cursor {:state {:channel channel
@@ -168,7 +178,7 @@
 
 (def DropdownSchema
   {:items [(s/either EntrySchema DividerSchema)]
-   :title s/Str
+   :title (s/either s/Str (s/pred fn?))
    (s/optional-key :id) (s/either s/Keyword s/Str s/Int)
    (s/optional-key :korks) (s/either s/Any [s/Any])
    (s/optional-key :icon) s/Any
