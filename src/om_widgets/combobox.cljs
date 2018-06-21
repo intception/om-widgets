@@ -5,7 +5,8 @@
             [sablono.core :refer-macros [html]]
             [om-widgets.utils :as utils]
             [cljs.reader :as reader]
-            [om-widgets.utils :as u]))
+            [om-widgets.utils :as u]
+            [pallet.thread-expr :as th]))
 
 
 (defn- option
@@ -13,11 +14,14 @@
   (reify
     om/IRenderState
     (render-state [_ {:keys [selected]}]
-      (let [opts (->> {:value (pr-str {:value k})}
-                      (merge (when (= k selected) {:selected 1})))]
+      (let [value (if (map? k)
+                    (into (sorted-map) k)
+                    k)
+            opts (->> {:value (pr-str {:value value})}
+                      (merge (when (= value selected) {:selected 1})))]
         (html
           (if (map? v)
-            (u/make-childs [:optgroup {:label k}] (om/build-all option v))
+            (u/make-childs [:optgroup {:label value}] (om/build-all option v))
             (dom/option (clj->js opts) v)))))))
 
 (defn- combo
@@ -45,11 +49,13 @@
                                                               "om-widgets-combobox-readonly")])
                        :disabled (or (:disabled state) (if (:read-only state) true false))
                        :onBlur (:onBlur state)
-                       ;:value (pr-str {:value value})
+                       :value (cond
+                                (nil? value) (pr-str {:value nil})
+                                (map? value) (pr-str {:value (into (sorted-map) value)})
+                                :else (pr-str {:value value}))
                        :id (:id state)}
                       (merge (when (:tabIndex state)) {:tabIndex (:tabIndex state)})
-                      (merge (when (:read-only state) {:readOnly true}))
-                      (merge (when (nil? value) {:value (pr-str {:value nil})})))]
+                      (merge (when (:read-only state) {:readOnly true})))]
         (apply dom/select (clj->js opts)
                ;; create an empty value to override <select> default behaviour of always selecting the first item
                ;; this plays well with required values or form validation
