@@ -14,8 +14,43 @@
 (defn- check
   [app owner]
   (reify
+    om/IDidMount
+    (did-mount [this]
+      (set! (.-indeterminate (om/get-node owner)) (om/get-state owner :intermediate)))
+
+    om/IDidUpdate
+    (did-update [this prev-props prev-state]
+      (set! (.-indeterminate (om/get-node owner)) (om/get-state owner :intermediate)))
+
     om/IRenderState
-    (render-state [this {:keys [label id class-name title path disabled on-change checked-value unchecked-value toggle-value]}]
+    (render-state [this {:keys [id path disabled on-change checked-value unchecked-value toggle-value]}]
+      (html
+        [:input {:type "checkbox"
+                 :id (name id)
+                 :disabled disabled
+                 :checked (checked? (utils/om-get app path) checked-value)
+                 :onChange (fn [e]
+                             (let [value (if (.. e -target -checked) checked-value unchecked-value)
+                                   dest (get @(om/get-props owner) path)]
+
+                               (if toggle-value
+                                 (if (contains? dest checked-value)
+                                   (utils/om-update! (om/get-props owner) path (disj dest checked-value))
+                                   (utils/om-update! (om/get-props owner) path (conj dest checked-value)))
+                                 (utils/om-update! (om/get-props owner) path value))
+
+                               ;; TODO this is done to force a refresh
+                               (when (utils/atom? (om/get-props owner))
+                                 (om/set-state! owner ::force-refresh (not (om/get-state owner ::force-refresh))))
+
+                               (when on-change (on-change value))))}]))))
+
+
+(defn- check-box
+  [app owner]
+  (reify
+    om/IRenderState
+    (render-state [this {:keys [label id class-name title path disabled on-change checked-value unchecked-value toggle-value intermediate]}]
       (html
         [:div (-> {:class [class-name
                            (when (checked? (utils/om-get app path) checked-value) "active")]}
@@ -23,25 +58,15 @@
          [:label {:class ["om-widgets-label"
                           (when disabled "text-muted")]
                   :htmlFor (name id)}
-          [:input {:type "checkbox"
-                   :id (name id)
-                   :disabled disabled
-                   :checked (checked? (utils/om-get app path) checked-value)
-                   :onChange (fn [e]
-                               (let [value (if (.. e -target -checked) checked-value unchecked-value)
-                                     dest (get @(om/get-props owner) path)]
+          (om/build check app {:state {:id id
+                                       :path path
+                                       :disabled disabled
+                                       :on-change on-change
+                                       :checked-value checked-value
+                                       :intermediate intermediate
+                                       :unchecked-value unchecked-value
+                                       :toggle-value toggle-value}})
 
-                                 (if toggle-value
-                                   (if (contains? dest checked-value)
-                                     (utils/om-update! (om/get-props owner) path (disj dest checked-value))
-                                     (utils/om-update! (om/get-props owner) path (conj dest checked-value)))
-                                   (utils/om-update! (om/get-props owner) path value))
-
-                                 ;; TODO this is done to force a refresh
-                                 (when (utils/atom? (om/get-props owner))
-                                   (om/set-state! owner ::force-refresh (not (om/get-state owner ::force-refresh))))
-
-                                 (when on-change (on-change value))))}]
           label]]))))
 
 ;; ---------------------------------------------------------------------
@@ -64,18 +89,19 @@
 ;; ---------------------------------------------------------------------
 ;; Public
 (defn checkbox
-  [app path {:keys [label id title disabled class-name on-change onChange checked-value unchecked-value toggle-value] :as opts
+  [app path {:keys [label id title disabled class-name on-change onChange checked-value unchecked-value toggle-value intermediate] :as opts
              :or {class-name "checkbox"
                   checked-value true
                   unchecked-value false
                   toggle-value false}}]
-  (om/build check app {:state {:label label
-                               :title title
-                               :id (or id path)
-                               :class-name class-name
-                               :checked-value checked-value
-                               :unchecked-value unchecked-value
-                               :toggle-value toggle-value
-                               :disabled disabled
-                               :on-change (or on-change onChange)
-                               :path path}}))
+  (om/build check-box app {:state {:label label
+                                   :title title
+                                   :id (or id path)
+                                   :class-name class-name
+                                   :checked-value checked-value
+                                   :unchecked-value unchecked-value
+                                   :toggle-value toggle-value
+                                   :intermediate intermediate
+                                   :disabled disabled
+                                   :on-change (or on-change onChange)
+                                   :path path}}))
