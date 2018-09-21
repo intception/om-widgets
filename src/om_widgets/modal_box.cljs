@@ -21,8 +21,9 @@
 
     om/IDidMount
     (did-mount [this]
-      (-> (sel1 "body")
-          (dommy/add-class! "om-widgets-modal-is-open"))
+      (when (om/get-state owner :set-modal-is-open)
+        (-> (sel1 "body")
+          (dommy/add-class! "om-widgets-modal-is-open")))
 
       (when (om/get-state owner :close-on-esc)
         (let [handle-keydown-fn (partial handle-keydown owner)]
@@ -31,8 +32,9 @@
 
     om/IWillUnmount
     (will-unmount [this]
-      (-> (sel1 "body")
-          (dommy/remove-class! "om-widgets-modal-is-open"))
+      (when (om/get-state owner :set-modal-is-open)
+        (-> (sel1 "body")
+          (dommy/remove-class! "om-widgets-modal-is-open")))
 
       (when-let [handle-keydown-fn (om/get-state owner :handle-keydown-fn)]
         (dommy/unlisten! (sel1 :body) :keydown handle-keydown-fn)))
@@ -76,14 +78,16 @@
 
 (defn modal-box
   "Arguments title, body and footer  [string or vector of components]"
-  [target {:keys [title body footer close-fn class-name close-on-esc size]
-           :or {body "Missing body parameter!"}}]
+  [target {:keys [title body footer close-fn class-name close-on-esc size set-modal-is-open]
+           :or {body "Missing body parameter!"
+                set-modal-is-open true}}]
   (om/build create-modal-box target {:state {:body body
                                              :close-fn close-fn
                                              :footer footer
                                              :title title
                                              :close-on-esc close-on-esc
                                              :size size
+                                             :set-modal-is-open set-modal-is-open
                                              :class-name class-name}}))
 
 (defn install-modal-box!
