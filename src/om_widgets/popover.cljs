@@ -53,7 +53,8 @@
 
 
 (defn app-root []
-  (sel1 "div [data-reactid]"))
+  (or (sel1 "div [data-reactid]")
+      (sel1 "div [data-reactroot]")))
 
 (defn popover-overlay
   [_ owner]

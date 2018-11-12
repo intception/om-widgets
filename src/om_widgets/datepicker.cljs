@@ -222,12 +222,11 @@
                        ;; next month
                                              (dom/th #js {:className "next"
                                                           :onClick (fn [e]
-                                                                     (om/set-state! owner :date (time/plus date (time/months 1))))} ">")
-
-                       ;; datepicker body
-                                             (apply dom/tr nil
-                                                    (om/build-all day-header days-short))
-                                             (om/build weeks-component app {:state {:path path :date date :onChange onChange}}))))))))
+                                                                     (om/set-state! owner :date (time/plus date (time/months 1))))} ">")))
+                          ;; datepicker body
+                          (apply dom/tr nil
+                                 (om/build-all day-header days-short))
+                          (om/build weeks-component app {:state {:path path :date date :onChange onChange}}))))))
 
 (defn datepicker
   "Datepicker public API
