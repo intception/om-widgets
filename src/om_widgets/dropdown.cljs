@@ -113,19 +113,19 @@
     om/IRenderState
     (render-state [_ {:keys [title items icon badge channel] :as state}]
       (html
-        [:li (build-dropdown-js-options state)
-         [:a (-> {:class "dropdown-toggle"}
-                 (th/when-> (string? title)
-                   (merge {:title title})))
-          (when icon [:span {:class (u/glyph icon)}])
-          (if (fn? title)
-            (title)
-            [:div
-             [:span title]
-             [:span {:class "caret"}]])
-          (when badge [:span.badge badge])]
-         (om/build dropdown-menu cursor {:state {:channel channel
-                                                 :items items}})]))))
+       [:div (build-dropdown-js-options state)
+        [:a (-> {:class "dropdown-toggle"}
+                (th/when-> (string? title)
+                  (merge {:title title})))
+         (when icon [:span {:class (u/glyph icon)}])
+         (if (fn? title)
+           (title)
+           [:div
+            [:span title]
+            [:span {:class "caret"}]])
+         (when badge [:span.badge badge])]
+        (om/build dropdown-menu cursor {:state {:channel channel
+                                                :items items}})]))))
 
 (defn- dropdown-container
   [cursor owner]
