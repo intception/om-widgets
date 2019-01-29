@@ -247,3 +247,38 @@
                                            :events-channel channel
                                            :header {:type :default
                                                     :columns [{:caption "Item" :field :item}]}))))))))
+(defn grid-summarized-sample
+  [app owner]
+
+  (reify
+    om/IRenderState
+    (render-state [_ state]
+      (dom/div #js {:className "panel panel-default"}
+               (dom/div #js {:className "panel-heading"} "Grid Request Range, 1s data retrieve delay ")
+               (dom/div #js {:className "panel-body"}
+                        (dom/div #js {:className ""}
+                                 (w/grid (get-in app [:source-summarized])
+                                         (get-in app [:selected])
+                                         :page-size 12
+                                         :header {:type :default
+                                                  :columns [{:caption "Name" :field :name}
+
+                                                            {:caption "Username"
+                                                             :field :username}
+
+                                                            {:caption "Registered Date"
+                                                             :field :fecha
+                                                             :data-format :date
+                                                             :date-formatter "yyyy/MM/dd"}
+
+                                                            {:caption "Ammount"
+                                                             :field :total
+                                                             :summarize (fn [acc row]
+                                                                           (+ acc (:total row)))
+                                                             :summary-render (fn [value]
+                                                                               [:div.text-info
+                                                                                [:label value]
+                                                                                [:span.glyphicon.glyphicon-euro]]
+                                                                               )
+                                                             }]}
+                                         :summarized? true)))))))

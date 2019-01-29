@@ -35,6 +35,9 @@
                             {:id :grid-request-range
                              :type :entry
                              :text "Grid Request Range"}
+                            {:id :grid-summarized
+                             :type :entry
+                             :text "Grid Summarized"}
 
                             ]}]
                   [{:text "Popup Window"
@@ -87,6 +90,13 @@
                             {:name "Alexis" :username "_axs_" :fecha #inst "2012-04-20"}
                             {:name "Martin" :username "nartub" :fecha #inst "2005-02-17"}
                             {:name "Intception" :username "intception" :fecha #inst "2001-02-17"}]
+
+            :source-summarized [{:name "Sebas" :username "kernelp4nic"  :fecha #inst "2002-04-20" :total 1000}
+                                {:name "Guille" :username "guilespi" :fecha #inst "2004-04-20" :total 900}
+                                {:name "Fabian" :username "fapenia" :fecha #inst "2004-04-21" :total 920}
+                                {:name "Alexis" :username "_axs_" :fecha #inst "2012-04-20" :total 500}
+                                {:name "Martin" :username "nartub" :fecha #inst "2005-02-17" :total 3000}
+                                {:name "Intception" :username "intception" :fecha #inst "2001-02-17" :total 2340}]
 
             :source-custom-cell [{:name "Seba"
                                   :username "kernelp4nic"

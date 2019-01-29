@@ -315,6 +315,27 @@
 
 (defmethod grid-pager :none [_ _ _])
 
+(defmulti row-summary-builder (fn [row owner opts]
+                                (:type opts)))
+
+
+(defmethod row-summary-builder :default
+  [row owner opts]
+  (reify
+    om/IRenderState
+    (render-state [_ {:keys [columns]}]
+      (html
+        (u/make-childs [:tr]
+                       (map (fn [value {:keys [summary-render] :as column}]
+                              [:td
+                               (if summary-render
+                                 (summary-render value)
+                                 [:span value])])
+                            row
+                            columns))
+
+        ))))
+
 
 (defn- grid-body
   [target owner opts]
@@ -387,19 +408,28 @@
                             :all-selected? (:all-selected? state)
                             :sort-info (:sort-info state)
                             :multiselect? (:multiselect? opts)}})
-
-         (utils/make-childs [:tbody]
-                            (map-indexed #(om/build row-builder %2 (merge {:state {:channel (:selection-channel state)
-                                                                                   :events-channel (:events-channel state)
-                                                                                   :target target
-                                                                                   :index %1
-                                                                                   :columns (:columns state)}
-                                                                           :opts {:multiselect? (:multiselect? opts)
-                                                                                  :disable-selection? (:disable-selection? opts)
-                                                                                  :selected-row-style (:selected-row-style opts)}}
-                                                                          (when (:key-field state)
-                                                                            {:react-key (get %2 (:key-field state))})))
-                                         rows))]))))
+         (u/make-childs [:tbody]
+                        (->> (map-indexed #(om/build row-builder %2 (merge {:state {:channel (:selection-channel state)
+                                                                                    :events-channel (:events-channel state)
+                                                                                    :target target
+                                                                                    :index %1
+                                                                                    :columns (:columns state)}
+                                                                            :opts {:multiselect? (:multiselect? opts)
+                                                                                   :disable-selection? (:disable-selection? opts)
+                                                                                   :selected-row-style (:selected-row-style opts)}}
+                                                                           (when (:key-field state)
+                                                                             {:react-key (get %2 (:key-field state))})))
+                                          rows)
+                             vec
+                             (#(if (:summarized? opts)
+                                 (conj % (let [summary-row (map (fn [{:keys [summarize] :as  column}]
+                                                                  (when summarize
+                                                                    (reduce summarize nil rows)))
+                                                                (:columns state))]
+                                           (om/build row-summary-builder summary-row {:state {:columns (:columns state)}
+                                                                                      :opts {:type (:summarized? state)}
+                                                                                      :react-key "summary"})))
+                                 %))))]))))
 
 ;; This function where private but we cannot test it from outside given the lack of #' reader in clojurescript
 ;; https://github.com/clojure/clojurescript/wiki/Differences-from-Clojure#the-reader
@@ -491,6 +521,7 @@
                            :bordered? (:bordered? opts)
                            :striped? (:striped? opts)
                            :multiselect? (:multiselect? opts)
+                           :summarized? (:summarized? opts)
                            :disable-selection? (:disable-selection? opts)
                            :selected-row-style (:selected-row-style opts)}})
 
@@ -551,7 +582,7 @@
 
 ;; TODO source should be a DataSource protocol?
 (defn grid
-  [source target & {:keys [id onChange events-channel key-field header pager language disable-selection? responsive?] :as definition}]
+  [source target & {:keys [id onChange events-channel key-field header pager language disable-selection? responsive? summarized?] :as definition}]
   (let [src {:rows (or (:rows source) source)
              :index (or (:index source) 0)
              :total-rows (or (:total-rows source) (count source))}
@@ -588,4 +619,5 @@
                       :responsive? responsive?
                       :disable-selection? disable-selection?
                       :selected-row-style (:selected-row-style definition)
+                      :summarized? summarized?
                       :id id}})))
