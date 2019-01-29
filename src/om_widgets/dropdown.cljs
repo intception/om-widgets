@@ -113,7 +113,7 @@
     om/IRenderState
     (render-state [_ {:keys [title items icon badge channel] :as state}]
       (html
-       [:div (build-dropdown-js-options state)
+       [:li (build-dropdown-js-options state)
         [:a (-> {:class "dropdown-toggle"}
                 (th/when-> (string? title)
                   (merge {:title title})))
@@ -139,10 +139,10 @@
     (will-mount [_] (channel-processing cursor owner))
 
     om/IRenderState
-    (render-state [_ {:keys [title as-link? icon badge items channel] :as state}]
+    (render-state [_ {:keys [title as-link? icon badge items channel class-name] :as state}]
       (let [title (str (when icon "  ") title " ")]
         (html
-          [:div (build-dropdown-js-options state)
+          [:li (build-dropdown-js-options state)
            (if as-link?
              [:a.btn-link
               (when icon [:span {:class icon}])

@@ -28,15 +28,16 @@
     om/IRenderState
     (render-state [_ {:keys [channel on-selection active-path]}]
       (html
-        [:li {:class [(when (= (get-in cursor [active-path])
-                               (:id entry))
-                        "active")]}
 
          (if (:items entry)
            (dropdown cursor (->> {:id (:id entry)
                                   :type :menu
                                   :icon (:icon entry)
                                   :title (:text entry)
+                                  :className (if (= (get-in cursor [active-path])
+                                                    (:id entry))
+                                               "active"
+                                               "")
                                   :on-selection (fn [v]
                                                   (on-selection v)
                                                   (when (om/get-state owner :collapsed?)
@@ -44,27 +45,33 @@
                                   :items (:items entry)}
                                  (th/when->> (:className entry)
                                    (merge {:className (:className entry)}))))
-           [:a (->> {}
-                    (th/when->> (:className entry)
-                      (merge {:className (:className entry)}))
-                    (th/when->> (:url entry)
-                      (merge {:href (:url entry)}))
-                    (th/when->> on-selection
-                      (merge {:onClick (fn [e]
-                                         (on-selection (:id @entry))
-                                         (when (om/get-state owner :collapsed?)
-                                           (put! channel :toggle-menu)))})))
 
-            (when (or (:iconClassName entry) (:icon entry))
-              [:span {:class (or (:iconClassName entry)
-                                 (u/glyph (:icon entry)))}])
 
-            (if (fn? (:text entry))
-              ((:text entry))
-              [:span (:text entry)])
+           [:li {:class [(when (= (get-in cursor [active-path])
+                                  (:id entry))
+                           "active")]}
+            [:a (->> {}
+                     (th/when->> (:className entry)
+                                 (merge {:className (:className entry)}))
+                     (th/when->> (:url entry)
+                                 (merge {:href (:url entry)}))
+                     (th/when->> on-selection
+                                 (merge {:onClick (fn [e]
+                                                    (on-selection (:id @entry))
+                                                    (when (om/get-state owner :collapsed?)
+                                                      (put! channel :toggle-menu)))})))
 
-            (when (:badge entry)
-              [:span.badge (:badge entry)])])]))))
+             (when (or (:iconClassName entry) (:icon entry))
+               [:span {:class (or (:iconClassName entry)
+                                  (u/glyph (:icon entry)))}])
+
+             (if (fn? (:text entry))
+               ((:text entry))
+               [:span (:text entry)])
+
+             (when (:badge entry)
+               [:span.badge (:badge entry)])]])))))
+
 
 (defn- navbar-nav
   [{:keys [cursor entries]} owner]
