@@ -23,8 +23,8 @@
                   :onChange (fn [e]
                               (when channel
                                 (put! channel value))
-                              (om/update! cursor cursor-path value))}
-          text]]))))
+                              (om/update! cursor cursor-path value))}]
+         text]))))
 
 (defn switcher
   [cursor owner]
