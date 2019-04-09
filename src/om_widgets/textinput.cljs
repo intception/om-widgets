@@ -6,18 +6,23 @@
             [cljs-time.format :as time-format]
             [cljs-time.coerce :as timec]
             [pallet.thread-expr :as th]))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def date-local-format "dd/MM/yyyy")
 (def date-local-mask "00/00/0000")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defn- date-from-localstring
   [value fmt]
   (let [d (time-format/parse (time-format/formatter fmt) value)]
     (js/Date. d)))
+
 (defn- string-from-date
   [dt fmt]
   (let [dt (timec/from-date dt)]
     (time-format/unparse (time-format/formatter fmt) dt)))
+
 (defn- convert-input
   [input-type value]
   (condp = input-type
@@ -27,6 +32,7 @@
                ;; assume empty string for unhandled values
                (str value)))
     value))
+
 (defn- convert-output
   [output-type value]
   (condp = output-type
@@ -37,6 +43,7 @@
     "numeric" (let [f (js/parseFloat value)]
                 (if (js/isNaN f) value f))
     value))
+
 (defn replace-item-at-pos
   "Given a vector and position number, will return a new
   vector with the element replaced."
@@ -47,6 +54,7 @@
     (if (and has-items? in-bounds?)
       (vec (concat (subvec v 0 p) [n] (subvec v (inc p))))
       v)))
+
 (defn- erase-selection
   [mask-vector entered-values sel-start sel-end]
   (if (= sel-start sel-end)
@@ -57,11 +65,13 @@
              entered-values)
            (inc sel-start)
            sel-end)))
+
 (defn- next-available-position
   [mask-vector pos]
   (if (and (> (count mask-vector) pos) (string? (nth mask-vector pos)))
     (recur mask-vector (inc pos))
     pos))
+
 (defn- special-key?
   [char-code]
   (contains? #{9    ;; tab
@@ -82,15 +92,19 @@
                45   ;; insert
                144} ;; num lock;
              char-code))
+
 (defn- get-selection-start ;; assume modern browser IE9 and up
   [control]
   (.-selectionStart control))
+
 (defn- get-selection-end ;; assume modern browser IE9 and up
   [control]
   (.-selectionEnd control))
+
 (defn- set-caret-pos
   [control pos]
   (.setSelectionRange control pos pos))
+
 (defn- mask-handler-selector
   [target owner state]
   (condp = (:input-format state)
@@ -99,6 +113,7 @@
     "password" :unmasked
     nil :unmasked
     :mask))
+
 (defn- update-target
   [target owner {:keys [input-format path onChange private-state] :as state} bInternal]
   (when (and target
@@ -113,6 +128,7 @@
                    (not bInternal)
                    (not= value (path target)))
           (onChange value))))))
+
 (defn- fire-on-change
   [target owner {:keys [typing-timeout private-state] :as state}]
   (let [cbtimeout (:cbtimeout @private-state)]
@@ -120,15 +136,18 @@
       (.clearTimeout js/window cbtimeout))
     (swap! private-state assoc :cbtimeout (.setTimeout js/window #(update-target target owner state false)
                                                        (or typing-timeout 500)))))
+
 (defn- cancel-pending-timers
   [target owner {:keys [typing-timeout private-state] :as state}]
   (let [cbtimeout (:cbtimeout @private-state)]
     (when-not (= 0 cbtimeout)
       (.clearTimeout js/window cbtimeout)
       (swap! private-state assoc :cbtimeout 0))))
+
 ;; ---------------------------------------------------------------------
 ;; handle-custom-keys
 (defmulti handle-custom-keys! mask-handler-selector)
+
 (defmethod handle-custom-keys! :mask
   [target owner state k]
   (let [private-state (:private-state state)
@@ -165,6 +184,7 @@
             (set-caret-pos dom-node sel-start)))
         false)
       true)))
+
 (defmethod handle-custom-keys! :default
   [target owner state k]
   true)
@@ -172,6 +192,7 @@
 ;; ---------------------------------------------------------------------
 ;; handlekeydown
 (defmulti handlekeydown mask-handler-selector)
+
 (defmethod handlekeydown :mask
   [target owner state e]
   (let [k (.-which e)]
@@ -224,15 +245,18 @@
 ;; ---------------------------------------------------------------------
 ;; handlekeyup
 (defmulti handlekeyup mask-handler-selector)
+
 (defmethod handlekeyup :mask
   [target owner state e]
   (let [k (.-which e)]
     (if (special-key? k)
       true)
     false))
+
 (defmethod handlekeyup :default
   [target owner state e]
   true)
+
 ;; ---------------------------------------------------------------------
 ;; handlekeypress
 (defmulti handlekeypress mask-handler-selector)
@@ -258,17 +282,21 @@
             (set-caret-pos dom-node pos)
             (set-caret-pos dom-node (inc pos))))))
     false))
+
 (defmethod handlekeypress :numeric
   [target owner state e]
   (let [char-code (.-which e)
         new-char (.fromCharCode js/String char-code)]
     (pos? (count (re-seq #"\d" new-char)))))
+
 (defmethod handlekeypress :default
   [target owner state e]
   true)
+
 ;; ---------------------------------------------------------------------
 ;; Apply Mask
 (defmulti applymask! mask-handler-selector)
+
 (defmethod applymask! :mask
   [target owner state value]
   (let [private-state (:private-state state)
@@ -293,14 +321,17 @@
         (swap! private-state assoc :entered-values entered-values
                :prev-value new-value)
         (set! (.-value dom-node)  new-value)))))
+
 (defmethod applymask! :default
   [target owner state value]
   (when-let  [dom-node (:dom-node @(:private-state state))]
     (when-not  (= value (:prev-value @(:private-state state)))
       (set! (.-value dom-node) value))))
+
 ;; ---------------------------------------------------------------------
 ;; handlepaste
 (defmulti handlepaste mask-handler-selector)
+
 (defmethod handlepaste :mask
   [target owner state k]
   (.setTimeout js/window (fn []
@@ -309,12 +340,15 @@
                              (applymask! target owner state (.-value dom-node))))
                1)
   true)
+
 (defmethod handlepaste :default
   [target owner state e]
   true)
+
 ;; ---------------------------------------------------------------------
 ;; Init Mask
 (defmulti initmask! mask-handler-selector)
+
 (defmethod initmask! :mask
   [target owner state]
   (let [private-state (:private-state state)
@@ -329,8 +363,10 @@
                           %) input-mask))]
     (swap! private-state assoc :entered-values (map #(when (string? %) %) mask)
            :mask-vector (remove nil? mask))))
+
 (defmethod initmask! :default
   [target owner state])
+
 ;; ---------------------------------------------------------------------
 ;; Components
 (defn- create-textinput
@@ -413,6 +449,7 @@
                        (merge {:max (:max state)}))
                      (th/when-> (:resize state)
                        (merge {:resize (name (:resize state))}))))))))
+
 (defn textinput
   [target path {:keys [input-class input-format align] :as opts
                 :or {input-class ""}}]
