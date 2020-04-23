@@ -174,15 +174,27 @@
                                 (if (<  o 0)
                                   (max o (- m))
                                   (min o m)))
+                      apply-zoom-factor (fn [rect zoomed-container]
+                                          (if-let [zn (.getElementById js/document zoomed-container)]
+                                            (let [zoom (.-zoom (.getComputedStyle js/window zn ""))]
+                                              (merge rect {:top (* (:top rect) zoom)
+                                                           :left (* (:left rect) zoom)
+                                                           :bottom (* (:bottom rect) zoom)
+                                                           :right (* (:right rect) zoom)
+                                                           :width (* (:width rect) zoom)
+                                                           :height (* (:height rect) zoom)}))
+                                            rect))
                       wz (window-size)
-                      trect (if coordinates
-                              {:top (:y coordinates)
-                               :bottom (+ (:y coordinates) 1)
-                               :left (:x coordinates)
-                               :right (+ (:x coordinates) 1)
-                               :width 1
-                               :height 1}
-                              (first (client-rects target)))
+                      trect (-> (if coordinates
+                                  {:top (:y coordinates)
+                                   :bottom (+ (:y coordinates) 1)
+                                   :left (:x coordinates)
+                                   :right (+ (:x coordinates) 1)
+                                   :width 1
+                                   :height 1}
+                                  (first (client-rects target)))
+                                (cond-> (:zoomed-container opts)
+                                        (apply-zoom-factor (:zoomed-container opts))))
                       target-pos (merge trect
                                         {:top (+ (:top trect) (:scroll-y wz))
                                          :bottom (+ (:bottom trect) (:scroll-y wz))
@@ -251,6 +263,7 @@
 
       om/IRenderState
       (render-state [this {:keys [label side has-arrow content-fn mouse-down] :as state}]
+
         (html
           [:div {:class (str  "om-widgets-popover " (name side) " " (:popover-class opts))}
            (when (:mouse-down opts)
@@ -278,6 +291,7 @@
                                                             :has-arrow (:has-arrow opts)
                                                             :mouse-down #(om/set-state! owner :visible false)
                                                             :popover-class (:popover-class opts)
+                                                            :zoomed-container (:zoomed-container opts)
                                                             :close-fn #(go
                                                                         (<! (timeout 10))
                                                                         (om/set-state! owner :visible false))}})))
@@ -312,6 +326,7 @@
                                             :opts {:align (:align opts)
                                                    :has-arrow (:has-arrow opts)
                                                    :mouse-down #(om/set-state! owner :visible false)
+                                                   :zoomed-container (:zoomed-container opts)
                                                    :popover-class (:popover-class opts)
                                                    :close-fn #(go
                                                                (<! (timeout 10))
@@ -336,6 +351,7 @@
                                  has-arrow
                                  popover-class
                                  launcher-class-name
+                                 zoomed-container
                                  channel
                                  align
                                  visible
@@ -358,6 +374,8 @@
                                              :coordinates coordinates}
                                      :opts {:for for
                                             :has-arrow has-arrow
+                                            :zoomed-container zoomed-container
+
                                             :popover-class popover-class
                                             :launcher-class-name launcher-class-name
                                             :align align}})
@@ -373,5 +391,6 @@
                                                      :coordinates coordinates}
                                              :opts {:align align
                                                     :popover-class popover-class
+                                                    :zoomed-container zoomed-container
                                                     :launcher-class-name launcher-class-name
                                                     :has-arrow has-arrow}})))
