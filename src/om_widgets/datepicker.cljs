@@ -60,7 +60,7 @@
         currrent-days (build-current-month-days date)
         next-days (build-next-month-days date)
         days (into [] (concat previous-days currrent-days next-days))]
-    (subvec (mapv vec (partition 7 days)) 0 6)))
+    (take 6 (mapv vec (partition 7 days)))))
 
 (defn- day-header [day]
   (om/component
