@@ -52,7 +52,7 @@
     (render-state [this {:keys [delete path input-format id class-name
                                 field-validation-fn field-is-valid disabled btn-text
                                 input-class-name input-placeholder input-size
-                                items-react-prefix] :as state}]
+                                items-react-prefix transform-value-fn] :as state}]
       (html
         (utils/make-childs
           [:ul {:class ["list-group" (when class-name class-name)]}
@@ -86,7 +86,7 @@
                                                      (fn [w]
                                                        ;; TODO if the path does not exist
                                                        ;; conj of nil return a list
-                                                       (conj w (om/get-state owner :input-value))))
+                                                       (conj w (transform-value-fn (om/get-state owner :input-value)))))
                                    (om/set-state! owner :input-value "")
                                    (om/set-state! owner :field-is-valid nil))}
                (when (not (:btn-add-icon-class state))
@@ -118,6 +118,7 @@
    (s/optional-key :id) s/Str
    (s/optional-key :disabled) s/Bool
    (s/optional-key :field-validation-fn) (s/pred fn?)
+   (s/optional-key :transform-value-fn) (s/pred fn?)
    (s/optional-key :btn-text) s/Str
    (s/optional-key :btn-add-class) s/Str
    (s/optional-key :btn-add-icon-class) s/Str
@@ -132,4 +133,6 @@
   (om/build editable-list app {:state (-> (or opts {})
                                           (merge {:path path
                                                   :field-validation-fn (or (:field-validation-fn opts)
-                                                                           (fn [d] true))}))}))
+                                                                           (fn [d] true))
+                                                  :transform-value-fn (or (:transform-value-fn opts)
+                                                                          identity)}))}))
