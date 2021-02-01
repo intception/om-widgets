@@ -7,6 +7,13 @@
             [cljs-time.format :as timef]))
 
 
+(defn ->seq
+  "Ensures key is a sequence suitable for using with get-in"
+  [path-or-key]
+  (if (sequential? path-or-key)
+    path-or-key
+    [path-or-key]))
+
 (defn make-childs
   "Build all alternative for sablono"
   [tag & childs]

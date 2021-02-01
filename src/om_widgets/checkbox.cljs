@@ -2,7 +2,7 @@
   (:require [om.core :as om :include-macros true]
             [schema.core :as s :include-macros true]
             [sablono.core :refer-macros [html]]
-            [om-widgets.utils :as utils]))
+            [om-widgets.utils :as utils :refer [->seq]]))
 
 
 (defn- checked?
@@ -31,7 +31,7 @@
                  :checked (checked? (utils/om-get app path) checked-value)
                  :onChange (fn [e]
                              (let [value (if (.. e -target -checked) checked-value unchecked-value)
-                                   dest (get @(om/get-props owner) path)]
+                                   dest (get-in @(om/get-props owner) (->seq path))]
 
                                (if toggle-value
                                  (if (contains? dest checked-value)
