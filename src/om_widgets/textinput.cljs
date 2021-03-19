@@ -271,12 +271,14 @@
         char-code (.-which e)
         new-char (.fromCharCode js/String char-code)
         entered-values (:entered-values @private-state)]
-    (when (and pos (> (count mask-vector) pos))
+    (when (and (not (:read-only state))
+               pos
+               (> (count mask-vector) pos))
       (let [m (nth mask-vector pos)]
         (if (re-matches m new-char)
           (let [new-entered-values (replace-item-at-pos entered-values pos new-char)]
             (swap! private-state assoc :entered-values new-entered-values)
-            (set! (.-value dom-node)  (apply str new-entered-values))
+            (set! (.-value dom-node) (apply str new-entered-values))
             (set-caret-pos dom-node (inc pos)))
           (if (string? mi)
             (set-caret-pos dom-node pos)
@@ -456,6 +458,8 @@
                 :or {input-class ""}}]
   (om/build create-textinput target
             {:state (-> opts
+                        (cond-> (nil? (:read-only opts))
+                                (assoc :read-only false))
                         (merge {:path path
                                 :input-mask (cond
                                               (= input-format "numeric") "numeric"
