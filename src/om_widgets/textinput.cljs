@@ -5,13 +5,30 @@
             [om-widgets.utils :as utils]
             [cljs-time.format :as time-format]
             [cljs-time.coerce :as timec]
+            [goog.object :as gobj]
             [pallet.thread-expr :as th]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(def date-local-format "dd/MM/yyyy")
 (def date-local-mask "00/00/0000")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn get-browser-locale
+  []
+  (or (gobj/get js/navigator "language")
+      (first (gobj/get js/navigator "languages"))
+      "en")) ;; Default to English if no locale is found
+
+(defn infer-date-format-pattern
+  []
+  (let [locale (get-browser-locale)
+        test-date (js/Date. 2024 10 28) ; Nov 28, 2024 (months are zero-based)
+        formatter (js/Intl.DateTimeFormat. locale)
+        formatted-date (.format formatter test-date)]
+    (-> formatted-date
+        (clojure.string/replace #"2024" "yyyy")
+        (clojure.string/replace #"11" "MM")
+        (clojure.string/replace #"28" "dd"))))
 
 (defn- date-from-localstring
   [value fmt]
@@ -27,7 +44,7 @@
   [input-type value]
   (condp = input-type
     "date" (try
-             (string-from-date value date-local-format)
+             (string-from-date value (infer-date-format-pattern))
              (catch js/Error e
                ;; assume empty string for unhandled values
                (str value)))
@@ -37,7 +54,7 @@
   [output-type value]
   (condp = output-type
     "date" (try
-             (date-from-localstring value date-local-format)
+             (date-from-localstring value (infer-date-format-pattern))
              (catch js/Error e
                value))
     "numeric" (let [f (js/parseFloat value)]
