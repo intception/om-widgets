@@ -1,5 +1,7 @@
 # om-widgets
 
+[![Clojure CI](https://github.com/baskeboler/om-widgets/actions/workflows/clojure.yml/badge.svg)](https://github.com/baskeboler/om-widgets/actions/workflows/clojure.yml)
+
 A Clojure clojurescript library that implement om/react widgets.
 
 [![Clojars Project](http://clojars.org/org.clojars.intception/om-widgets/latest-version.svg)](http://clojars.org/org.clojars.intception/om-widgets)
