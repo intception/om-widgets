@@ -22,7 +22,7 @@
                                   :sunday weekday-current-month)))
                             (inc last-day))]
     (mapv (fn [d] {:day d
-                   :month (if (= (time/month date) 1) 12 (dec (time/month date)))
+                   :month (if (= current_month 1) 12 (dec current_month))
                    :year (time/year date)
                    :belongs-to-month :previous}) days-to-fill)))
 
