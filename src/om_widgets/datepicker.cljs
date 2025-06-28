@@ -239,11 +239,12 @@
 
   note: we assume today date if the cursor does not have a date
   "
-  [app path {:keys [id hidden onChange] :or {hidden true}}]
+  [app path {:keys [id hidden onChange week-start] :or {hidden true week-start :monday}}]
   (om/build body-component app {:state {:id id
                                         :hidden hidden
                                         :date (if (instance? js/Date (utils/om-get app [path]))
                                                 (time/date-time (utils/om-get app [path]))
                                                 (time/now))
+                                        :week-start week-start
                                         :path path
                                         :onChange onChange}}))
