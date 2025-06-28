@@ -6,8 +6,8 @@
             [cljs-time.format :as time-format]
             [cljs-time.coerce :as timec]
             [goog.object :as gobj]
-            [pallet.thread-expr :as th]))
-
+            [pallet.thread-expr :as th]
+            [clojure.string :as str]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def date-local-mask "00/00/0000")
