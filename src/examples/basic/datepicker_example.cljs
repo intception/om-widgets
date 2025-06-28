@@ -29,7 +29,7 @@
                                                       :placeholder "MM/DD/YYYY"})])
                (fn [close]
                  (w/datepicker app :input-group-left))
-               {:for "btn-cal-left-1"})]
+               {:for "btn-cal-left"})]
             [:div.well
              [:label "Input Group - left side (:date-format dd/MM/yyyy)"]
              (w/popover
