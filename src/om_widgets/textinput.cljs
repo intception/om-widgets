@@ -478,15 +478,13 @@
                         (cond-> (nil? (:read-only opts))
                                 (assoc :read-only false))
                         (merge {:path path
-                                :input-mask (cond
-                                              (= input-format "numeric") "numeric"
-                                              (= input-format "integer") "numeric"
-                                              (= input-format "currency") "numeric"
-                                              (= input-format "date") date-local-mask
-                                              :else input-format)
-                                :currency (if (= input-format "currency") true false)
+                                :input-mask (case input-format
+                                              ("numeric" "integer" "currency") "numeric"
+                                              "date" date-local-mask
+                                              input-format)
+                                
+                                :currency (= input-format "currency")
                                 :align (or align
-                                           (cond (= input-format "numeric") "right"
-                                                 (= input-format "integer") "right"
-                                                 (= input-format "currency") "right"
-                                                 :else "left"))}))}))
+                                           (case input-format
+                                             ("numeric" "integer" "currency") "right"
+                                             "left"))}))}))
