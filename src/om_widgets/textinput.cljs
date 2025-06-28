@@ -51,10 +51,10 @@
     value))
 
 (defn- convert-output
-  [output-type value]
+  [output-type value fmt]
   (condp = output-type
     "date" (try
-             (date-from-localstring value (infer-date-format-pattern))
+             (date-from-localstring value (or fmt (infer-date-format-pattern)))
              (catch js/Error e
                value))
     "numeric" (let [f (js/parseFloat value)]
@@ -132,11 +132,11 @@
     :mask))
 
 (defn- update-target
-  [target owner {:keys [input-format path onChange private-state] :as state} bInternal]
+  [target owner {:keys [input-format date-format path onChange private-state] :as state} bInternal]
   (when (and target
              (not= 0 (:cbtimeout @private-state)))
     (let [dom-node (:dom-node @private-state)
-          value (convert-output input-format (.-value dom-node))]
+          value (convert-output input-format (.-value dom-node) date-format)]
       (do
         (.clearTimeout js/window (:cbtimeout @private-state))
         (swap! private-state assoc :cbtimeout 0 :prev-value value)
