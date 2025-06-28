@@ -471,7 +471,7 @@
                        (merge {:resize (name (:resize state))}))))))))
 
 (defn textinput
-  [target path {:keys [input-class input-format align] :as opts
+  [target path {:keys [input-class input-format date-format align] :as opts
                 :or {input-class ""}}]
   (om/build create-textinput target
             {:state (-> opts
@@ -482,7 +482,7 @@
                                               ("numeric" "integer" "currency") "numeric"
                                               "date" date-local-mask
                                               input-format)
-                                
+                                :date-format (and (= input-format "date") date-format)
                                 :currency (= input-format "currency")
                                 :align (or align
                                            (case input-format
