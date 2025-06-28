@@ -7,6 +7,7 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/clojurescript "1.7.122" :scope "provided"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                 [org.clojure/tools.nrepl "0.2.13"]
                  [org.omcljs/om "0.8.8" :scope "provided"]
                  [org.clojars.intception/thread-expr "1.4.0"]
                  [com.andrewmcveigh/cljs-time "0.3.13"]
