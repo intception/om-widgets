@@ -202,7 +202,7 @@
     om/IDisplayName
     (display-name [_] "DatepickerBody")
     om/IRenderState
-    (render-state [this {:keys [path date onChange] :as state}]
+    (render-state [this {:keys [path date onChange week-start] :as state}]
       (dom/div #js {:className "datepicker datepicker-days" :style #js {:display "block"}}
                (dom/table #js {:className "table-condensed"}
                           (dom/thead nil
@@ -223,10 +223,12 @@
                                                           :onClick (fn [e]
                                                                      (om/set-state! owner :date (time/plus date (time/months 1))))} ">"))
                                      (apply dom/tr nil
-                                            (om/build-all day-header days-short)))
+                                            (om/build-all day-header (case week-start
+                                                                       :monday days-short
+                                                                       :sunday (concat [(last days-short)] (butlast days-short))))))
 
                           ;; datepicker body
-                          (om/build weeks-component app {:state {:path path :date date :onChange onChange}}))))))
+                          (om/build weeks-component app {:state {:path path :date date :onChange onChange :week-start week-start}}))))))
 
 (defn datepicker
   "Datepicker public API
