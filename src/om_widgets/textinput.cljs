@@ -473,6 +473,8 @@
                        (merge {:resize (name (:resize state))}))))))))
 
 (defn textinput
+  "Opts:
+     - date-format: only applied when input-format is \"date\". Should be one of the valid values, otherwise is ignored"
   [target path {:keys [input-class input-format date-format align] :as opts
                 :or {input-class ""}}]
   (let [valid-date-formats #{"MM/dd/yyy" "dd/MM/yyyy"}]
