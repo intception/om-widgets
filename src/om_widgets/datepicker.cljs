@@ -16,7 +16,7 @@
         last-day (time/number-of-days-in-the-month previous-month)
         days-to-fill (range (inc (- last-day (dec weekday-current-month))) (inc last-day))]
     (mapv (fn [d] {:day d
-                   :month (- 1 (time/month date))
+                   :month (if (= (time/month date) 1) 12 (dec (time/month date)))
                    :year (time/year date)
                    :belongs-to-month :previous}) days-to-fill)))
 
