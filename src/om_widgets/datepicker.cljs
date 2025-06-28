@@ -245,6 +245,9 @@
   app >> the cursor
   path >> the internal path to update the cursor
 
+  opts:
+    - week-start: defines whether the week starts on Monday or Sunday. Dafults to Monday
+
   note: we assume today date if the cursor does not have a date
   "
   [app path {:keys [id hidden onChange week-start] :or {hidden true week-start :monday}}]
