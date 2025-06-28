@@ -62,7 +62,14 @@
                {:for "btn-cal-close-on-select"})]]
 
            [:div.col-lg-6
-            [:div.well
-             (w/datepicker app :inline)
-             ]
-            [:label (str (:inline app))]]]]]))))
+            [:div
+             [:span "Week starting on Monday"]
+             [:div.well
+              (w/datepicker app :inline)]
+             [:label (str (:inline app))]]
+            [:hr]
+            [:div
+             [:span "Week starting on Sunday"]
+             [:div.well
+              (w/datepicker app :inline {:week-start :sunday})]
+             [:label (str (:inline app))]]]]]]))))
