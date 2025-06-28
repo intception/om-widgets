@@ -330,8 +330,8 @@
                                   (recur (next (next mv)) (next cv) (conj r m c)))
                                 (recur (next mv) (next cv) (conj r (if (re-matches m c) c \_))))
                               r)))
-                        (:mask-vector @private-state)
-                        (vec (convert-input (:input-format state) value (:date-format state))))
+                         (:mask-vector @private-state)
+                         (vec (convert-input (:input-format state) value (:date-format state))))
         prev-value (:prev-value @private-state)
         new-value (apply str entered-values)
         dom-node (:dom-node @private-state)]
