@@ -456,7 +456,7 @@
                                      (:placeholder state))
                       :disabled (:disabled state)
                       ;:typing-timeout (:typing-timeout state)
-                      :type (condp = (:input-format state)
+                      :type (case (:input-format state)
                               "password" "password"
                               "numeric" "number"
                               "text")
