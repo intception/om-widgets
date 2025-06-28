@@ -335,7 +335,7 @@
         prev-value (:prev-value @private-state)
         new-value (apply str entered-values)
         dom-node (:dom-node @private-state)]
-    (when (and (not= prev-value new-value) dom-node)
+    (when (and value (not= prev-value new-value) dom-node)
       (do
         (swap! private-state assoc :entered-values entered-values
                :prev-value new-value)
