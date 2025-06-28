@@ -41,10 +41,10 @@
     (time-format/unparse (time-format/formatter fmt) dt)))
 
 (defn- convert-input
-  [input-type value]
+  [input-type value fmt]
   (condp = input-type
     "date" (try
-             (string-from-date value (infer-date-format-pattern))
+             (string-from-date value (or fmt (infer-date-format-pattern)))
              (catch js/Error e
                ;; assume empty string for unhandled values
                (str value)))
@@ -330,8 +330,8 @@
                                   (recur (next (next mv)) (next cv) (conj r m c)))
                                 (recur (next mv) (next cv) (conj r (if (re-matches m c) c \_))))
                               r)))
-                         (:mask-vector @private-state)
-                         (vec (convert-input (:input-format state) value)))
+                        (:mask-vector @private-state)
+                        (vec (convert-input (:input-format state) value (:date-format state))))
         prev-value (:prev-value @private-state)
         new-value (apply str entered-values)
         dom-node (:dom-node @private-state)]
