@@ -29,7 +29,22 @@
                                                       :placeholder "MM/DD/YYYY"})])
                (fn [close]
                  (w/datepicker app :input-group-left))
-               {:for "btn-cal-left"})]
+               {:for "btn-cal-left-1"})]
+            [:div.well
+             [:label "Input Group - left side (:date-format dd/MM/yyyy)"]
+             (w/popover
+              (fn [show]
+                [:div.input-group
+                 [:span.input-group-btn
+                  [:button.btn.btn-primary {:id "btn-cal-left-dt-format" :onClick show}
+                   [:span.glyphicon.glyphicon-calendar]]]
+                 (w/textinput app :input-group-date-format {:input-class "form-control"
+                                                     :input-format "date"
+                                                     :date-format "dd/MM/yyyy"
+                                                     :placeholder "MM/DD/YYYY"})])
+              (fn [close]
+                (w/datepicker app :input-group-date-format))
+              {:for "btn-cal-left-dt-format"})]
 
             [:div.well
              [:label "Input Group - right side"]
