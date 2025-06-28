@@ -9,12 +9,18 @@
 ;; TODO translate
 (defonce days-short ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"])
 
-(defn- build-previous-month-days [date]
-  (let [current-month (time/date-time (time/year date) (time/month date))
-        weekday-current-month (time/day-of-week current-month)
-        previous-month (time/minus current-month (time/months 1))
+(defn- build-previous-month-days [date week-start]
+  (let [current_month (time/month date)
+        first-day-of-month (time/date-time (time/year date) current_month)
+        weekday-current-month (time/day-of-week first-day-of-month)
+        previous-month (time/minus first-day-of-month (time/months 1))
         last-day (time/number-of-days-in-the-month previous-month)
-        days-to-fill (range (inc (- last-day (dec weekday-current-month))) (inc last-day))]
+        days-to-fill (range (inc
+                             (- last-day
+                                (case week-start
+                                  :monday (dec weekday-current-month)
+                                  :sunday weekday-current-month)))
+                            (inc last-day))]
     (mapv (fn [d] {:day d
                    :month (if (= (time/month date) 1) 12 (dec (time/month date)))
                    :year (time/year date)
@@ -55,8 +61,8 @@
     [...]
   [{:day 1 :month 3 :year 2014 :belongs-to-month :next}] ]
   "
-  [date]
-  (let [previous-days (build-previous-month-days date)
+  [date week-start]
+  (let [previous-days (build-previous-month-days date week-start)
         currrent-days (build-current-month-days date)
         next-days (build-next-month-days date)
         days (into [] (concat previous-days currrent-days next-days))]
@@ -167,13 +173,13 @@
     om/IDisplayName
     (display-name [_] "DatepickerWeeks")
     om/IRenderState
-    (render-state [this {:keys [date path onChange] :as state}]
+    (render-state [this {:keys [date path onChange week-start] :as state}]
       (apply dom/tbody nil
              (map (fn [week]
                     (apply dom/tr nil
                            (map (fn [d]
                                   (om/build day-component app {:state {:day d :path path :date date :onChange onChange}})) week)))
-                  (build-weeks date))))))
+                  (build-weeks date week-start))))))
 
 (defn- year-component [app owner]
   (reify
