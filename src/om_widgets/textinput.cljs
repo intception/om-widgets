@@ -475,18 +475,21 @@
 (defn textinput
   [target path {:keys [input-class input-format date-format align] :as opts
                 :or {input-class ""}}]
-  (om/build create-textinput target
-            {:state (-> opts
-                        (cond-> (nil? (:read-only opts))
-                                (assoc :read-only false))
-                        (merge {:path path
-                                :input-mask (case input-format
-                                              ("numeric" "integer" "currency") "numeric"
-                                              "date" date-local-mask
-                                              input-format)
-                                :date-format (and (= input-format "date") date-format)
-                                :currency (= input-format "currency")
-                                :align (or align
-                                           (case input-format
-                                             ("numeric" "integer" "currency") "right"
-                                             "left"))}))}))
+  (let [valid-date-formats #{"MM/dd/yyy" "dd/MM/yyyy"}]
+    (om/build create-textinput target
+              {:state (-> opts
+                          (cond-> (nil? (:read-only opts))
+                            (assoc :read-only false))
+                          (merge {:path path
+                                  :input-mask (case input-format
+                                                ("numeric" "integer" "currency") "numeric"
+                                                "date" date-local-mask
+                                                input-format)
+                                  :date-format (when (and (= input-format "date")
+                                                          (valid-date-formats date-format))
+                                                 date-format)
+                                  :currency (= input-format "currency")
+                                  :align (or align
+                                             (case input-format
+                                               ("numeric" "integer" "currency") "right"
+                                               "left"))}))})))
