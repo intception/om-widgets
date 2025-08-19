@@ -8,15 +8,20 @@
 
 ;; TODO translate
 (defonce days-short ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"])
+(defonce days-short-sunday-first ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"])
 
-(defn- build-previous-month-days [date]
+(defn- get-weekdays [sunday-first?]
+  (if sunday-first? days-short-sunday-first days-short))
+
+(defn- build-previous-month-days [date sunday-first?]
   (let [current-month (time/date-time (time/year date) (time/month date))
         weekday-current-month (time/day-of-week current-month)
         previous-month (time/minus current-month (time/months 1))
         last-day (time/number-of-days-in-the-month previous-month)
-        days-to-fill (range (inc (- last-day (dec weekday-current-month))) (inc last-day))]
+        sunday-first-offset (if sunday-first? 1 0)
+        days-to-fill (range (inc (- last-day (dec weekday-current-month) sunday-first-offset)) (inc last-day))]
     (mapv (fn [d] {:day d
-                   :month (- 1 (time/month date))
+                   :month (- (time/month date) 1)
                    :year (time/year date)
                    :belongs-to-month :previous}) days-to-fill)))
 
@@ -29,13 +34,13 @@
              :belongs-to-month :current})
           (range 1 (inc last-day)))))
 
-(defn- build-next-month-days [date]
+(defn- build-next-month-days [date sunday-first?]
   (let [current-month (time/date-time (time/year date) (time/month date))
         last-day-number (time/number-of-days-in-the-month current-month)
         last-day (time/date-time (time/year current-month) (time/month current-month) last-day-number)
         weekday-last-day (time/day-of-week last-day)
-        weekday-current-month (time/day-of-week current-month)
-        days-to-fill (range 1 (inc (- 14 weekday-last-day)))]
+        sunday-first-offset (if sunday-first? 1 0)
+        days-to-fill (range 1 (inc (- 14 weekday-last-day sunday-first-offset)))]
     (mapv (fn [d] {:day d
                    :month (+ 1 (time/month date))
                    :year (time/year date)
@@ -55,11 +60,11 @@
     [...]
   [{:day 1 :month 3 :year 2014 :belongs-to-month :next}] ]
   "
-  [date]
-  (let [previous-days (build-previous-month-days date)
-        currrent-days (build-current-month-days date)
-        next-days (build-next-month-days date)
-        days (into [] (concat previous-days currrent-days next-days))]
+  [date sunday-first?]
+  (let [previous-days (build-previous-month-days date sunday-first?)
+        current-days (build-current-month-days date)
+        next-days (build-next-month-days date sunday-first?)
+        days (into [] (concat previous-days current-days next-days))]
     (take 6 (mapv vec (partition 7 days)))))
 
 (defn- day-header [day]
@@ -167,13 +172,13 @@
     om/IDisplayName
     (display-name [_] "DatepickerWeeks")
     om/IRenderState
-    (render-state [this {:keys [date path onChange] :as state}]
+    (render-state [this {:keys [date path onChange sunday-first?] :as state}]
       (apply dom/tbody nil
              (map (fn [week]
                     (apply dom/tr nil
                            (map (fn [d]
                                   (om/build day-component app {:state {:day d :path path :date date :onChange onChange}})) week)))
-                  (build-weeks date))))))
+                  (build-weeks date sunday-first?))))))
 
 (defn- year-component [app owner]
   (reify
@@ -202,7 +207,7 @@
     om/IDisplayName
     (display-name [_] "DatepickerBody")
     om/IRenderState
-    (render-state [this {:keys [path date onChange] :as state}]
+    (render-state [this {:keys [path date onChange sunday-first?] :as state}]
       (dom/div #js {:className "datepicker datepicker-days" :style #js {:display "block"}}
                (dom/table #js {:className "table-condensed"}
                           (dom/thead nil
@@ -223,10 +228,10 @@
                                                           :onClick (fn [e]
                                                                      (om/set-state! owner :date (time/plus date (time/months 1))))} ">"))
                                      (apply dom/tr nil
-                                            (om/build-all day-header days-short)))
+                                            (om/build-all day-header (get-weekdays sunday-first?))))
 
                           ;; datepicker body
-                          (om/build weeks-component app {:state {:path path :date date :onChange onChange}}))))))
+                          (om/build weeks-component app {:state {:path path :date date :onChange onChange :sunday-first? sunday-first?}}))))))
 
 (defn datepicker
   "Datepicker public API
@@ -239,11 +244,13 @@
 
   note: we assume today date if the cursor does not have a date
   "
-  [app path {:keys [id hidden onChange] :or {hidden true}}]
+  [app path {:keys [id hidden onChange sunday-first?] :or {hidden        true
+                                                           sunday-first? false}}]
   (om/build body-component app {:state {:id id
                                         :hidden hidden
                                         :date (if (instance? js/Date (utils/om-get app [path]))
                                                 (time/date-time (utils/om-get app [path]))
                                                 (time/now))
                                         :path path
-                                        :onChange onChange}}))
+                                        :onChange onChange
+                                        :sunday-first? sunday-first?}}))

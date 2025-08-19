@@ -72,7 +72,11 @@
      :datepicker {:inline #inst "1991-01-25"
                   :input-group-left #inst "1991-01-25"
                   :input-group-right #inst "1991-01-25"
-                  :input-group-close-on-change #inst "1991-01-25"}
+                  :input-group-close-on-change #inst "1991-01-25"
+                  :slash-separator #inst "1991-01-25"
+                  :hyphen-separator #inst "1991-01-25"
+                  :dot-separator #inst "1991-01-25"
+                  :no-separator #inst "1991-01-25"}
      :sex :male
      :tab {:selected-tab :inbox}
      :form {:name ""

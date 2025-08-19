@@ -12,7 +12,7 @@ just run:
 ```bash
 lein figwheel basic
 ```
-inside the repo and this will start a webserver serving the sample files, point your browser to: `http://localhost:3449/examples/basic/index.html`
+inside the repo and this will start a webserver serving the sample files, point your browser to: `http://localhost:3450/examples/basic/index.html`
 and you are ready to go.
 
 ## License

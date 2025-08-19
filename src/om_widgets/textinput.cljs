@@ -1,6 +1,7 @@
 (ns om-widgets.textinput
   (:require-macros [pallet.thread-expr :as th])
-  (:require [om.core :as om :include-macros true]
+  (:require [clojure.string :as str]
+            [om.core :as om :include-macros true]
             [om.dom :as dom :include-macros true]
             [om-widgets.utils :as utils]
             [cljs-time.format :as time-format]
@@ -8,21 +9,49 @@
             [goog.object :as gobj]
             [pallet.thread-expr :as th]))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (def date-local-mask "00/00/0000")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- date-format->mask
+  [format]
+  (when format
+    (str/replace format #"[YyMmDd]" "0")))
+
+(def valid-formats
+  #{"yyyy-MM-dd"
+    "dd-MM-yyyy"
+    "MM-dd-yyyy"
+
+    "yyyy/MM/dd"
+    "dd/MM/yyyy"
+    "MM/dd/yyyy"
+
+    "yyyy.MM.dd"
+    "dd.MM.yyyy"
+    "MM.dd.yyyy"
+
+    "yyyyMMdd"
+    "ddMMyyyy"
+    "MMddyyyy"
+    })
+
+(defn ensure-valid-date-format [date-format]
+  (when (and date-format
+             (not (contains? valid-formats date-format)))
+    (throw (ex-info "Invalid date-format passed in textinput component"
+                    {:date-format date-format}))))
 
 (defn get-browser-locale
   []
   (or (gobj/get js/navigator "language")
       (first (gobj/get js/navigator "languages"))
-      "en")) ;; Default to English if no locale is found
+      "en"))                                                ;; Default to English if no locale is found
 
 (defn infer-date-format-pattern
   []
   (let [locale (get-browser-locale)
-        test-date (js/Date. 2024 10 28) ; Nov 28, 2024 (months are zero-based)
+        test-date (js/Date. 2024 10 28)                     ; Nov 28, 2024 (months are zero-based)
         formatter (js/Intl.DateTimeFormat. locale)
         formatted-date (.format formatter test-date)]
     (-> formatted-date
@@ -41,20 +70,20 @@
     (time-format/unparse (time-format/formatter fmt) dt)))
 
 (defn- convert-input
-  [input-type value]
+  [input-type value {:keys [date-format]}]
   (condp = input-type
     "date" (try
-             (string-from-date value (infer-date-format-pattern))
+             (string-from-date value (or date-format (infer-date-format-pattern)))
              (catch js/Error e
                ;; assume empty string for unhandled values
                (str value)))
     value))
 
 (defn- convert-output
-  [output-type value]
+  [output-type value {:keys [date-format]}]
   (condp = output-type
     "date" (try
-             (date-from-localstring value (infer-date-format-pattern))
+             (date-from-localstring value (or date-format (infer-date-format-pattern)))
              (catch js/Error e
                value))
     "numeric" (let [f (js/parseFloat value)]
@@ -91,30 +120,30 @@
 
 (defn- special-key?
   [char-code]
-  (contains? #{9    ;; tab
-               13   ;; enter
-               16   ;; shift
-               17   ;; ctrl
-               18   ;; alt
-               20   ;; caps lock
-               27   ;; escape
-               33   ;; page up
-               34   ;; page down
-               35   ;; home
-               36   ;; end
-               37   ;; left arrow
-               38   ;; up arrow
-               39   ;; right arrow
-               40   ;; down arrow
-               45   ;; insert
-               144} ;; num lock;
+  (contains? #{9                                            ;; tab
+               13                                           ;; enter
+               16                                           ;; shift
+               17                                           ;; ctrl
+               18                                           ;; alt
+               20                                           ;; caps lock
+               27                                           ;; escape
+               33                                           ;; page up
+               34                                           ;; page down
+               35                                           ;; home
+               36                                           ;; end
+               37                                           ;; left arrow
+               38                                           ;; up arrow
+               39                                           ;; right arrow
+               40                                           ;; down arrow
+               45                                           ;; insert
+               144}                                         ;; num lock;
              char-code))
 
-(defn- get-selection-start ;; assume modern browser IE9 and up
+(defn- get-selection-start                                  ;; assume modern browser IE9 and up
   [control]
   (.-selectionStart control))
 
-(defn- get-selection-end ;; assume modern browser IE9 and up
+(defn- get-selection-end                                    ;; assume modern browser IE9 and up
   [control]
   (.-selectionEnd control))
 
@@ -132,11 +161,11 @@
     :mask))
 
 (defn- update-target
-  [target owner {:keys [input-format path onChange private-state] :as state} bInternal]
+  [target owner {:keys [input-format path onChange private-state date-format] :as state} bInternal]
   (when (and target
              (not= 0 (:cbtimeout @private-state)))
     (let [dom-node (:dom-node @private-state)
-          value (convert-output input-format (.-value dom-node))]
+          value (convert-output input-format (.-value dom-node) {:date-format date-format})]
       (do
         (.clearTimeout js/window (:cbtimeout @private-state))
         (swap! private-state assoc :cbtimeout 0 :prev-value value)
@@ -184,7 +213,7 @@
                     (when-not (string? (nth mask-vector pos))
                       (let [new-entered-values (replace-item-at-pos entered-values pos \_)]
                         (swap! private-state assoc :entered-values new-entered-values)
-                        (set! (.-value dom-node)  (apply str new-entered-values))))
+                        (set! (.-value dom-node) (apply str new-entered-values))))
                     (set-caret-pos dom-node pos))))
             ;; delete
             46 (when (< sel-start (count mask-vector))
@@ -192,12 +221,12 @@
                    (when-not (string? (nth mask-vector sel-start))
                      (let [new-entered-values (replace-item-at-pos entered-values sel-start \_)]
                        (swap! private-state assoc :entered-values new-entered-values)
-                       (set! (.-value dom-node)  (apply str new-entered-values)))))
+                       (set! (.-value dom-node) (apply str new-entered-values)))))
                  (set-caret-pos dom-node (inc sel-start))))
           ;; Selection
           (let [new-entered-values (erase-selection mask-vector entered-values sel-start sel-end)]
             (swap! private-state assoc :entered-values new-entered-values)
-            (set! (.-value dom-node)  (apply str new-entered-values))
+            (set! (.-value dom-node) (apply str new-entered-values))
             (set-caret-pos dom-node sel-start)))
         false)
       true)))
@@ -330,8 +359,8 @@
                                   (recur (next (next mv)) (next cv) (conj r m c)))
                                 (recur (next mv) (next cv) (conj r (if (re-matches m c) c \_))))
                               r)))
-                         (:mask-vector @private-state)
-                         (vec (convert-input (:input-format state) value)))
+                        (:mask-vector @private-state)
+                        (vec (convert-input (:input-format state) value state)))
         prev-value (:prev-value @private-state)
         new-value (apply str entered-values)
         dom-node (:dom-node @private-state)]
@@ -339,12 +368,12 @@
       (do
         (swap! private-state assoc :entered-values entered-values
                :prev-value new-value)
-        (set! (.-value dom-node)  new-value)))))
+        (set! (.-value dom-node) new-value)))))
 
 (defmethod applymask! :default
   [target owner state value]
-  (when-let  [dom-node (:dom-node @(:private-state state))]
-    (when-not  (= value (:prev-value @(:private-state state)))
+  (when-let [dom-node (:dom-node @(:private-state state))]
+    (when-not (= value (:prev-value @(:private-state state)))
       (set! (.-value dom-node) value))))
 
 ;; ---------------------------------------------------------------------
@@ -412,81 +441,82 @@
       ((if (not (:multiline state))
          dom/input
          dom/textarea)
-        (clj->js (-> {:id (:id state)
-                      :name (:id state)
-                      :hidden (:hidden state)
-                      :className (clojure.string/join " " ["om-widgets-input-text" (:input-class state)])
-                      :autoComplete (or (:auto-complete state)
-                                        "off")
-                      :readOnly (:read-only state)
-                      :onKeyDown #(if (false? (handlekeydown target owner state %))
-                                    (.preventDefault %)
-                                    nil)
-                      :onKeyUp #(if (false? (handlekeyup target owner state %))
-                                  (.preventDefault %)
-                                  nil)
-                      :onInput #(if (false? (handle-on-input target owner state %))
-                                  (.preventDefault %)
-                                  nil)
-                      :onKeyPress #(do
-                                     (when (= "Enter" (.-key %))
-                                       (do
-                                         (when (and (:flush-on-enter state)
-                                                    (not (:multiline state)))
-                                           (update-target target owner state true))
-                                         (when (:onEnter state)
-                                           ((:onEnter state) %))))
-                                     (when (:onKeyPress state)
-                                       ((:onKeyPress state) %))
-                                     (if (false?  (handlekeypress target owner state %))
-                                       (.preventDefault %)
-                                       nil))
-                      :autoFocus (:autofocus state)
-                      :tabIndex (:tabIndex state)
-                      :onBlur (fn [e]
-                                (update-target target owner state true)
-                                (when (:onBlur state)
-                                  ((:onBlur state)))
-                                nil)
-                      :onPaste #(if (false? (handlepaste target owner state %))
-                                  (.preventDefault %)
-                                  nil)
-                      :placeholder (:placeholder state)
-                      :disabled (:disabled state)
-                      ;:typing-timeout (:typing-timeout state)
-                      :type (condp = (:input-format state)
-                              "password" "password"
-                              "numeric" "number"
-                              "text")
-                      :style {:textAlign (:align state)}}
-                     (th/when-> (:step state)
-                       (merge {:step (:step state)}))
-                     (th/when-> (:pattern state)
-                       (merge {:pattern (:pattern state)}))
-                     (th/when-> (:min state)
-                       (merge {:min (:min state)}))
-                     (th/when-> (:max state)
-                       (merge {:max (:max state)}))
-                     (th/when-> (:resize state)
-                       (merge {:resize (name (:resize state))}))))))))
+       (clj->js (-> {:id           (:id state)
+                     :name         (:id state)
+                     :hidden       (:hidden state)
+                     :className    (clojure.string/join " " ["om-widgets-input-text" (:input-class state)])
+                     :autoComplete (or (:auto-complete state)
+                                       "off")
+                     :readOnly     (:read-only state)
+                     :onKeyDown    #(if (false? (handlekeydown target owner state %))
+                                      (.preventDefault %)
+                                      nil)
+                     :onKeyUp      #(if (false? (handlekeyup target owner state %))
+                                      (.preventDefault %)
+                                      nil)
+                     :onInput      #(if (false? (handle-on-input target owner state %))
+                                      (.preventDefault %)
+                                      nil)
+                     :onKeyPress   #(do
+                                      (when (= "Enter" (.-key %))
+                                        (do
+                                          (when (and (:flush-on-enter state)
+                                                     (not (:multiline state)))
+                                            (update-target target owner state true))
+                                          (when (:onEnter state)
+                                            ((:onEnter state) %))))
+                                      (when (:onKeyPress state)
+                                        ((:onKeyPress state) %))
+                                      (if (false? (handlekeypress target owner state %))
+                                        (.preventDefault %)
+                                        nil))
+                     :autoFocus    (:autofocus state)
+                     :tabIndex     (:tabIndex state)
+                     :onBlur       (fn [e]
+                                     (update-target target owner state true)
+                                     (when (:onBlur state)
+                                       ((:onBlur state)))
+                                     nil)
+                     :onPaste      #(if (false? (handlepaste target owner state %))
+                                      (.preventDefault %)
+                                      nil)
+                     :placeholder  (:placeholder state)
+                     :disabled     (:disabled state)
+                     ;:typing-timeout (:typing-timeout state)
+                     :type         (condp = (:input-format state)
+                                     "password" "password"
+                                     "numeric" "number"
+                                     "text")
+                     :style        {:textAlign (:align state)}}
+                    (th/when-> (:step state)
+                               (merge {:step (:step state)}))
+                    (th/when-> (:pattern state)
+                               (merge {:pattern (:pattern state)}))
+                    (th/when-> (:min state)
+                               (merge {:min (:min state)}))
+                    (th/when-> (:max state)
+                               (merge {:max (:max state)}))
+                    (th/when-> (:resize state)
+                               (merge {:resize (name (:resize state))}))))))))
 
 (defn textinput
-  [target path {:keys [input-class input-format align] :as opts
-                :or {input-class ""}}]
+  [target path {:keys [input-class input-format align read-only date-format] :as opts
+                :or   {input-class ""
+                       read-only   false}}]
+  (ensure-valid-date-format date-format)
+
   (om/build create-textinput target
-            {:state (-> opts
-                        (cond-> (nil? (:read-only opts))
-                                (assoc :read-only false))
-                        (merge {:path path
-                                :input-mask (cond
-                                              (= input-format "numeric") "numeric"
-                                              (= input-format "integer") "numeric"
-                                              (= input-format "currency") "numeric"
-                                              (= input-format "date") date-local-mask
-                                              :else input-format)
-                                :currency (if (= input-format "currency") true false)
-                                :align (or align
-                                           (cond (= input-format "numeric") "right"
-                                                 (= input-format "integer") "right"
-                                                 (= input-format "currency") "right"
-                                                 :else "left"))}))}))
+            {:state (merge opts {:path        path
+                                 :date-format date-format
+                                 :input-mask  (cond
+                                                (= input-format "numeric") "numeric"
+                                                (= input-format "integer") "numeric"
+                                                (= input-format "currency") "numeric"
+                                                (= input-format "date") (or (date-format->mask date-format) date-local-mask)
+                                                :else input-format)
+                                 :currency    (if (= input-format "currency") true false)
+                                 :align       (or align
+                                                  (cond (= input-format "numeric") "right"
+                                                        (= input-format "integer") "right"
+                                                        (= input-format "currency") "right"
+                                                        :else "left"))})}))
